@@ -63,9 +63,14 @@ export async function getChat(id:number):Promise<ChatInfo>{
   if(usePreviewStore().enabled){const c=sampleChats.find(c=>c.id===id);if(!c)throw new Error('Чат не найден');return c}
   return (await api<{data:ChatInfo}>('/api/v1/chats/'+id)).data
 }
-export async function getMessages(id:number,after=0):Promise<ChatMessage[]>{
-  if(usePreviewStore().enabled)return (sampleMessages[id]||[]).filter(x=>x.id>after)
-  return (await api<{data:ChatMessage[]}>('/api/v1/chats/'+id+'/messages'+(after?'?after='+after:''))).data
+export async function getMessages(id:number,after=0,before=0):Promise<ChatMessage[]>{
+  if(usePreviewStore().enabled)return (sampleMessages[id]||[]).filter(x=>(!after||x.id>after)&&(!before||x.id<before))
+  const suffix=after?'?after='+after:before?'?before='+before:''
+  return (await api<{data:ChatMessage[]}>('/api/v1/chats/'+id+'/messages'+suffix)).data
+}
+export async function sendTyping(id:number){
+  check()
+  return api('/api/v1/chats/'+id+'/typing',{method:'POST',body:{}})
 }
 export async function sendMessage(id:number,body:string,reply_to_id:number|null,client_token:string):Promise<ChatMessage>{
   check()

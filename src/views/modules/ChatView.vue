@@ -9,12 +9,14 @@ import BasePageHeading from '../../components/ui/BasePageHeading.vue'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseNotice from '../../components/ui/BaseNotice.vue'
 import {
-  listChats, getChatUsers, createChat, getChat, getMessages, sendMessage, markMessages,
+  listChats, getChatUsers, createChat, getChat, getMessages, sendMessage, sendTyping, markMessages,
   editMessage, deleteMessage, archiveChat, leaveChat, addChatMember,
   type ChatInfo, type ChatMessage, type ChatFilter, type ChatUser
 } from '../../api/chat'
 import { useSessionStore } from '../../stores/session'
 import { usePreviewStore } from '../../stores/preview'
+import { connectRealtime, disconnectRealtime, onChatSignal, onChatReconnect,
+  realtimeConnected, onlineUsers, type ChatSignal } from '../../api/realtime'
 
 const session=useSessionStore()
 const preview=usePreviewStore()
@@ -40,6 +42,13 @@ const timeline=ref<HTMLElement|null>(null)
 const composer=ref<HTMLTextAreaElement|null>(null)
 const readSeen=ref(new Set<number>())
 const deliverySeen=ref(new Set<number>())
+const typingName=ref('')
+const loadingEarlier=ref(false)
+const canLoadEarlier=ref(false)
+let lastTypingSent=0
+let typingTimer:ReturnType<typeof setTimeout>|null=null
+let removeSignal:(()=>void)|null=null
+let removeReconnect:(()=>void)|null=null
 const filterOptions:{key:ChatFilter;label:string}[]=[
   {key:'all',label:'Все'},{key:'channels',label:'Каналы'},
   {key:'direct',label:'Личные'},{key:'archived',label:'Архив'}
@@ -67,11 +76,13 @@ async function openChat(chat:ChatInfo){
   draft.value=drafts.value[chat.id]||''
   replyTo.value=null;editing.value=null;mobileConversation.value=true
   messages.value=[];readSeen.value=new Set();deliverySeen.value=new Set()
+  canLoadEarlier.value=false;typingName.value=''
   chatBusy.value=true;error.value=''
   try{
     const [detail,data]=await Promise.all([getChat(chat.id),getMessages(chat.id)])
     if(ticket!==t)return
     active.value=detail;messages.value=data
+    canLoadEarlier.value=data.length===60
     await nextTick()
     if(timeline.value)timeline.value.scrollTop=timeline.value.scrollHeight
     await markVisible()
@@ -82,7 +93,7 @@ function closeChat(){
   if(active.value)drafts.value[active.value.id]=draft.value
   mobileConversation.value=false
   active.value=null
-  messages.value=[]
+  messages.value=[];typingName.value=''
   ticket++
 }
 async function sync(){
@@ -155,6 +166,40 @@ async function submit(){
   }catch(e){error.value=e instanceof Error?e.message:'Не удалось отправить сообщение'}
   finally{sending.value=false}
 }
+async function loadEarlier(){
+  const chat=active.value
+  if(!chat||loadingEarlier.value||!canLoadEarlier.value||!messages.value.length)return
+  const el=timeline.value
+  loadingEarlier.value=true
+  try{
+    const height=el?.scrollHeight||0
+    const older=await getMessages(chat.id,0,messages.value[0].id)
+    if(active.value?.id!==chat.id)return
+    const current=new Map(messages.value.map(m=>[m.id,m]))
+    for(const msg of older)current.set(msg.id,msg)
+    messages.value=[...current.values()].sort((a,b)=>a.id-b.id)
+    canLoadEarlier.value=older.length===60
+    await nextTick()
+    if(el)el.scrollTop=el.scrollHeight-height
+  }catch(e){error.value=e instanceof Error?e.message:'Не удалось загрузить историю'}
+  finally{loadingEarlier.value=false}
+}
+function scrollMessages(){
+  if(timeline.value&&timeline.value.scrollTop<40)void loadEarlier()
+  void markVisible()
+}
+function receivedSignal(signal:ChatSignal){
+  if(signal.kind==='typing'&&active.value?.id===signal.chat_id&&
+      signal.metadata?.user_id!==selfId.value){
+    const user=active.value.members.find(m=>m.id===signal.metadata?.user_id)
+    typingName.value=(user?.name||'Сотрудник')+' печатает…'
+    if(typingTimer)clearTimeout(typingTimer)
+    typingTimer=setTimeout(()=>{typingName.value=''},4000)
+    return
+  }
+  if(active.value?.id===signal.chat_id)void sync()
+  void refreshChats()
+}
 function handleComposer(e:KeyboardEvent){
   if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();void submit()}
 }
@@ -210,20 +255,36 @@ async function addMember(){
 }
 watch(filter,()=>void refreshChats())
 watch(()=>session.session?.active_company_id,()=>{
-  closeChat();void refreshChats();void loadPeople()
+  closeChat();disconnectRealtime()
+  if(!preview.enabled)void connectRealtime()
+  void refreshChats();void loadPeople()
 })
 watch(()=>preview.enabled,()=>{
-  closeChat();void refreshChats();void loadPeople()
+  closeChat();disconnectRealtime()
+  if(!preview.enabled)void connectRealtime()
+  void refreshChats();void loadPeople()
 })
-watch(draft,v=>{if(active.value)drafts.value[active.value.id]=v})
+watch(draft,v=>{
+  if(active.value)drafts.value[active.value.id]=v
+  if(!v.trim()||!active.value||preview.enabled||!realtimeConnected.value)return
+  if(Date.now()-lastTypingSent>2000){
+    lastTypingSent=Date.now()
+    void sendTyping(active.value.id).catch(()=>{})
+  }
+})
 onMounted(()=>{
   void refreshChats();void loadPeople()
+  removeSignal=onChatSignal(receivedSignal)
+  removeReconnect=onChatReconnect(()=>{void sync();void refreshChats()})
+  if(!preview.enabled)void connectRealtime()
   pollTimer=setInterval(()=>{if(!document.hidden){void sync();void refreshChats()}},6000)
   document.addEventListener('visibilitychange',onVisibility)
 })
 function onVisibility(){if(!document.hidden){void sync();void markVisible()}}
 onBeforeUnmount(()=>{
   if(pollTimer)clearInterval(pollTimer)
+  if(typingTimer)clearTimeout(typingTimer)
+  removeSignal?.();removeReconnect?.();disconnectRealtime()
   document.removeEventListener('visibilitychange',onVisibility)
 })
 </script>
@@ -272,7 +333,8 @@ onBeforeUnmount(()=>{
             <button type="button" class="messenger-back" aria-label="Назад к чатам" @click="closeChat"><ChevronLeft :size="19"/></button>
             <span class="messenger-avatar messenger-avatar--small">{{ active.kind==='channel'?'#':initials(active.title) }}</span>
             <span class="messenger-chat-title"><strong>{{ active.title }}</strong>
-              <small>{{ active.kind==='channel'?active.members.length+' участников':'Личный чат' }}</small>
+              <small v-if="active.kind==='channel'">{{ active.members.length }} участников · {{ active.members.filter(m=>onlineUsers.has(m.id)).length }} в сети</small>
+              <small v-else>{{ active.members.some(m=>m.id!==selfId&&onlineUsers.has(m.id))?'В сети':'Личный чат' }}</small>
             </span>
             <button v-if="active.kind==='channel'&&active.is_admin" type="button" class="toolbar-icon"
               title="Добавить участника" aria-label="Добавить участника" @click="userId=null;showAddMember=true"><UserPlus :size="17"/></button>
@@ -282,8 +344,9 @@ onBeforeUnmount(()=>{
             <button v-if="active.kind==='channel'" type="button" class="toolbar-icon" title="Выйти из канала"
               aria-label="Выйти из канала" @click="leave"><LogOut :size="17"/></button>
           </header>
-          <div ref="timeline" class="messenger-messages" role="log" aria-label="Сообщения чата" @scroll.passive="markVisible">
+          <div ref="timeline" class="messenger-messages" role="log" aria-label="Сообщения чата" @scroll.passive="scrollMessages">
             <p v-if="chatBusy" class="messenger-muted">Загрузка истории…</p>
+            <p v-else-if="loadingEarlier" class="messenger-muted">Загрузка предыдущих сообщений…</p>
             <p v-else-if="!messages.length" class="messenger-muted">Сообщений пока нет. Напишите первое сообщение.</p>
             <div v-for="m in messages" :key="m.id" class="messenger-message-line" :class="{mine:m.user_id===selfId}">
               <div class="messenger-message" :class="{'messenger-message--deleted':m.deleted}"
@@ -320,7 +383,11 @@ onBeforeUnmount(()=>{
               <Send :size="18"/><span class="visually-hidden">Отправить</span>
             </BaseButton>
           </form>
-          <div class="messenger-sync-note">Сообщения обновляются автоматически каждые 6 секунд</div>
+          <div class="messenger-sync-note">
+            <span v-if="typingName" class="messenger-typing">{{ typingName }} · </span>
+            <span v-if="realtimeConnected" class="messenger-realtime-connected">В реальном времени · Reverb</span>
+            <span v-else>Автоматическое обновление · соединение восстанавливается</span>
+          </div>
         </template>
         <div v-else class="messenger-welcome">
           <MessageCircle :size="44"/>

@@ -562,3 +562,6 @@
   .messenger-compose{padding:8px}
 }
 @media(prefers-reduced-motion:reduce){.messenger-message-actions{transition:none}}
+
+.messenger-realtime-connected{color:var(--color-success);font-weight:650}
+.messenger-typing{color:var(--color-primary);font-weight:600}
