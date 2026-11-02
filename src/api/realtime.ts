@@ -115,7 +115,9 @@ export async function connectRealtime():Promise<boolean>{
       }
     })
     return true
-  }catch{
+  }catch(cause){
+    const reason=cause instanceof Error?cause.message:'unknown'
+    console.warn('TOIR realtime initialization failed: '+reason.slice(0,140))
     disconnectRealtime()
     return false
   }

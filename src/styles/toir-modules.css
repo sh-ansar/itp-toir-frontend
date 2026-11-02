@@ -565,3 +565,12 @@
 
 .messenger-realtime-connected{color:var(--color-success);font-weight:650}
 .messenger-typing{color:var(--color-primary);font-weight:600}
+
+/* Realtime indicator and correct multi-recipient read receipt UX */
+.messenger-sidebar-footer{min-width:0;gap:8px}
+.messenger-sidebar-footer>span:not(.messenger-network-state){flex:1;min-width:0}
+.messenger-network-state{display:inline-flex;align-items:center;gap:5px;flex:none;
+  font-size:10px;color:var(--color-muted)}
+.messenger-network-dot{width:6px;height:6px;border-radius:50%;background:var(--color-muted)}
+.messenger-network-state.connected .messenger-network-dot{background:var(--color-success)}
+.messenger-network-state.connected{color:var(--color-success)}

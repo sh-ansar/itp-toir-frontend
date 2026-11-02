@@ -325,7 +325,15 @@ onBeforeUnmount(()=>{
           <div v-if="!visibleChats.length" class="messenger-list-empty"><Inbox :size="25"/>
             <strong>Чатов пока нет</strong><small>Создайте личный чат или канал.</small></div>
         </div>
-        <footer class="messenger-sidebar-footer"><ShieldCheck :size="14"/> Данные доступны только участникам своей компании</footer>
+        <footer class="messenger-sidebar-footer">
+          <ShieldCheck :size="14"/>
+          <span>Чаты доступны только сотрудникам компании</span>
+          <span class="messenger-network-state" :class="{connected:realtimeConnected}"
+            :title="realtimeConnected?'Reverb подключён':'Восстанавливается подключение'">
+            <span aria-hidden="true" class="messenger-network-dot"></span>
+            {{ realtimeConnected?'В сети':'Подключение' }}
+          </span>
+        </footer>
       </aside>
       <section class="messenger-main">
         <template v-if="active">
@@ -355,9 +363,11 @@ onBeforeUnmount(()=>{
                 <blockquote v-if="m.reply_preview" class="messenger-reply">{{ m.reply_preview }}</blockquote>
                 <p>{{ m.deleted?'Сообщение удалено':m.body }}</p>
                 <footer><span v-if="m.edited_at">изменено · </span><span>{{ ago(m.created_at) }}</span>
-                  <span v-if="m.user_id===selfId" :title="m.read_count>0?'Прочитано':m.delivered_count>0?'Доставлено':'Отправлено'">
-                    <CheckCheck v-if="m.read_count>0" :size="15" class="receipt-read"/>
-                    <CheckCheck v-else-if="m.delivered_count>0" :size="15"/>
+                  <span v-if="m.user_id===selfId"
+                    :title="m.total_recipients>0&&m.read_count>=m.total_recipients?'Прочитано всеми':
+                      m.total_recipients>0&&m.delivered_count>=m.total_recipients?'Доставлено всем':'Отправлено'">
+                    <CheckCheck v-if="m.total_recipients>0&&m.read_count>=m.total_recipients" :size="15" class="receipt-read"/>
+                    <CheckCheck v-else-if="m.total_recipients>0&&m.delivered_count>=m.total_recipients" :size="15"/>
                     <Check v-else :size="15"/>
                   </span></footer>
                 <div v-if="!m.deleted" class="messenger-message-actions">
