@@ -69,6 +69,13 @@ export async function changePassword(data: {
   })).message
 }
 
+export async function recoveryAvailable(): Promise<boolean> {
+  try {
+    const health = await api<{ status:string; service:string; capabilities?:{password_reset?:boolean} }>('/api/v1/health')
+    return health.status === 'ok' && health.service === 'itp-toir-api' && health.capabilities?.password_reset === true
+  } catch { return false }
+}
+
 export async function apiHealth(): Promise<boolean> {
   try {
     const health = await api<{ status: string; service: string }>('/api/v1/health')

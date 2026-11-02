@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [vue()],
     base: env.VITE_BASE_PATH || '/',
+    build: { assetsDir: 'toir-static' },
     server: {
       host: '127.0.0.1',
       port: 5173,
