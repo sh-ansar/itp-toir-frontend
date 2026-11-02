@@ -135,6 +135,13 @@ const plans:ToirRecord[]=Array.from({length:18},(_,index)=>{
     created_at:isoTime(-140-index),
   }
 })
+// Link sample work orders to sample maintenance cycles for detail-screen review.
+for(let index=0;index<orders.length;index+=5){
+  const plan=plans[(index/5)%plans.length]
+  orders[index].maintenance_plan_id=plan.id
+  orders[index].maintenance_plan=plan
+  orders[index].scheduled_for=plan.next_due_date
+}
 const supplies:ToirRecord[]=Array.from({length:22},(_,index)=>{
   const asset=assets[4+index%16]
   return {
@@ -179,7 +186,7 @@ export function demoList(resource:ResourceName, query:ResourceQuery={}):{
       row.asset?.name,row.employee?.name,row.department,row.email
     ].some(value=>String(value||'').toLocaleLowerCase('ru').includes(needle)))
   }
-  for(const key of ['status','category','asset_id','employee_id'] as const){
+  for(const key of ['status','category','asset_id','employee_id','maintenance_plan_id'] as const){
     const value=query[key]
     if(value!==undefined&&value!==null&&String(value)!==''){
       result=result.filter(row=>String(row[key]||'')===String(value))

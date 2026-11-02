@@ -91,7 +91,6 @@ export const specs:Record<ResourceName,ModuleSpec> = {
     fields:[{key:'title',label:'Задание',required:true},
       {key:'asset_id',label:'Актив',type:'asset'},{key:'project_id',label:'Проект',type:'project'},
       {key:'type',label:'Тип работ',type:'select',options:[{value:'planned',label:'Плановая'},{value:'emergency',label:'Аварийная'}]},
-      {key:'status',label:'Статус',type:'select',options:statusOptions('waiting','in_progress','overdue','closed')},
       {key:'employee_id',label:'Исполнитель',type:'employee'},
       {key:'planned_start',label:'Плановое начало',type:'datetime-local'},
       {key:'planned_end',label:'Плановое завершение',type:'datetime-local'},

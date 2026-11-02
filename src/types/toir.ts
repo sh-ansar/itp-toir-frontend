@@ -3,6 +3,9 @@ export type RecordValue = string | number | boolean | null | undefined
 export interface ToirRecord {
   id: number
   company_id: number
+  user_id?: number | null
+  maintenance_plan_id?: number | null
+  scheduled_for?: string | null
   name?: string
   code?: string
   title?: string
@@ -45,6 +48,7 @@ export interface ToirRecord {
   employee?: ToirRecord | null
   project?: ToirRecord | null
   parent?: ToirRecord | null
+  maintenance_plan?: ToirRecord | null
   events?: Array<{ id:number; action:string; message:string|null; changes:Record<string,unknown>|null; created_at:string }>
   created_at?: string
   updated_at?: string

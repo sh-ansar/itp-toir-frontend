@@ -376,3 +376,23 @@
 .tree-toggle svg{transition:transform .12s}
 .tree-toggle svg.open{transform:rotate(90deg)}
 @media(prefers-reduced-motion:reduce){.tree-toggle svg{transition:none}}
+
+
+/* Maintenance workflow confirmation uses the shared modal and input tokens. */
+.workflow-dialog{gap:10px}
+.workflow-dialog h2{margin:0}
+.workflow-form{display:grid;gap:10px}
+.workflow-form label{display:grid;gap:8px;font-size:12px;font-weight:650}
+.workflow-form textarea{
+  width:100%;resize:vertical;min-height:102px;max-height:220px;
+  padding:10px 12px;border:1px solid var(--color-stroke);
+  border-radius:8px;color:var(--color-text);background:var(--color-surface-raised);
+  font:inherit;line-height:1.55
+}
+.workflow-form textarea:focus-visible{outline:2px solid var(--color-primary);outline-offset:1px}
+.workflow-form .category-dialog-footer{margin-top:4px}
+.detail-plan-link{display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  margin:16px 0;font-size:12px}
+.event-state{display:inline-flex;padding:3px 9px;border-radius:20px;
+  background:var(--color-accent-soft);color:var(--color-primary);font-size:11px}
+.detail-panel .muted{color:var(--color-muted);font-size:12px;line-height:1.6}

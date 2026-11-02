@@ -9,6 +9,7 @@ export interface ResourceQuery {
   category?: string
   asset_id?: number
   employee_id?: number
+  maintenance_plan_id?: number
   page?: number
   per_page?: number
 }
@@ -46,6 +47,23 @@ export async function deleteResource(resource:ResourceName,id:number):Promise<vo
   assertWriteAllowed()
   await api('/api/v1/resources/'+resource+'/'+id,{method:'DELETE'})
 }
+export type WorkOrderAction = 'start' | 'complete' | 'reopen'
+
+export async function transitionWorkOrder(
+  id:number, action:WorkOrderAction, comment?:string
+):Promise<ToirRecord> {
+  assertWriteAllowed()
+  const result=await api<{data:ToirRecord}>('/api/v1/work-orders/'+id+'/transition',{
+    method:'POST',body:{action,comment:comment||null}
+  })
+  return result.data
+}
+
+export async function issuePlanOrder(id:number):Promise<{data:ToirRecord;created:boolean}> {
+  assertWriteAllowed()
+  return api('/api/v1/plans/'+id+'/issue',{method:'POST',body:{}})
+}
+
 export async function loadOverview():Promise<Overview>{
   if(usePreviewStore().enabled)return demoOverview()
   const result=await api<{data:Overview}>('/api/v1/overview')
