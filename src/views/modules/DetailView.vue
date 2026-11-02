@@ -8,6 +8,8 @@ import BasePageHeading from '../../components/ui/BasePageHeading.vue'
 import BaseStatusPill from '../../components/ui/BaseStatusPill.vue'
 import ToirEditorDrawer from '../../components/toir/ToirEditorDrawer.vue'
 import ToirRegistryTable from '../../components/toir/ToirRegistryTable.vue'
+import ToirOrderMaterials from '../../components/toir/ToirOrderMaterials.vue'
+import { getStock, receiveSupply, type StockItem } from '../../api/stock'
 import { loadResource, listResources, deleteResource, transitionWorkOrder, issuePlanOrder, type WorkOrderAction } from '../../api/resources'
 import { specs, STATUS_LABELS, canEdit } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
@@ -28,9 +30,17 @@ const workflowAction=ref<WorkOrderAction|'issue'|null>(null)
 const workflowNote=ref('')
 const workflowBusy=ref(false)
 const workflowError=ref('')
+const supplyDialog=ref(false)
+const stockChoices=ref<StockItem[]>([])
+const stockTarget=ref<number|null>(null)
+const supplyBusy=ref(false)
 const related=ref<{orders:ToirRecord[];plans:ToirRecord[];assets:ToirRecord[]}>({orders:[],plans:[],assets:[]})
 const editable=computed(()=>canEdit(session.session?.active_role,props.resource))
-const canEditDetails=computed(()=>editable.value&&!(props.resource==='work-orders'&&record.value?.status==='closed'))
+const canEditDetails=computed(()=>editable.value&&!(props.resource==='work-orders'&&record.value?.status==='closed')
+  && !(props.resource==='supplies'&&record.value?.status==='delivered'))
+const canReceiveSupply=computed(()=>props.resource==='supplies' && record.value &&
+  ['requested','ordered'].includes(record.value.status||'') &&
+  ['owner','admin','manager'].includes(session.session?.active_role||''))
 const canOperateOrder=computed(()=>{
   const role=session.session?.active_role
   if(['owner','admin','manager','engineer'].includes(role||''))return true
@@ -104,6 +114,25 @@ async function remove(){
   catch(cause){error.value=cause instanceof Error?cause.message:'Не удалось архивировать запись'}
 }
 function saved(){editor.value=false;void refresh()}
+async function openSupplyReceipt(){
+  if(!record.value||props.resource!=='supplies')return
+  stockTarget.value=null;error.value=''
+  try{
+    stockChoices.value=(await getStock({per_page:100})).data
+      .filter(item=>item.unit===record.value?.unit)
+    supplyDialog.value=true
+  }catch(e){error.value=e instanceof Error?e.message:'Не удалось загрузить склад'}
+}
+async function submitSupplyReceipt(){
+  if(!record.value||!stockTarget.value||supplyBusy.value||preview.enabled)return
+  supplyBusy.value=true;error.value=''
+  try{
+    await receiveSupply(record.value.id,stockTarget.value)
+    supplyDialog.value=false
+    await refresh()
+  }catch(e){error.value=e instanceof Error?e.message:'Не удалось принять заявку'}
+  finally{supplyBusy.value=false}
+}
 const operationLabel=computed(()=>({
   start:'Начать работы',complete:'Завершить работы',reopen:'Открыть повторно',issue:'Выпустить наряд'
 })[workflowAction.value||'start'])
@@ -165,6 +194,9 @@ async function confirmOperation(){
         type="button" @click="openOperation('complete')"><CheckCircle2 :size="16"/>Завершить работы</BaseButton>
       <BaseButton v-if="resource==='work-orders'&&record?.status==='closed'&&canReopen"
         type="button" variant="secondary" @click="openOperation('reopen')"><RotateCcw :size="16"/>Открыть повторно</BaseButton>
+      <BaseButton v-if="canReceiveSupply" type="button" variant="secondary" @click="openSupplyReceipt">
+        <Package :size="16"/>Принять на склад
+      </BaseButton>
       <BaseButton v-if="resource==='plans'&&canIssuePlan"
         type="button" @click="openOperation('issue')"><CalendarPlus :size="16"/>Выпустить наряд</BaseButton>
       <BaseButton v-if="canEditDetails&&!preview.enabled" variant="secondary" type="button" @click="remove"><Trash2 :size="16" />Удалить</BaseButton>
@@ -205,7 +237,8 @@ async function confirmOperation(){
             <strong>{{ ({
               created:'Создано',updated:'Изменено',deleted:'Удалено',
               start:'Начало работ',complete:'Работы завершены',reopen:'Повторное открытие',
-              issued_from_plan:'Выпущен из плана ТО',overdue:'Срок выполнения истёк'
+              issued_from_plan:'Выпущен из плана ТО',overdue:'Срок выполнения истёк',
+              material_reserve:'Резерв материалов',material_consume:'Списание материалов',material_release:'Снятие резерва'
             } as Record<string,string>)[item.action]||item.action }}</strong>
             <span v-if="item.changes?.to" class="event-state">{{ STATUS_LABELS[String(item.changes.to)]||item.changes.to }}</span>
             <p v-if="item.message">{{ item.message }}</p>
@@ -231,6 +264,10 @@ async function confirmOperation(){
         <h2>Планы обслуживания</h2>
         <ToirRegistryTable :rows="related.plans" :columns="specs.plans.columns.slice(0,4)" :selectable="false"
           @open="id=>router.push('/plans/'+id)" />
+      </section>
+      <section v-else-if="tab==='resources'&&resource==='work-orders'" class="detail-panel">
+        <ToirOrderMaterials :order-id="record.id" :status="record.status||''"
+          :can-operate="canOperateOrder" @changed="refresh" />
       </section>
       <section v-else-if="tab==='assets'" class="detail-panel">
         <h2>Связанный актив</h2>
@@ -276,6 +313,40 @@ async function confirmOperation(){
               <BaseButton type="submit" :disabled="workflowBusy||preview.enabled||(
                 ['complete','reopen'].includes(workflowAction)&&workflowNote.trim().length<3
               )">{{ workflowBusy?'Выполняется…':'Подтвердить' }}</BaseButton>
+            </div>
+          </form>
+        </section>
+      </div>
+    </Teleport>
+    <Teleport to="body">
+      <div v-if="supplyDialog" class="category-backdrop" @click.self="!supplyBusy&&(supplyDialog=false)">
+        <section class="category-dialog warehouse-dialog" role="dialog" aria-modal="true" aria-label="Принять на склад">
+          <header class="category-dialog-head">
+            <div class="category-dialog-icon"><Package :size="19"/></div>
+            <button type="button" class="drawer-close" aria-label="Закрыть" :disabled="supplyBusy" @click="supplyDialog=false"><X :size="18"/></button>
+          </header>
+          <h2>Принять заявку на склад</h2>
+          <p>Количество из заявки будет оприходовано один раз, с записью в журнале.
+            Учётная цена обновится как средневзвешенная.</p>
+          <BaseNotice v-if="preview.enabled" tone="warning">Демо-режим: проведение прихода отключено.</BaseNotice>
+          <form class="warehouse-form" @submit.prevent="submitSupplyReceipt">
+            <label>Позиция склада с той же единицей измерения *
+              <select v-model="stockTarget" required>
+                <option :value="null" disabled>Выберите позицию</option>
+                <option v-for="item in stockChoices" :key="item.id" :value="item.id">
+                  {{ item.sku }} — {{ item.name }}
+                </option>
+              </select>
+            </label>
+            <p v-if="!stockChoices.length" class="muted">
+              Совпадающих позиций на первой странице нет.
+              <RouterLink class="detail-link" to="/warehouse">Добавьте позицию на складе</RouterLink>.
+            </p>
+            <div class="category-dialog-footer">
+              <BaseButton type="button" variant="secondary" :disabled="supplyBusy" @click="supplyDialog=false">Отмена</BaseButton>
+              <BaseButton type="submit" :disabled="!stockTarget||supplyBusy||preview.enabled">
+                {{ supplyBusy?'Проведение…':'Провести приход' }}
+              </BaseButton>
             </div>
           </form>
         </section>

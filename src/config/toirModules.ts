@@ -129,7 +129,7 @@ export const specs:Record<ResourceName,ModuleSpec> = {
       {key:'quantity',label:'Количество',type:'number'},
       {key:'unit',label:'Единица измерения'},
       {key:'unit_price',label:'Цена за единицу',type:'number'},
-      {key:'status',label:'Статус',type:'select',options:statusOptions('requested','ordered','delivered','cancelled')},
+      {key:'status',label:'Статус',type:'select',options:statusOptions('requested','ordered','cancelled')},
       {key:'requested_at',label:'Дата запроса',type:'date'}]
   },
   'tenders':{

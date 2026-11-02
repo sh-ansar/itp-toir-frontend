@@ -33,6 +33,7 @@ const groups=[
   ]},
   {key:'supplies',label:'Поставки',icon:Truck,children:[
     {label:'Заявки на склад',path:'/supplies',icon:Package},
+    {label:'Склад и остатки',path:'/warehouse',icon:Warehouse},
     {label:'Тендеры',path:'/tenders',icon:BriefcaseBusiness}
   ]},
   {key:'reports',label:'Отчеты',icon:FileBarChart,children:[

@@ -7,6 +7,7 @@ import BaseNotice from '../../components/ui/BaseNotice.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
 import ToirRegistryTable from '../../components/toir/ToirRegistryTable.vue'
 import { loadOverview, listResources } from '../../api/resources'
+import { getStock, type StockItem } from '../../api/stock'
 import { specs } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
 import { usePreviewStore } from '../../stores/preview'
@@ -19,7 +20,7 @@ const router=useRouter()
 const overview=ref<Overview|null>(null)
 const orders=ref<ToirRecord[]>([])
 const employees=ref<ToirRecord[]>([])
-const supplies=ref<ToirRecord[]>([])
+const stockItems=ref<StockItem[]>([])
 const busy=ref(false)
 const error=ref('')
 const reports=[
@@ -38,7 +39,7 @@ const rows=computed(()=>{
     return {id:emp.id,company_id:emp.company_id,name:emp.name,position:emp.position,department:emp.department,
       total:assigned.length,closed:assigned.filter(o=>o.status==='closed').length}
   })
-  if(props.report==='warehouse')return supplies.value.map(x=>({...x,amount:Number(x.quantity||0)*Number(x.unit_price||0)}))
+  if(props.report==='warehouse')return stockItems.value.map(x=>({...x,amount:Number(x.quantity_on_hand||0)*Number(x.unit_cost||0)}))
   return orders.value
 })
 const columns=computed(()=>{
@@ -47,8 +48,9 @@ const columns=computed(()=>{
     {key:'department',label:'Подразделение',width:190},{key:'total',label:'Всего работ',width:135},
     {key:'closed',label:'Завершено',width:135}]
   if(props.report==='warehouse')return [
-    {key:'name',label:'Номенклатура',width:245},{key:'quantity',label:'Количество',width:140},
-    {key:'unit',label:'Единица',width:100},{key:'status',label:'Статус',width:150},
+    {key:'sku',label:'Артикул',width:130},{key:'name',label:'Номенклатура',width:245},
+    {key:'quantity_on_hand',label:'В наличии',width:110},{key:'quantity_reserved',label:'Резерв',width:100},
+    {key:'available_quantity',label:'Доступно',width:110},{key:'unit',label:'Ед.',width:80},
     {key:'amount',label:'Сумма',width:165}]
   return specs['work-orders'].columns.slice(0,6)
 })
@@ -63,8 +65,8 @@ watch(()=>props.report,()=>{reportPage.value=1})
 const stats=computed(()=>{
   const o=overview.value
   return props.report==='warehouse'
-    ? [{label:'Позиции в реестре',value:supplies.value.length},{label:'Заявки на склад',value:o?.supplies_requested||0},
-       {label:'Поставлено',value:supplies.value.filter(r=>r.status==='delivered').length}]
+    ? [{label:'Позиции на складе',value:stockItems.value.length},{label:'Требуют пополнения',value:stockItems.value.filter(r=>Number(r.available_quantity)<=Number(r.minimum_quantity)).length},
+       {label:'Стоимость остатков',value:Math.round(stockItems.value.reduce((v,r)=>v+Number(r.quantity_on_hand)*Number(r.unit_cost),0))}]
     : props.report==='employees'
     ?[{label:'Сотрудников',value:o?.employees||0},{label:'Всего нарядов',value:o?.work_orders||0},
        {label:'Закрыто работ',value:o?.closed||0}]
@@ -81,11 +83,11 @@ const maxBar=computed(()=>Math.max(1,...chart.value.map(x=>x.n)))
 async function refresh(){
   busy.value=true;error.value=''
   try{
-    const [o,wo,em,su]=await Promise.all([
+    const [o,wo,em,st]=await Promise.all([
       loadOverview(),listResources('work-orders',{per_page:100}),
-      listResources('employees',{per_page:100}),listResources('supplies',{per_page:100})
+      listResources('employees',{per_page:100}),getStock({per_page:100})
     ])
-    overview.value=o;orders.value=wo.data;employees.value=em.data;supplies.value=su.data
+    overview.value=o;orders.value=wo.data;employees.value=em.data;stockItems.value=st.data
   }catch(cause){error.value=cause instanceof Error?cause.message:'Не удалось загрузить отчёт'}
   finally{busy.value=false}
 }
@@ -127,7 +129,7 @@ onMounted(()=>void refresh())
       <p class="muted">В таблице показаны первые 100 записей. Полные выгрузки реализуются в модуле отчётности.</p>
       <ToirRegistryTable :rows="shownRows" :columns="columns" :meta="reportMeta" :selectable="false" :loading="busy"
         @page="reportPage=$event" @page-size="reportPageSize=$event;reportPage=1"
-        @open="id=>router.push(report==='employees'?'/employees/'+id:report==='warehouse'?'/supplies/'+id:'/work-orders/'+id)" />
+        @open="id=>router.push(report==='employees'?'/employees/'+id:report==='warehouse'?'/warehouse':'/work-orders/'+id)" />
     </div>
   </div>
 </template>

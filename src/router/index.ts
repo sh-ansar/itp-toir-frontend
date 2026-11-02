@@ -13,6 +13,7 @@ import ScheduleView from '../views/modules/ScheduleView.vue'
 import ReportsView from '../views/modules/ReportsView.vue'
 import NotificationsView from '../views/modules/NotificationsView.vue'
 import ChatView from '../views/modules/ChatView.vue'
+import WarehouseView from '../views/modules/WarehouseView.vue'
 import SettingsView from '../views/modules/SettingsView.vue'
 import type { ResourceName } from '../types/toir'
 
@@ -49,6 +50,7 @@ export const router = createRouter({
       props:(route:{params:Record<string,unknown>})=>({report:String(route.params.report)}),meta:{auth:true}},
     {path:'/reports',redirect:'/reports/repairs'},
     {path:'/notifications',name:'notifications',component:NotificationsView,meta:{auth:true}},
+    {path:'/warehouse',name:'warehouse',component:WarehouseView,meta:{auth:true}},
     {path:'/chat',name:'chat',component:ChatView,meta:{auth:true}},
     {path:'/settings',name:'settings',component:SettingsView,meta:{auth:true}},
     {path:'/:pathMatch(.*)*',name:'404',component:NotFoundView },
