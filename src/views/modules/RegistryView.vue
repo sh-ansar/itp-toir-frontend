@@ -7,13 +7,16 @@ import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseNotice from '../../components/ui/BaseNotice.vue'
 import ToirRegistryTable from '../../components/toir/ToirRegistryTable.vue'
 import ToirEditorDrawer from '../../components/toir/ToirEditorDrawer.vue'
+import ToirCategoryDialog from '../../components/toir/ToirCategoryDialog.vue'
 import { specs, canEdit } from '../../config/toirModules'
 import { listResources, deleteResource } from '../../api/resources'
 import { useSessionStore } from '../../stores/session'
+import { usePreviewStore } from '../../stores/preview'
 import type { ResourceName, ToirRecord, PageMeta } from '../../types/toir'
 
 const props=defineProps<{resource:ResourceName}>()
 const session=useSessionStore()
+const preview=usePreviewStore()
 const router=useRouter()
 const route=useRoute()
 const spec=computed(()=>specs[props.resource])
@@ -27,6 +30,8 @@ const busy=ref(false)
 const error=ref('')
 const selected=ref<number[]>([])
 const editorOpen=ref(false)
+const categoryDialog=ref(false)
+const defaults=ref<Record<string,string>>({})
 const filtersOpen=ref(false)
 const columnsOpen=ref(false)
 const selectedColumns=ref<string[]>([])
@@ -59,6 +64,7 @@ watch(()=>props.resource,()=>{
   void load()
 })
 watch(()=>session.session?.active_company_id,()=>{page.value=1;void load()})
+watch(()=>preview.enabled,()=>{page.value=1;editorOpen.value=false;void load()})
 watch([page,perPage,tab],()=>void load())
 watch(search,()=>{
   if(searchTimer)clearTimeout(searchTimer)
@@ -75,6 +81,16 @@ function syncUrlFilters(){
 watch(()=>route.fullPath,()=>{syncUrlFilters();void load()})
 onMounted(()=>{selectedColumns.value=spec.value.columns.map(c=>c.key);syncUrlFilters();void load()})
 function goTo(id:number){void router.push('/'+props.resource+'/'+id)}
+function beginCreate(){
+  defaults.value={}
+  if(props.resource==='assets'){categoryDialog.value=true;return}
+  editorOpen.value=true
+}
+function categorySelected(category:string){
+  defaults.value={category}
+  categoryDialog.value=false
+  editorOpen.value=true
+}
 function resetFilters(){search.value='';tab.value='all';page.value=1;filtersOpen.value=false;void load()}
 function csv(){
   const columns=shownColumns.value
@@ -129,9 +145,9 @@ function saved(id:number){editorOpen.value=false;page.value=1;void load();void r
           :class="{active:tab===item.key}" @click="tab=item.key;page=1">{{ item.label }}</button>
       </nav>
       <div class="toolbar-actions">
-        <BaseButton v-if="editable" type="button" @click="editorOpen=true"><Plus :size="16" />Создать</BaseButton>
+        <BaseButton v-if="editable" type="button" @click="beginCreate"><Plus :size="16" />Создать</BaseButton>
         <BaseButton v-if="editable" variant="secondary" type="button"
-          :disabled="selected.length===0||busy" @click="removeSelected"><Trash2 :size="16" />Удалить</BaseButton>
+          :disabled="selected.length===0||busy||preview.enabled" @click="removeSelected"><Trash2 :size="16" />Удалить</BaseButton>
         <button class="toolbar-icon" type="button" title="Экспортировать текущую страницу в CSV"
           aria-label="Экспорт CSV" @click="csv"><ArrowDownToLine :size="19" /></button>
       </div>
@@ -146,6 +162,8 @@ function saved(id:number){editorOpen.value=false;page.value=1;void load();void r
     </section>
     <ToirRegistryTable :columns="shownColumns" :rows="rows" :meta="meta" :loading="busy"
       v-model:selected="selected" @open="goTo" @page="page=$event" @page-size="perPage=$event;page=1" />
-    <ToirEditorDrawer :open="editorOpen" :spec="spec" @close="editorOpen=false" @saved="saved" />
+    <ToirCategoryDialog :open="categoryDialog" @close="categoryDialog=false" @choose="categorySelected" />
+    <ToirEditorDrawer :open="editorOpen" :spec="spec" :preview="preview.enabled" :defaults="defaults"
+      @close="editorOpen=false" @saved="saved" />
   </div>
 </template>

@@ -11,11 +11,13 @@ import ToirRegistryTable from '../../components/toir/ToirRegistryTable.vue'
 import { loadResource, listResources, deleteResource } from '../../api/resources'
 import { specs, STATUS_LABELS, canEdit } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
+import { usePreviewStore } from '../../stores/preview'
 import type { ResourceName, ToirRecord } from '../../types/toir'
 
 const props=defineProps<{resource:ResourceName;id:string}>()
 const router=useRouter()
 const session=useSessionStore()
+const preview=usePreviewStore()
 const spec=computed(()=>specs[props.resource])
 const record=ref<ToirRecord|null>(null)
 const busy=ref(false)
@@ -56,7 +58,7 @@ async function refresh(){
   }catch(cause){if(run===stamp){record.value=null;error.value=cause instanceof Error?cause.message:'Не удалось загрузить запись'}}
   finally{if(run===stamp)busy.value=false}
 }
-watch(()=>[props.resource,props.id,session.session?.active_company_id],()=>{
+watch(()=>[props.resource,props.id,session.session?.active_company_id,preview.enabled],()=>{
   tab.value='overview';void refresh()
 })
 onMounted(()=>void refresh())
@@ -76,7 +78,7 @@ function textOf(field:string):string{
   return STATUS_LABELS[String(value)]||String(value)
 }
 async function remove(){
-  if(!record.value||!editable.value)return
+  if(!record.value||!editable.value||preview.enabled)return
   if(!window.confirm('Перенести запись в архив?'))return
   try{await deleteResource(props.resource,record.value.id);await router.replace('/'+props.resource)}
   catch(cause){error.value=cause instanceof Error?cause.message:'Не удалось архивировать запись'}
@@ -97,7 +99,7 @@ function saved(){editor.value=false;void refresh()}
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <div v-if="record" class="detail-actions">
       <BaseButton v-if="editable" @click="editor=true"><Pencil :size="16" />Редактировать</BaseButton>
-      <BaseButton v-if="editable" variant="secondary" @click="remove"><Trash2 :size="16" />Удалить</BaseButton>
+      <BaseButton v-if="editable&&!preview.enabled" variant="secondary" @click="remove"><Trash2 :size="16" />Удалить</BaseButton>
       <BaseStatusPill v-if="record.status" :tone="['closed','completed','active'].includes(record.status)?'success':'info'">
         {{ STATUS_LABELS[record.status]||record.status }}
       </BaseStatusPill>
@@ -162,6 +164,6 @@ function saved(){editor.value=false;void refresh()}
         <p class="muted">Раздел создан. Операции и вложения подключаются в следующем этапе; вымышленные данные не отображаются.</p>
       </section>
     </template>
-    <ToirEditorDrawer :open="editor" :spec="spec" :record="record" @close="editor=false" @saved="saved" />
+    <ToirEditorDrawer :open="editor" :spec="spec" :record="record" :preview="preview.enabled" @close="editor=false" @saved="saved" />
   </div>
 </template>

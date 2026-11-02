@@ -9,10 +9,12 @@ import ToirRegistryTable from '../../components/toir/ToirRegistryTable.vue'
 import { loadOverview, listResources } from '../../api/resources'
 import { specs } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
+import { usePreviewStore } from '../../stores/preview'
 import type { Overview, ToirRecord } from '../../types/toir'
 
 const props=defineProps<{report:string}>()
 const session=useSessionStore()
+const preview=usePreviewStore()
 const router=useRouter()
 const overview=ref<Overview|null>(null)
 const orders=ref<ToirRecord[]>([])
@@ -28,6 +30,8 @@ const reports=[
   {id:'history',label:'История ремонта',icon:History}
 ]
 const selected=computed(()=>reports.find(x=>x.id===props.report)||reports[0])
+const reportPage=ref(1)
+const reportPageSize=ref(15)
 const rows=computed(()=>{
   if(props.report==='employees')return employees.value.map(emp=>{
     const assigned=orders.value.filter(o=>o.employee_id===emp.id)
@@ -48,6 +52,14 @@ const columns=computed(()=>{
     {key:'amount',label:'Сумма',width:165}]
   return specs['work-orders'].columns.slice(0,6)
 })
+const reportMeta=computed(()=>({
+  total:rows.value.length,
+  current_page:reportPage.value,
+  last_page:Math.max(1,Math.ceil(rows.value.length/reportPageSize.value)),
+  per_page:reportPageSize.value
+}))
+const shownRows=computed(()=>rows.value.slice((reportPage.value-1)*reportPageSize.value,reportPage.value*reportPageSize.value))
+watch(()=>props.report,()=>{reportPage.value=1})
 const stats=computed(()=>{
   const o=overview.value
   return props.report==='warehouse'
@@ -78,6 +90,7 @@ async function refresh(){
   finally{busy.value=false}
 }
 watch(()=>session.session?.active_company_id,()=>void refresh())
+watch(()=>preview.enabled,()=>void refresh())
 onMounted(()=>void refresh())
 </script>
 <template>
@@ -112,7 +125,8 @@ onMounted(()=>void refresh())
     <div class="report-table">
       <h2>{{ report==='warehouse'?'Запчасти и материалы':report==='employees'?'Работы сотрудников':'Реестр работ' }}</h2>
       <p class="muted">В таблице показаны первые 100 записей. Полные выгрузки реализуются в модуле отчётности.</p>
-      <ToirRegistryTable :rows="rows" :columns="columns" :selectable="false" :loading="busy"
+      <ToirRegistryTable :rows="shownRows" :columns="columns" :meta="reportMeta" :selectable="false" :loading="busy"
+        @page="reportPage=$event" @page-size="reportPageSize=$event;reportPage=1"
         @open="id=>router.push(report==='employees'?'/employees/'+id:report==='warehouse'?'/supplies/'+id:'/work-orders/'+id)" />
     </div>
   </div>

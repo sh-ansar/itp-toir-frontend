@@ -248,3 +248,121 @@
   .home-order{grid-template-columns:85px 1fr 18px}.home-order small{display:none}
   .detail-actions .base-button{font-size:11px}.detail-tabs button{padding:8px 11px}}
 @media(prefers-reduced-motion:reduce){.group-chevron{transition:none}}
+
+
+/* Explicit preview mode for visual acceptance; never confused with saved business data. */
+.preview-toggle{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:36px;padding:0 11px;border:1px solid var(--color-primary-stroke);
+  border-radius:8px;background:var(--color-accent-soft);color:var(--color-primary);
+  white-space:nowrap;font-size:12px;font-weight:650
+}
+.preview-toggle:hover{background:var(--color-hover)}
+.preview-toggle--active{
+  background:var(--color-warning-surface);border-color:var(--color-warning);
+  color:var(--color-warning)
+}
+.preview-toggle svg{flex:none}
+.demo-banner{
+  display:flex;align-items:center;gap:10px;padding:9px 24px;
+  border-bottom:1px solid var(--color-warning);
+  background:var(--color-warning-surface);color:var(--color-text);
+  font-size:12px;line-height:17px
+}
+.demo-banner-label{
+  display:inline-block;padding:4px 7px;border-radius:5px;
+  background:var(--color-surface);color:var(--color-warning);font-weight:750;
+  white-space:nowrap
+}
+.demo-banner > span:nth-child(2){flex:1}
+.demo-banner button{display:grid;place-items:center;min-width:27px;height:27px;
+  border:0;background:transparent;border-radius:6px;color:inherit;font-size:22px}
+.demo-banner button:hover{background:var(--color-hover)}
+@media(max-width:900px){
+  .preview-toggle span{display:none}
+  .preview-toggle{min-width:36px;width:36px;padding:0}
+}
+@media(max-width:520px){
+  .demo-banner{padding:7px 12px;font-size:11px;gap:7px}
+  .demo-banner-label{font-size:10px}
+}
+
+
+/* Category-first creation, matching the supplied TOIR interaction prototype. */
+.category-backdrop{position:fixed;inset:0;z-index:95;display:grid;place-items:center;
+  padding:18px;background:var(--color-overlay)}
+.category-dialog{display:grid;gap:0;width:min(100%,420px);max-height:calc(100dvh - 30px);overflow:auto;
+  padding:24px;background:var(--color-surface);color:var(--color-text);
+  border:1px solid var(--color-stroke);border-radius:14px;box-shadow:var(--shadow-float)}
+.category-dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.category-dialog-head .drawer-close{margin-left:auto}
+.category-dialog-icon{width:40px;height:40px;display:grid;place-items:center;
+  background:var(--color-accent-soft);border-radius:11px;color:var(--color-primary)}
+.category-dialog h2{margin:0 0 7px;font-size:21px;line-height:1.2}
+.category-dialog>p{margin:0 0 18px;font-size:13px;color:var(--color-muted);line-height:1.5}
+.category-options{display:grid;gap:8px}
+.category-option{display:flex;align-items:flex-start;gap:12px;padding:12px;
+  border:1px solid var(--color-stroke);border-radius:9px;cursor:pointer}
+.category-option:hover{background:var(--color-hover)}
+.category-option.selected{border-color:var(--color-primary);background:var(--color-accent-soft)}
+.category-option input{width:17px;height:17px;flex:none;margin:3px 0 0;accent-color:var(--color-primary)}
+.category-option span{display:grid;gap:4px}
+.category-option strong{font-size:13px}
+.category-option small{font-size:11px;color:var(--color-muted);line-height:1.4}
+.category-dialog-footer{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}
+
+
+/* Gantt and read-only detail inspector, no backend persistence in preview mode. */
+.planning-orders-toggle{display:inline-flex;align-items:center;gap:8px;
+  min-height:36px;padding:7px 10px;border:1px solid var(--color-stroke);
+  border-radius:8px;font-size:12px;color:var(--color-muted);white-space:nowrap}
+.planning-orders-toggle input{accent-color:var(--color-primary);width:15px;height:15px}
+.planning-shell{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+.planning-shell--inspecting{grid-template-columns:minmax(0,1fr) 300px;align-items:start}
+.gantt-name.selected{background:var(--color-accent-soft);color:var(--color-primary)}
+.gantt-days>div{position:relative}
+.gantt-block{left:0;right:0;width:100%;height:22px;top:11px;border-radius:0;
+  display:block;text-align:left;overflow:visible;z-index:2}
+.gantt-block--start{border-top-left-radius:5px;border-bottom-left-radius:5px}
+.gantt-block--end{border-top-right-radius:5px;border-bottom-right-radius:5px}
+.gantt-block--success{background:var(--color-success)}
+.gantt-block--danger{background:var(--color-danger)}
+.gantt-block--warning{background:var(--color-warning)}
+.gantt-block--info{background:var(--color-primary)}
+.gantt-block span{position:absolute;left:5px;top:4px;z-index:5;
+  max-width:225px;white-space:nowrap;font-size:10px;color:#fff;
+  text-shadow:0 1px 1px rgba(0,0,0,.13)}
+.gantt-days>div:hover .gantt-block{filter:brightness(.96)}
+.planning-inspector{position:sticky;top:90px;display:grid;gap:16px;padding:18px;
+  border:1px solid var(--color-stroke);border-radius:10px;background:var(--color-surface);min-width:0}
+.planning-inspector header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.planning-inspector header small{font-size:11px;color:var(--color-muted)}
+.planning-inspector header button{display:grid;place-items:center;width:27px;height:27px;
+  border:0;border-radius:6px;background:var(--color-soft);color:var(--color-muted)}
+.planning-inspector h2{margin:0;font-size:17px;line-height:1.35}
+.planning-inspector .status-pill{justify-self:start}
+.inspector-dl{display:grid;gap:7px;font-size:12px;margin:0}
+.inspector-dl dt{color:var(--color-muted);padding-top:5px}
+.inspector-dl dd{margin:0;padding:0 0 8px;border-bottom:1px solid var(--color-stroke);overflow-wrap:anywhere}
+.inspector-open{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:36px;padding:8px 12px;border-radius:7px;background:var(--color-primary);
+  color:var(--color-on-primary);font-size:12px;font-weight:700}
+@media(max-width:1150px){.planning-shell--inspecting{grid-template-columns:minmax(0,1fr)}
+  .planning-inspector{position:static}}
+
+
+.schedule-period{font-size:13px;white-space:nowrap}
+.schedule-count{font-size:12px;color:var(--color-muted);white-space:nowrap}
+.schedule-search{display:inline-flex;align-items:center;gap:7px;padding:0 10px;
+  min-height:36px;width:min(240px,100%);border:1px solid var(--color-stroke);
+  border-radius:8px;background:var(--color-surface);color:var(--color-muted)}
+.schedule-search input{min-width:0;flex:1;width:100%;outline:none;border:0;
+  background:transparent;color:var(--color-text);font-size:12px}
+.schedule-search:focus-within{outline:2px solid var(--color-primary);outline-offset:1px}
+.schedule-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+.schedule-layout--inspecting{grid-template-columns:minmax(0,1fr) 300px;align-items:start}
+.day-head.today,.day-slot.today{background:var(--color-accent-soft)}
+.schedule-event--selected{box-shadow:inset 0 0 0 2px var(--color-primary)}
+.schedule-inspector{top:90px}
+@media(max-width:1150px){.schedule-layout--inspecting{grid-template-columns:minmax(0,1fr)}.schedule-inspector{position:static}}
+@media(max-width:700px){.schedule-search{max-width:none;width:100%}.schedule-count{display:none}}

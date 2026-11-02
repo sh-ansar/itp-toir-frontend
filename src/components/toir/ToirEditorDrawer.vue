@@ -8,7 +8,7 @@ import type { ModuleSpec } from '../../config/toirModules'
 import type { ResourceName, ToirRecord } from '../../types/toir'
 import { createResource, updateResource, listResources } from '../../api/resources'
 
-const props=defineProps<{open:boolean;spec:ModuleSpec;record?:ToirRecord|null}>()
+const props=defineProps<{open:boolean;spec:ModuleSpec;record?:ToirRecord|null;preview?:boolean;defaults?:Record<string,string>}>()
 const emit=defineEmits<{close:[];saved:[id:number]}>()
 const form=reactive<Record<string,string>>({})
 const reference=ref<Record<string,ToirRecord[]>>({})
@@ -23,7 +23,7 @@ watch(()=>[props.open,props.record?.id,props.spec.resource],async ()=>{
   if(!props.open)return
   error.value=''
   for(const f of props.spec.fields){
-    const value=props.record?.[f.key]
+    const value=props.record?.[f.key] ?? props.defaults?.[f.key]
     form[f.key]=value===null||value===undefined?'':String(value).replace(' ','T').slice(0,f.type==='datetime-local'?16:undefined)
   }
   const needed=[...new Set(props.spec.fields.map(f=>linked[f.type||'']).filter(Boolean))]
@@ -49,7 +49,7 @@ function convert(){
   return result
 }
 async function submit(){
-  if(busy.value)return
+  if(busy.value||props.preview)return
   busy.value=true
   error.value=''
   try{
@@ -72,6 +72,7 @@ async function submit(){
           <button class="drawer-close" type="button" aria-label="Закрыть" @click="emit('close')"><X :size="21" /></button>
         </header>
         <form id="toir-editor" class="editor-body" @submit.prevent="submit">
+          <BaseNotice v-if="preview" tone="info">Предпросмотр формы. Сохранение в демонстрационном режиме отключено.</BaseNotice>
           <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
           <template v-for="field in spec.fields" :key="field.key">
             <div v-if="field.type==='select'||field.type==='asset'||field.type==='employee'||field.type==='project'||field.type==='parent'"
@@ -104,7 +105,7 @@ async function submit(){
         </form>
         <footer class="editor-footer">
           <BaseButton variant="secondary" type="button" :disabled="busy" @click="emit('close')">Отмена</BaseButton>
-          <BaseButton type="submit" :disabled="!ready" @click="submit">
+          <BaseButton type="submit" :disabled="!ready||preview" @click="submit">
             <Save :size="17" />{{ busy?'Сохранение…':'Сохранить' }}
           </BaseButton>
         </footer>

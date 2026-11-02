@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { LogOut, Menu, Moon, Sun, UserRound } from 'lucide-vue-next'
+import { Eye, EyeOff, LogOut, Menu, Moon, Sun, UserRound } from 'lucide-vue-next'
 import { useSessionStore } from '../../stores/session'
 import { usePreferencesStore, type Locale } from '../../stores/preferences'
 import { useI18n } from '../../i18n'
+import { usePreviewStore } from '../../stores/preview'
 
 defineEmits<{ 'open-menu': [] }>()
 const router = useRouter()
 const session = useSessionStore()
 const ui = usePreferencesStore()
+const preview = usePreviewStore()
 const { t } = useI18n()
 const error = ref('')
 const active = computed(() => session.session?.companies.find(
@@ -21,6 +23,7 @@ async function companyChanged(event: Event) {
   error.value = ''
   try {
     await session.chooseCompany(id)
+    preview.setEnabled(false)
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : t('operationError')
     ;(event.target as HTMLSelectElement).value = String(session.session?.active_company_id || '')
@@ -31,6 +34,7 @@ async function logout() {
   error.value = ''
   try {
     await session.logout()
+    preview.setEnabled(false)
     await router.replace({ name: 'login' })
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : t('operationError')
@@ -59,6 +63,13 @@ async function logout() {
         </select>
         <span v-else class="company-name">{{ active?.name || t('company') }}</span>
       </div>
+      <button type="button" class="preview-toggle" :class="{ 'preview-toggle--active': preview.enabled }"
+        :aria-pressed="preview.enabled" :title="preview.enabled ? t('previewActive') : t('previewMode')"
+        @click="preview.toggle()">
+        <EyeOff v-if="preview.enabled" :size="16" aria-hidden="true" />
+        <Eye v-else :size="16" aria-hidden="true" />
+        <span>{{ preview.enabled ? t('previewActive') : t('previewMode') }}</span>
+      </button>
       <label class="visually-hidden" for="topbar-language">{{ t('language') }}</label>
       <select id="topbar-language" class="topbar-language" :value="ui.locale"
         @change="ui.locale = ($event.target as HTMLSelectElement).value as Locale">

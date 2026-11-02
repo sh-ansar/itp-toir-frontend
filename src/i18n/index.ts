@@ -52,6 +52,9 @@ const ru = {
   openMenu: 'Открыть меню',
   emptyModules: 'Функции появятся после подключения модулей',
   security: 'Безопасность',
+  previewMode: 'Показать макет',
+  previewActive: 'Демо-режим',
+  previewNotice: 'Демонстрационные данные только для просмотра интерфейса. Они не сохраняются в базе.',
   independent: 'Отдельная корпоративная система ITP'
 } as const
 
@@ -108,6 +111,9 @@ const en: Record<Key, string> = {
   openMenu: 'Open menu',
   emptyModules: 'Features will become available as modules are connected',
   security: 'Security',
+  previewMode: 'Preview screens',
+  previewActive: 'Demo mode',
+  previewNotice: 'Sample data for interface preview only. Nothing is saved to the database.',
   independent: 'Independent ITP corporate product'
 }
 const ka: Record<Key, string> = {
@@ -162,6 +168,9 @@ const ka: Record<Key, string> = {
   openMenu: 'მენიუს გახსნა',
   emptyModules: 'ფუნქციები მოდულების ჩართვის შემდეგ გამოჩნდება',
   security: 'უსაფრთხოება',
+  previewMode: 'ეკრანების ნახვა',
+  previewActive: 'დემო რეჟიმი',
+  previewNotice: 'საჩვენებელი მონაცემებია მხოლოდ ინტერფეისის სანახავად. მონაცემები ბაზაში არ ინახება.',
   independent: 'ITP-ის დამოუკიდებელი კორპორაციული სისტემა'
 }
 const all: Record<Locale, Record<Key, string>> = { ru, en, ka }

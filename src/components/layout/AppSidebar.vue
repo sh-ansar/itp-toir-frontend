@@ -50,13 +50,14 @@ function isActive(path:string){
   return route.path===path && (path!=='/assets'||!route.query.category)
 }
 function toggle(key:string){expanded.value[key]=!expanded.value[key]}
+const logoSrc = import.meta.env.BASE_URL + 'brand/itp-mark.svg'
 </script>
 
 <template>
   <aside class="sidebar toir-sidebar" :class="{'toir-sidebar--collapsed':ui.sidebarCollapsed,'sidebar--open':mobileOpen}">
     <div class="toir-sidebar-head">
       <RouterLink to="/" class="brand-link" @click="close">
-        <img src="/brand/itp-mark.svg" alt="ITP" width="45" height="34" />
+        <img :src="logoSrc" alt="ITP" width="45" height="34" />
         <span class="brand-copy"><strong>ТО и Р</strong><small>Техническое обслуживание</small></span>
       </RouterLink>
       <button class="sidebar-collapse-btn" type="button" :title="ui.sidebarCollapsed?'Развернуть меню':'Свернуть меню'"
