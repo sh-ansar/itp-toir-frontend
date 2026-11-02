@@ -366,3 +366,13 @@
 .schedule-inspector{top:90px}
 @media(max-width:1150px){.schedule-layout--inspecting{grid-template-columns:minmax(0,1fr)}.schedule-inspector{position:static}}
 @media(max-width:700px){.schedule-search{max-width:none;width:100%}.schedule-count{display:none}}
+
+
+.tree-cell{display:flex;align-items:center;gap:5px;max-width:100%;min-width:0}
+.tree-cell .row-link{flex:1;min-width:0}
+.tree-toggle,.tree-spacer{display:grid;place-items:center;width:20px;min-width:20px;height:21px;padding:0;
+  border:0;background:transparent;color:var(--color-muted);border-radius:5px}
+.tree-toggle:hover{background:var(--color-accent-soft);color:var(--color-primary)}
+.tree-toggle svg{transition:transform .12s}
+.tree-toggle svg.open{transform:rotate(90deg)}
+@media(prefers-reduced-motion:reduce){.tree-toggle svg{transition:none}}

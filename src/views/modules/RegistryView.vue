@@ -161,6 +161,7 @@ function saved(id:number){editorOpen.value=false;page.value=1;void load();void r
       <span class="filter-help"><AlertCircle :size="14" />Поиск выполняется по текущей компании</span>
     </section>
     <ToirRegistryTable :columns="shownColumns" :rows="rows" :meta="meta" :loading="busy"
+      :tree-mode="resource==='assets'&&tab==='all'"
       v-model:selected="selected" @open="goTo" @page="page=$event" @page-size="perPage=$event;page=1" />
     <ToirCategoryDialog :open="categoryDialog" @close="categoryDialog=false" @choose="categorySelected" />
     <ToirEditorDrawer :open="editorOpen" :spec="spec" :preview="preview.enabled" :defaults="defaults"

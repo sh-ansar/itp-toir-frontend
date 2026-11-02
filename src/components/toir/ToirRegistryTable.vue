@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { ChevronUp, ChevronDown, ChevronRight, Inbox } from 'lucide-vue-next'
 import BaseStatusPill from '../ui/BaseStatusPill.vue'
 import type { PageMeta, ToirRecord } from '../../types/toir'
@@ -14,7 +14,8 @@ const props = withDefaults(defineProps<{
   selected?:number[]
   selectable?:boolean
   emptyText?:string
-}>(),{loading:false,selected:()=>[],selectable:true,emptyText:'Пока нет записей'})
+  treeMode?:boolean
+}>(),{loading:false,selected:()=>[],selectable:true,emptyText:'Пока нет записей',treeMode:false})
 const emit=defineEmits<{
   open:[id:number]
   'update:selected':[ids:number[]]
@@ -31,6 +32,56 @@ const sorted=computed(()=>{
     return (sortAsc.value?1:-1)*new Intl.Collator('ru',{numeric:true,sensitivity:'base'}).compare(x,y)
   })
 })
+const expanded=ref<Set<number>>(new Set())
+watch(()=>props.rows,rows=>{expanded.value=new Set(rows.map(row=>row.id))},{immediate:true})
+const visibleRows=computed(()=>{
+  if(!props.treeMode)return sorted.value
+  const byId=new Map(sorted.value.map(row=>[row.id,row]))
+  const children=new Map<number,ToirRecord[]>()
+  const roots:ToirRecord[]=[]
+  for(const row of sorted.value){
+    const parentId=typeof row.parent_id==='number'?row.parent_id:undefined
+    if(parentId!==undefined&&parentId!==row.id&&byId.has(parentId)){
+      const group=children.get(parentId)||[]
+      group.push(row)
+      children.set(parentId,group)
+    }else{roots.push(row)}
+  }
+  const visited=new Set<number>()
+  const result:ToirRecord[]=[]
+  function add(row:ToirRecord){
+    if(visited.has(row.id))return
+    visited.add(row.id)
+    result.push(row)
+    if(expanded.value.has(row.id))for(const child of children.get(row.id)||[])add(child)
+  }
+  for(const row of roots)add(row)
+  // Preserve records even if the current page contains broken parent cycles.
+  for(const row of sorted.value)if(!visited.has(row.id)&&!byId.has(Number(row.parent_id)))add(row)
+  return result
+})
+const parentIndex=computed(()=>new Map(props.rows.map(row=>[row.id,row])))
+function depth(row:ToirRecord):number{
+  if(!props.treeMode)return 0
+  let current=row;let count=0
+  const seen=new Set<number>([row.id])
+  while(typeof current.parent_id==='number'&&parentIndex.value.has(current.parent_id)&&count<5){
+    if(seen.has(current.parent_id))break
+    seen.add(current.parent_id)
+    current=parentIndex.value.get(current.parent_id)!
+    count++
+  }
+  return count*16
+}
+function hasChildren(id:number):boolean{
+  return props.rows.some(row=>row.parent_id===id)
+}
+function toggleExpanded(id:number){
+  const next=new Set(expanded.value)
+  if(next.has(id))next.delete(id)
+  else next.add(id)
+  expanded.value=next
+}
 const selectedSet=computed(()=>new Set(props.selected))
 const allSelected=computed(()=>props.rows.length>0&&props.rows.every(r=>selectedSet.value.has(r.id)))
 function rawValue(row:ToirRecord,key:string):string{
@@ -93,13 +144,13 @@ function tone(status:string):'success'|'warning'|'danger'|'info'|'neutral'{
         </thead>
         <tbody>
           <tr v-if="loading"><td :colspan="columns.length+(selectable?2:1)" class="empty-row">Загрузка данных…</td></tr>
-          <tr v-else-if="sorted.length===0">
+          <tr v-else-if="visibleRows.length===0">
             <td :colspan="columns.length+(selectable?2:1)" class="empty-row">
               <div class="empty-holder"><Inbox :size="26" /><strong>{{ emptyText }}</strong>
                 <span>Измените фильтры или создайте новую запись.</span></div>
             </td>
           </tr>
-          <tr v-for="row in (loading?[]:sorted)" :key="row.id" class="data-row">
+          <tr v-for="row in (loading?[]:visibleRows)" :key="row.id" class="data-row">
             <td v-if="selectable" class="check-column" @click.stop>
               <input type="checkbox" :aria-label="'Выбрать запись '+row.id"
                 :checked="selectedSet.has(row.id)" @change="toggle(row.id,($event.target as HTMLInputElement).checked)" />
@@ -107,6 +158,15 @@ function tone(status:string):'success'|'warning'|'danger'|'info'|'neutral'{
             <td v-for="c in columns" :key="c.key" :title="format(row,c.key)">
               <BaseStatusPill v-if="c.key==='status'" :tone="tone(String(row.status||''))">{{ format(row,c.key) }}</BaseStatusPill>
               <span v-else-if="c.key==='type' && row.type==='emergency'" class="danger-text">{{ format(row,c.key) }}</span>
+              <div v-else-if="treeMode&&c.key==='name'" class="tree-cell" :style="{paddingLeft:depth(row)+'px'}">
+                <button v-if="hasChildren(row.id)" type="button" class="tree-toggle"
+                  :aria-label="expanded.has(row.id)?'Свернуть дочерние активы':'Показать дочерние активы'"
+                  :aria-expanded="expanded.has(row.id)" @click.stop="toggleExpanded(row.id)">
+                  <ChevronRight :size="15" :class="{open:expanded.has(row.id)}"/>
+                </button>
+                <span v-else class="tree-spacer" aria-hidden="true"></span>
+                <button class="row-link" type="button" @click="emit('open',row.id)">{{ format(row,c.key) }}</button>
+              </div>
               <button v-else-if="['name','title','number'].includes(c.key)" class="row-link" type="button"
                 @click="emit('open',row.id)">{{ format(row,c.key) }}</button>
               <span v-else class="cell-clip">{{ format(row,c.key) }}</span>
