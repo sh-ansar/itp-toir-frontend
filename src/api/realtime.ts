@@ -63,7 +63,7 @@ export async function connectRealtime():Promise<boolean>{
       wsPort:443,
       wssPort:443,
       forceTLS:true,
-      enabledTransports:['wss'],
+      enabledTransports:['ws','wss'],
       disableStats:true,
       channelAuthorization:{
         customHandler:(params,done)=>{
@@ -94,7 +94,7 @@ export async function connectRealtime():Promise<boolean>{
     pusher=client
     echo=new Echo({broadcaster:'reverb',client,key:settings.key,wsHost:settings.host,
       wsPath:settings.path,wsPort:443,wssPort:443,forceTLS:true,
-      enabledTransports:['wss']})
+      enabledTransports:['ws','wss']})
     currentChannel=settings.channel
     if(settings.presence_channel){
       currentPresence=settings.presence_channel
