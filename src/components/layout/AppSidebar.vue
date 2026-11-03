@@ -5,7 +5,7 @@ import {
   Wrench, ClipboardList, CalendarDays, Users, FolderKanban,
   Boxes, Package, Warehouse, Hammer, Cog, Truck, Bell, MessageCircle,
   FileBarChart, Settings, ChevronDown, PanelLeftClose, PanelLeftOpen,
-  X, LayoutDashboard, BriefcaseBusiness
+  X, LayoutDashboard, BriefcaseBusiness, ShieldAlert, Network, UsersRound
 } from 'lucide-vue-next'
 import { usePreferencesStore } from '../../stores/preferences'
 import { useSessionStore } from '../../stores/session'
@@ -15,17 +15,19 @@ const emit=defineEmits<{'update:mobileOpen':[v:boolean]}>()
 const route=useRoute()
 const ui=usePreferencesStore()
 const session=useSessionStore()
-const expanded=ref<Record<string,boolean>>({maintenance:true,assets:true,supplies:false,reports:false})
+const expanded=ref<Record<string,boolean>>({maintenance:true,assets:true,supplies:false,reports:true})
 const groups=[
   {key:'maintenance',label:'Ремонт и обслуживание',icon:Wrench,children:[
     {label:'Наряд-задания',path:'/work-orders',icon:ClipboardList},
     {label:'Планирование',path:'/plans',icon:Cog},
+    {label:'Бригады и смены',path:'/crews',icon:UsersRound},
     {label:'Расписание',path:'/schedule',icon:CalendarDays},
     {label:'Сотрудники',path:'/employees',icon:Users},
     {label:'Проекты',path:'/projects',icon:FolderKanban}
   ]},
   {key:'assets',label:'Активы',icon:Boxes,children:[
     {label:'Все активы',path:'/assets',icon:Package},
+    {label:'Цифровая структура',path:'/asset-tree',icon:Network},
     {label:'Помещение',path:'/assets?category=premises',icon:Warehouse},
     {label:'Оборудование',path:'/assets?category=equipment',icon:Cog},
     {label:'Инструменты',path:'/assets?category=tools',icon:Hammer},
@@ -41,6 +43,7 @@ const groups=[
     {label:'Рейтинг сотрудников',path:'/reports/employees',icon:Users},
     {label:'Наличие запчастей на складе',path:'/reports/warehouse',icon:Package},
     {label:'По качеству ремонта',path:'/reports/quality',icon:Cog},
+    {label:'Риски оборудования',path:'/risk',icon:ShieldAlert},
     {label:'История ремонта',path:'/reports/history',icon:ClipboardList}
   ]}
 ]

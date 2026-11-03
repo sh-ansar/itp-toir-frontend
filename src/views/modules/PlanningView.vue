@@ -88,7 +88,7 @@ function tone(status:string):'success'|'danger'|'warning'|'info'{
 async function load(){
   loading.value=true;error.value=''
   try{
-    const result=await loadSchedule()
+    const result=await loadSchedule({from:days.value[0].key,to:days.value[days.value.length-1].key})
     plans.value=result.plans
     orders.value=result.orders
   }catch(cause){error.value=cause instanceof Error?cause.message:'Не удалось загрузить планы'}
@@ -100,6 +100,7 @@ function shift(amount:number){
   date.value=next
   selected.value=null
   rowLimit.value=24
+  void load()
 }
 watch(()=>session.session?.active_company_id,()=>{selected.value=null;void load()})
 watch(()=>preview.enabled,()=>{selected.value=null;void load()})

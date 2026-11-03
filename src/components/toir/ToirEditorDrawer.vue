@@ -7,16 +7,18 @@ import BaseFormField from '../ui/BaseFormField.vue'
 import type { ModuleSpec } from '../../config/toirModules'
 import type { ResourceName, ToirRecord } from '../../types/toir'
 import { createResource, updateResource, listResources } from '../../api/resources'
+import { getCrews, getAssetTree, type Crew } from '../../api/operations'
 
 const props=defineProps<{open:boolean;spec:ModuleSpec;record?:ToirRecord|null;preview?:boolean;defaults?:Record<string,string>}>()
 const emit=defineEmits<{close:[];saved:[id:number]}>()
 const form=reactive<Record<string,string>>({})
 const reference=ref<Record<string,ToirRecord[]>>({})
+const crews=ref<Crew[]>([])
 const busy=ref(false)
 const error=ref('')
 const ready=computed(()=>props.open&&!busy.value)
 const isEdit=computed(()=>!!props.record?.id)
-const numeric=new Set(['asset_id','employee_id','parent_id','project_id','periodicity_days','purchase_value','estimated_cost','quantity','unit_price','budget'])
+const numeric=new Set(['asset_id','employee_id','parent_id','project_id','periodicity_days','purchase_value','estimated_cost','quantity','unit_price','budget','crew_id','duration_minutes','criticality','priority','interval_hours','next_due_hours'])
 const linked:Record<string,ResourceName>={asset:'assets',parent:'assets',employee:'employees',project:'projects'}
 
 watch(()=>[props.open,props.record?.id,props.spec.resource],async ()=>{
@@ -26,14 +28,23 @@ watch(()=>[props.open,props.record?.id,props.spec.resource],async ()=>{
     const value=props.record?.[f.key] ?? props.defaults?.[f.key]
     form[f.key]=value===null||value===undefined?'':String(value).replace(' ','T').slice(0,f.type==='datetime-local'?16:undefined)
   }
+  if(props.spec.fields.some(f=>f.type==='crew')){
+    try{crews.value=await getCrews()}catch{crews.value=[]}
+  }
   const needed=[...new Set(props.spec.fields.map(f=>linked[f.type||'']).filter(Boolean))]
   for(const resource of needed){
-    try { const data=await listResources(resource,{per_page:100});reference.value[resource]=data.data }
+    try {
+      if(resource==='assets'&&props.spec.resource==='assets')reference.value[resource]=await getAssetTree()
+      else{
+        const data=await listResources(resource,{per_page:100});reference.value[resource]=data.data
+      }
+    }
     catch { reference.value[resource]=[] }
   }
 },{immediate:true})
 
 function optionsFor(field:string){
+  if(field==='crew')return crews.value.map(c=>({...c,company_id:0})) as ToirRecord[]
   const resource=linked[field]
   return (reference.value[resource]||[]).filter(r=>
     !(props.spec.resource==='assets' && resource==='assets' && r.id===props.record?.id)
@@ -75,7 +86,7 @@ async function submit(){
           <BaseNotice v-if="preview" tone="info">Предпросмотр формы. Сохранение в демонстрационном режиме отключено.</BaseNotice>
           <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
           <template v-for="field in spec.fields" :key="field.key">
-            <div v-if="field.type==='select'||field.type==='asset'||field.type==='employee'||field.type==='project'||field.type==='parent'"
+            <div v-if="field.type==='select'||field.type==='asset'||field.type==='employee'||field.type==='project'||field.type==='parent'||field.type==='crew'"
               class="editor-control">
               <label :for="'edit-'+field.key">{{ field.label }}<span v-if="field.required"> *</span></label>
               <select :id="'edit-'+field.key" v-model="form[field.key]" :required="field.required" :disabled="busy">

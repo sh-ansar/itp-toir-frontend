@@ -13,6 +13,9 @@ import ScheduleView from '../views/modules/ScheduleView.vue'
 import ReportsView from '../views/modules/ReportsView.vue'
 import NotificationsView from '../views/modules/NotificationsView.vue'
 import ChatView from '../views/modules/ChatView.vue'
+import AssetStructureView from '../views/modules/AssetStructureView.vue'
+import WorkforcePlanningView from '../views/modules/WorkforcePlanningView.vue'
+import RiskIntelligenceView from '../views/modules/RiskIntelligenceView.vue'
 import WarehouseView from '../views/modules/WarehouseView.vue'
 import SettingsView from '../views/modules/SettingsView.vue'
 import type { ResourceName } from '../types/toir'
@@ -46,6 +49,9 @@ export const router = createRouter({
     {path:'/plans/:id',name:'plan-detail',component:DetailView,
       props:(route:{params:Record<string,unknown>})=>({resource:'plans',id:String(route.params.id)}),meta:{auth:true}},
     {path:'/schedule',name:'schedule',component:ScheduleView,meta:{auth:true}},
+    {path:'/asset-tree',name:'asset-tree',component:AssetStructureView,meta:{auth:true}},
+    {path:'/crews',name:'crews',component:WorkforcePlanningView,meta:{auth:true}},
+    {path:'/risk',name:'risk',component:RiskIntelligenceView,meta:{auth:true}},
     {path:'/reports/:report',name:'reports',component:ReportsView,
       props:(route:{params:Record<string,unknown>})=>({report:String(route.params.report)}),meta:{auth:true}},
     {path:'/reports',redirect:'/reports/repairs'},

@@ -69,8 +69,9 @@ export async function loadOverview():Promise<Overview>{
   const result=await api<{data:Overview}>('/api/v1/overview')
   return result.data
 }
-export async function loadSchedule():Promise<ScheduleResponse>{
+export async function loadSchedule(range?:{from:string;to:string}):Promise<ScheduleResponse>{
   if(usePreviewStore().enabled)return demoSchedule()
-  const result=await api<{data:ScheduleResponse}>('/api/v1/schedule')
+  const query=range?'?'+new URLSearchParams(range).toString():''
+  const result=await api<{data:ScheduleResponse}>('/api/v1/schedule'+query)
   return result.data
 }

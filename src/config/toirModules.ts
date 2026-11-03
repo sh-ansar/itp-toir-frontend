@@ -3,7 +3,7 @@ import type { ResourceName } from '../types/toir'
 export interface FieldConfig {
   key: string
   label: string
-  type?: 'text'|'email'|'number'|'date'|'datetime-local'|'textarea'|'select'|'asset'|'employee'|'project'|'parent'
+  type?: 'text'|'email'|'number'|'date'|'datetime-local'|'textarea'|'select'|'asset'|'employee'|'project'|'parent'|'crew'
   required?: boolean
   options?: { value:string; label:string }[]
   width?: number
@@ -41,6 +41,14 @@ export const specs:Record<ResourceName,ModuleSpec> = {
       {key:'category',label:'Категория актива',type:'select',required:true,options:[
         {value:'premises',label:'Помещение'},{value:'equipment',label:'Оборудование'},
         {value:'tools',label:'Инструменты'},{value:'materials',label:'Запчасти и материалы'}]},
+      {key:'node_type',label:'Тип узла',type:'select',options:[
+        {value:'object',label:'Объект / площадка'},
+        {value:'system',label:'Система / технологическая линия'},
+        {value:'equipment',label:'Оборудование'},
+        {value:'aggregate',label:'Агрегат'},
+        {value:'assembly',label:'Узел / сборка'},
+        {value:'component',label:'Деталь / компонент'}]},
+      {key:'criticality',label:'Критичность (1–5)',type:'number'},
       {key:'parent_id',label:'Родительский актив',type:'parent'},
       {key:'status',label:'Состояние',type:'select',options:statusOptions('active','maintenance','inactive','retired')},
       {key:'location',label:'Местоположение'},
@@ -92,6 +100,8 @@ export const specs:Record<ResourceName,ModuleSpec> = {
       {key:'asset_id',label:'Актив',type:'asset'},{key:'project_id',label:'Проект',type:'project'},
       {key:'type',label:'Тип работ',type:'select',options:[{value:'planned',label:'Плановая'},{value:'emergency',label:'Аварийная'}]},
       {key:'employee_id',label:'Исполнитель',type:'employee'},
+      {key:'crew_id',label:'Исполняющая бригада',type:'crew'},
+      {key:'duration_minutes',label:'Трудоёмкость / длительность, мин',type:'number'},
       {key:'planned_start',label:'Плановое начало',type:'datetime-local'},
       {key:'planned_end',label:'Плановое завершение',type:'datetime-local'},
       {key:'estimated_cost',label:'Смета',type:'number'},
@@ -112,6 +122,13 @@ export const specs:Record<ResourceName,ModuleSpec> = {
       {key:'employee_id',label:'Ответственный',type:'employee'},
       {key:'start_date',label:'Дата начала',type:'date'},
       {key:'next_due_date',label:'Следующая дата ТО',type:'date',required:true},
+      {key:'crew_id',label:'Ответственная бригада',type:'crew'},
+      {key:'duration_minutes',label:'Длительность ТО, мин',type:'number'},
+      {key:'priority',label:'Приоритет (1–5)',type:'number'},
+      {key:'interval_hours',label:'Интервал по наработке, ч',type:'number'},
+      {key:'next_due_hours',label:'Следующий порог моточасов',type:'number'},
+      {key:'work_instructions',label:'Состав работ / чек-лист',type:'textarea'},
+      {key:'safety_instructions',label:'Меры безопасности',type:'textarea'},
       {key:'periodicity_days',label:'Периодичность (дней)',type:'number',required:true},
       {key:'status',label:'Статус',type:'select',options:statusOptions('planned','active','paused','completed')},
       {key:'description',label:'Описание',type:'textarea'}]

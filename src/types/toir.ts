@@ -22,14 +22,25 @@ export interface ToirRecord {
   manager_name?: string
   asset_id?: number
   employee_id?: number
+  crew_id?: number | null
   project_id?: number
-  parent_id?: number
+  parent_id?: number | null
   serial_number?: string
   manufacturer?: string
   model?: string
   commissioned_at?: string
   purchase_value?: string
   periodicity_days?: number
+  duration_minutes?: number|null
+  priority?: number
+  interval_hours?: number|null
+  next_due_hours?: number|null
+  node_type?: string
+  criticality?: number
+  condition_score?: number|null
+  operating_hours?: string|number
+  work_instructions?: string
+  safety_instructions?: string
   next_due_date?: string
   start_date?: string
   end_date?: string
@@ -46,6 +57,7 @@ export interface ToirRecord {
   deadline_at?: string
   asset?: ToirRecord | null
   employee?: ToirRecord | null
+  crew?: ToirRecord | null
   project?: ToirRecord | null
   parent?: ToirRecord | null
   maintenance_plan?: ToirRecord | null
