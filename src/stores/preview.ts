@@ -1,21 +1,10 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed } from 'vue'
 
-/**
- * Ephemeral in-memory visual prototype data.
- * Never stored in a browser, never sent to any backend endpoint.
- * The actual TOIR records are always the default mode.
- */
+// Legacy callers use this read-only state. All workflows now use the real API.
 export const usePreviewStore = defineStore('toir-visual-preview', () => {
-  const enabled = ref(false)
-
-  function setEnabled(value: boolean) {
-    enabled.value = value
-  }
-
-  function toggle() {
-    enabled.value = !enabled.value
-  }
-
+  const enabled = computed(() => false)
+  const setEnabled = (_value:boolean) => {}
+  const toggle = () => {}
   return { enabled, setEnabled, toggle }
 })

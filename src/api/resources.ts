@@ -1,6 +1,4 @@
 import { api } from './client'
-import { usePreviewStore } from '../stores/preview'
-import { demoFind, demoList, demoOverview, demoSchedule } from '../demo/toirDemo'
 import type { Overview, PageMeta, ResourceName, ScheduleResponse, ToirRecord } from '../types/toir'
 
 export interface ResourceQuery {
@@ -17,7 +15,6 @@ export interface ResourceQuery {
 export async function listResources(
   resource:ResourceName, filters:ResourceQuery = {}
 ):Promise<{data:ToirRecord[];meta:PageMeta}> {
-  if(usePreviewStore().enabled)return demoList(resource,filters)
   const query = new URLSearchParams()
   for (const [key, value] of Object.entries(filters)) {
     if (value !== undefined && value !== null && value !== '') query.set(key, String(value))
@@ -33,59 +30,34 @@ export interface AssetPassport {
   readings: Array<{id:number;meter:string;value:number;recorded_at:string;note?:string|null}>
 }
 export async function loadAssetPassport(id:number):Promise<AssetPassport> {
-  if(usePreviewStore().enabled){
-    const [asset,orders,plans]=await Promise.all([
-      demoFind('assets',id),
-      demoList('work-orders',{asset_id:id,per_page:100}),
-      demoList('plans',{asset_id:id,per_page:100}),
-    ])
-    return {
-      asset,orders:orders.data,plans:plans.data,readings:[],
-      summary:{
-        total_orders:orders.data.length,
-        completed_orders:orders.data.filter(x=>x.status==='closed').length,
-        open_orders:orders.data.filter(x=>['waiting','in_progress','overdue','awaiting_acceptance'].includes(x.status||'')).length,
-        plan_count:plans.data.length,reading_count:0,
-      },
-    }
-  }
   const result=await api<{data:AssetPassport}>('/api/v1/assets/'+id+'/passport')
   return result.data
 }
 export async function loadResource(resource:ResourceName,id:number):Promise<ToirRecord> {
-  if(usePreviewStore().enabled)return demoFind(resource,id)
   const result=await api<{data:ToirRecord}>('/api/v1/resources/'+resource+'/'+id)
   return result.data
 }
-function assertWriteAllowed():void {
-  if(usePreviewStore().enabled)throw new Error('Демо-режим не сохраняет изменения. Отключите просмотр макета для работы с реальными записями.')
-}
+
 export async function createResource(resource:ResourceName,payload:Record<string,unknown>):Promise<ToirRecord>{
-  assertWriteAllowed()
   const result=await api<{data:ToirRecord}>('/api/v1/resources/'+resource,{method:'POST',body:payload})
   return result.data
 }
 export async function updateResource(resource:ResourceName,id:number,payload:Record<string,unknown>):Promise<ToirRecord>{
-  assertWriteAllowed()
   const result=await api<{data:ToirRecord}>('/api/v1/resources/'+resource+'/'+id,{method:'PATCH',body:payload})
   return result.data
 }
 export async function deleteResource(resource:ResourceName,id:number):Promise<void>{
-  assertWriteAllowed()
   await api('/api/v1/resources/'+resource+'/'+id,{method:'DELETE'})
 }
 export async function reportAssetFault(id:number,payload:{title:string;description:string;priority:'normal'|'high'|'critical'}):Promise<ToirRecord>{
-  assertWriteAllowed()
   const result=await api<{data:ToirRecord}>('/api/v1/assets/'+id+'/faults',{method:'POST',body:payload})
   return result.data
 }
 export async function dispatchWorkOrder(id:number,payload:{employee_id:number;planned_start?:string;planned_end?:string;comment?:string}):Promise<ToirRecord>{
-  assertWriteAllowed()
   const result=await api<{data:ToirRecord}>('/api/v1/work-orders/'+id+'/dispatch',{method:'POST',body:payload})
   return result.data
 }
 export async function reviewWorkOrder(id:number,decision:'accept'|'reject',comment:string):Promise<ToirRecord>{
-  assertWriteAllowed()
   const result=await api<{data:ToirRecord}>('/api/v1/work-orders/'+id+'/review',{method:'POST',body:{decision,comment}})
   return result.data
 }
@@ -100,7 +72,6 @@ export type WorkOrderAction = 'start' | 'complete' | 'reopen'
 export async function transitionWorkOrder(
   id:number, action:WorkOrderAction, comment?:string, actualLaborMinutes?:number
 ):Promise<ToirRecord> {
-  assertWriteAllowed()
   const result=await api<{data:ToirRecord}>('/api/v1/work-orders/'+id+'/transition',{
     method:'POST',body:{action,comment:comment||null,...(actualLaborMinutes===undefined?{}:{actual_labor_minutes:actualLaborMinutes})}
   })
@@ -108,17 +79,14 @@ export async function transitionWorkOrder(
 }
 
 export async function issuePlanOrder(id:number):Promise<{data:ToirRecord;created:boolean}> {
-  assertWriteAllowed()
   return api('/api/v1/plans/'+id+'/issue',{method:'POST',body:{}})
 }
 
 export async function loadOverview():Promise<Overview>{
-  if(usePreviewStore().enabled)return demoOverview()
   const result=await api<{data:Overview}>('/api/v1/overview')
   return result.data
 }
 export async function loadSchedule(range?:{from:string;to:string}):Promise<ScheduleResponse>{
-  if(usePreviewStore().enabled)return demoSchedule()
   const query=range?'?'+new URLSearchParams(range).toString():''
   const result=await api<{data:ScheduleResponse}>('/api/v1/schedule'+query)
   return result.data
