@@ -6,7 +6,7 @@ import BasePageHeading from '../../components/ui/BasePageHeading.vue'
 import BaseNotice from '../../components/ui/BaseNotice.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
 import ToirRegistryTable from '../../components/toir/ToirRegistryTable.vue'
-import { loadOverview, listResources } from '../../api/resources'
+import { loadOverview, listResources, loadWorkControl, type WorkControl } from '../../api/resources'
 import { getStock, type StockItem } from '../../api/stock'
 import { specs } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
@@ -18,6 +18,7 @@ const session=useSessionStore()
 const preview=usePreviewStore()
 const router=useRouter()
 const overview=ref<Overview|null>(null)
+const workControl=ref<WorkControl|null>(null)
 const orders=ref<ToirRecord[]>([])
 const employees=ref<ToirRecord[]>([])
 const stockItems=ref<StockItem[]>([])
@@ -88,6 +89,7 @@ async function refresh(){
       listResources('employees',{per_page:100}),getStock({per_page:100})
     ])
     overview.value=o;orders.value=wo.data;employees.value=em.data;stockItems.value=st.data
+    workControl.value=preview.enabled?null:await loadWorkControl()
   }catch(cause){error.value=cause instanceof Error?cause.message:'Не удалось загрузить отчёт'}
   finally{busy.value=false}
 }
@@ -112,6 +114,37 @@ onMounted(()=>void refresh())
         <span>{{ item.label }}</span><strong>{{ busy?'…':item.value }}</strong>
       </BaseCard>
     </div>
+    <section v-if="report==='repairs'&&workControl" class="work-control-report" aria-label="Контроль исполнения нарядов">
+      <div class="report-heading"><h2>Контроль сроков, назначений и затрат</h2>
+        <p>По текущей компании. Просрочка определяется по плановому сроку даже до изменения статуса наряда.</p></div>
+      <div class="report-kpis">
+        <BaseCard><span>Незакрытые работы</span><strong>{{ workControl.summary.open_orders }}</strong></BaseCard>
+        <BaseCard><span>Нарушены сроки</span><strong>{{ workControl.summary.late_orders }}</strong></BaseCard>
+        <BaseCard><span>Без исполнителя</span><strong>{{ workControl.summary.unassigned_orders }}</strong></BaseCard>
+        <BaseCard><span>Ожидают приёмки</span><strong>{{ workControl.summary.awaiting_acceptance }}</strong></BaseCard>
+      </div>
+      <div class="report-kpis">
+        <BaseCard><span>Фактические материалы</span><strong>{{ Number(workControl.summary.recorded_material_cost).toLocaleString('ru-RU') }}</strong><small>Учтённая стоимость списаний, без расчётной зарплаты</small></BaseCard>
+        <BaseCard><span>Учтённое время</span><strong>{{ (workControl.summary.recorded_labor_minutes/60).toLocaleString('ru-RU',{maximumFractionDigits:2}) }} ч</strong><small>Только по {{ workControl.summary.orders_with_labor_recorded }} нарядам</small></BaseCard>
+      </div>
+      <h3>Приоритетные незакрытые наряды</h3>
+      <p class="muted">До {{ workControl.limit }} записей: сначала критические, затем ближайшие сроки.</p>
+      <div class="toir-table-scroll"><table class="toir-table">
+        <thead><tr><th>Наряд</th><th>Оборудование</th><th>Приоритет</th><th>Плановый срок</th><th>Исполнитель</th><th>Статус</th><th>Материалы</th></tr></thead>
+        <tbody>
+          <tr v-for="item in workControl.orders" :key="item.id">
+            <td><RouterLink :to="'/work-orders/'+item.id">{{ item.number||'#'+item.id }}</RouterLink></td>
+            <td>{{ item.asset?.name||'Не указано' }}</td>
+            <td>{{ item.priority===1?'Критический':item.priority===2?'Высокий':item.priority===3?'Обычный':'P'+item.priority }}</td>
+            <td :class="{'danger-text':item.is_late}">{{ item.planned_end?new Date(item.planned_end).toLocaleString('ru-RU'):'Не назначен' }}{{ item.is_late?' · просрочено':'' }}</td>
+            <td>{{ item.employee?.name||'Не назначен' }}</td><td>{{ item.status==='awaiting_acceptance'?'На приёмке':item.status==='in_progress'?'В работе':item.status==='overdue'?'Просрочено':'Ожидает' }}</td>
+            <td>{{ Number(item.actual_material_cost||0).toLocaleString('ru-RU') }}</td>
+          </tr>
+          <tr v-if="!workControl.orders.length"><td colspan="7">Нет незакрытых нарядов.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <BaseNotice v-if="report==='repairs'&&preview.enabled" tone="info">В демо-режиме оперативный контроль отключён — реальные показатели компании не отображаются.</BaseNotice>
     <BaseCard v-if="report==='repairs'||report==='quality'" >
       <div class="report-heading"><h2>{{ report==='repairs'?'Состояние нарядов':'Результаты завершения работ' }}</h2>
         <p>Рассчитано по данным текущей компании</p></div>

@@ -102,6 +102,7 @@ function toggleAll(checked:boolean){
 function format(row:ToirRecord,key:string){
   const value=rawValue(row,key)
   if(!value)return '—'
+  if(key==='priority')return ({'1':'Критический','2':'Высокий','3':'Обычный','4':'Низкий','5':'Минимальный'} as Record<string,string>)[value]||value
   if(['created_at','planned_start','planned_end','next_due_date','start_date','end_date','deadline_at','requested_at'].includes(key)){
     const date=new Date(value)
     return Number.isFinite(date.getTime())?date.toLocaleDateString('ru-RU'):value
@@ -116,7 +117,7 @@ function tone(status:string):'success'|'warning'|'danger'|'info'|'neutral'{
   if(['closed','completed','active','delivered'].includes(status))return 'success'
   if(['overdue','cancelled','retired'].includes(status))return 'danger'
   if(['waiting','planned','paused','requested'].includes(status))return 'warning'
-  if(['in_progress','ordered','published'].includes(status))return 'info'
+  if(['in_progress','awaiting_acceptance','ordered','published'].includes(status))return 'info'
   return 'neutral'
 }
 </script>

@@ -51,8 +51,9 @@
   border-bottom:1px solid var(--color-table-border);color:var(--color-text)}
 .toir-table tbody tr:last-child td{border-bottom:0}.toir-table tbody td:last-child{border-right:0}
 .toir-table tbody .data-row:hover{background:var(--color-table-hover)}
-.toir-table .check-column{width:43px;min-width:43px;max-width:43px;padding:8px 12px}
-.toir-table .check-column input{width:17px;height:17px;accent-color:var(--color-primary);cursor:pointer}
+.toir-table .check-column{box-sizing:border-box;width:44px;min-width:44px;max-width:44px;padding:0!important;text-align:center;vertical-align:middle;overflow:visible;text-overflow:clip}
+.toir-table .check-column input[type="checkbox"]{display:block;box-sizing:border-box;width:17px;height:17px;margin:0 auto;padding:0;accent-color:var(--color-primary);cursor:pointer;vertical-align:middle}
+.toir-table .check-column::before,.toir-table .check-column::after{content:none!important}
 .toir-table .row-last{width:38px;min-width:38px;padding:0}
 .col-sort{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
   padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
@@ -814,3 +815,31 @@
   .checklist-step-heading{gap:6px}
   .checklist-inline-actions .base-button{flex:1 1 auto}
 }
+
+/* Asset passport: compact, responsive operational indicators. */
+.asset-history-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 20px}
+.asset-history-summary>div{display:grid;gap:8px;padding:16px;border:1px solid var(--color-stroke);border-radius:var(--radius-sm);background:var(--color-surface-raised)}
+.asset-history-summary small{color:var(--color-muted);font-size:12px}
+.asset-history-summary strong{font-size:23px;line-height:1.2;font-weight:750}
+.asset-reading-list{display:grid;gap:4px}
+@media(max-width:760px){.asset-history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Operational control report uses the same cards and table primitives as other modules. */
+.work-control-report{display:grid;gap:14px;margin:18px 0 26px;min-width:0}
+.work-control-report .report-kpis{margin:0}
+.work-control-report h3{font-size:14px;font-weight:700;margin:8px 0 0}
+.work-control-report .toir-table-scroll{min-width:0}
+.work-control-report .danger-text{color:var(--color-danger);font-weight:700}
+
+/* Detail registries should hug their content instead of leaving a blank table-height gap. */
+.detail-panel .toir-table-shell{min-height:0}
+
+/* Company membership administration follows the shared table/card design system. */
+.members-section{display:grid;gap:16px;margin-top:24px;min-width:0}
+.members-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.members-heading h2{display:flex;align-items:center;gap:9px;margin:0;font-size:18px}
+.members-heading p{margin:7px 0 0}
+.members-actions{display:flex;align-items:center;gap:8px}
+.members-table td{vertical-align:middle}
+.members-table td select{width:100%;min-width:130px;max-width:190px}
+@media(max-width:760px){.members-heading{align-items:flex-start}.members-table{min-width:750px}}

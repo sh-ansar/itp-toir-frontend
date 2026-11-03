@@ -94,11 +94,13 @@ export const specs:Record<ResourceName,ModuleSpec> = {
     breadcrumb:'Ремонт и обслуживание / Наряд-задания',
     columns:[{key:'number',label:'Номер',width:130},{key:'created_at',label:'Дата',width:150},
       {key:'asset',label:'Актив',width:200},{key:'title',label:'Описание',width:250},
-      {key:'type',label:'Тип',width:125},{key:'status',label:'Статус',width:130},
+      {key:'type',label:'Тип',width:125},{key:'priority',label:'Приоритет',width:140},
+      {key:'status',label:'Статус',width:130},
       {key:'employee',label:'Исполнитель',width:200}],
     fields:[{key:'title',label:'Задание',required:true},
       {key:'asset_id',label:'Актив',type:'asset'},{key:'project_id',label:'Проект',type:'project'},
-      {key:'type',label:'Тип работ',type:'select',options:[{value:'planned',label:'Плановая'},{value:'emergency',label:'Аварийная'}]},
+      {key:'priority',label:'Приоритет',type:'select',options:[{value:'1',label:'Критический'},{value:'2',label:'Высокий'},{value:'3',label:'Обычный'},{value:'4',label:'Низкий'},{value:'5',label:'Минимальный'}]},
+        {key:'type',label:'Тип работ',type:'select',options:[{value:'planned',label:'Плановая'},{value:'emergency',label:'Аварийная'}]},
       {key:'employee_id',label:'Исполнитель',type:'employee'},
       {key:'crew_id',label:'Исполняющая бригада',type:'crew'},
       {key:'duration_minutes',label:'Трудоёмкость / длительность, мин',type:'number'},
@@ -108,6 +110,7 @@ export const specs:Record<ResourceName,ModuleSpec> = {
       {key:'description',label:'Описание работ',type:'textarea'}],
     tabs:[{key:'all',label:'Все'},{key:'waiting',label:'Ожидают'},
       {key:'overdue',label:'Просрочено'},{key:'in_progress',label:'В работе'},
+      {key:'awaiting_acceptance',label:'На приёмке'},
       {key:'closed',label:'Закрытые'}]
   },
   'plans':{
@@ -165,6 +168,7 @@ export const specs:Record<ResourceName,ModuleSpec> = {
   }
 }
 export const STATUS_LABELS:Record<string,string> = {
+  awaiting_acceptance:'Ожидает приёмки',
   ...Object.fromEntries(statusOptions('active','maintenance','inactive','retired','waiting','in_progress','overdue','closed',
     'planned','paused','completed','vacation','requested','ordered','delivered','cancelled','draft','published','evaluation').map(o=>[o.value,o.label])),
   equipment:'Оборудование',premises:'Помещение',tools:'Инструменты',materials:'Запчасти и материалы',
