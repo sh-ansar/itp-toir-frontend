@@ -1,0 +1,31 @@
+name: TOIR frontend checks
+
+on:
+  push:
+    branches:
+      - feature/toir-foundation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck and production build for /mro/
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /mro/
+      - name: Assert built entry paths
+        run: |
+          grep -q '/mro/' dist/index.html
+          test -s dist/fonts.css
