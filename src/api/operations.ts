@@ -181,7 +181,15 @@ export async function removeShift(id:number):Promise<void>{
   deny();await api('/api/v1/operations/shifts/'+id,{method:'DELETE'})
 }
 export async function generateOrders(days:number,dry_run=true):Promise<GenerateResult>{
-  deny();return (await api<{data:GenerateResult}>('/api/v1/operations/generate',{
+  if(usePreviewStore().enabled){
+    if(!dry_run)throw new Error('В режиме макета наряды не создаются.')
+    return {
+      created:demoForecast.filter(f=>f.due!=='future'&&
+        f.date>=todayKey(-5)&&f.date<=todayKey(days)).length,
+      existing:0,blocked:[],preview:true,created_orders:[],
+    }
+  }
+  return (await api<{data:GenerateResult}>('/api/v1/operations/generate',{
     method:'POST',body:{days,dry_run}
   })).data
 }

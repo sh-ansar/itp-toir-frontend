@@ -113,7 +113,7 @@ async function cancelShift(id:number){
   catch(e){error.value=e instanceof Error?e.message:'Не удалось удалить смену'}
 }
 async function previewGeneration(){
-  if(preview.enabled||saving.value)return
+  if(saving.value)return
   saving.value=true;error.value='';result.value=null
   try{result.value=await generateOrders(rangeDays.value,true);modal.value='generate'}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось рассчитать план'}
