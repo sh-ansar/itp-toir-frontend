@@ -13,10 +13,24 @@ function savedValue<T extends string>(key: string, allowed: readonly T[], fallba
   }
 }
 
+function readSidebarCollapsed(): boolean {
+  try { return localStorage.getItem('toir-sidebar-collapsed') === 'true' }
+  catch { return false }
+}
+
 export const usePreferencesStore = defineStore('preferences', () => {
   const theme = ref<Theme>(savedValue('toir-theme', ['light', 'dark'], 'light'))
   const locale = ref<Locale>(savedValue('toir-locale', ['ru', 'en', 'ka'], 'ru'))
-  const sidebarCollapsed = ref(false)
+  const sidebarCollapsed = ref(readSidebarCollapsed())
+
+  function toggleSidebar(): void {
+    sidebarCollapsed.value = !sidebarCollapsed.value
+  }
+
+  watch(sidebarCollapsed, value => {
+    try { localStorage.setItem('toir-sidebar-collapsed', String(value)) }
+    catch { /* Local storage may be disabled. */ }
+  })
 
   watch(theme, value => {
     document.documentElement.dataset.theme = value
@@ -31,5 +45,5 @@ export const usePreferencesStore = defineStore('preferences', () => {
   function toggleTheme(): void {
     theme.value = theme.value === 'dark' ? 'light' : 'dark'
   }
-  return { theme, locale, sidebarCollapsed, toggleTheme }
+  return { theme, locale, sidebarCollapsed, toggleSidebar, toggleTheme }
 })

@@ -44,6 +44,15 @@
 .brand-copy small{font-size:10px;line-height:13px;color:var(--color-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-collapse-btn,.mobile-close-btn{display:grid;place-items:center;flex:none;width:32px;height:32px;margin-left:auto;border:0;border-radius:8px;background:transparent;color:var(--color-muted)}
 .sidebar-collapse-btn:hover,.mobile-close-btn:hover{background:var(--color-hover);color:var(--color-primary)}
+.sidebar-collapse-btn img{display:block;width:20px;height:20px;object-fit:contain}
+.toir-sidebar--collapsed .sidebar-collapse-btn{display:grid;margin-left:0;flex:none}
+:root[data-theme="dark"] .sidebar-collapse-btn img{filter:brightness(0) saturate(100%) invert(77%) sepia(21%) saturate(592%) hue-rotate(157deg) brightness(93%) contrast(92%);}
+.toir-sidebar .brand-link{flex:1;min-width:0}
+.toir-sidebar .toir-brand-icon{width:42px;height:42px;border-radius:9px;flex:0 0 42px}
+.toir-sidebar .brand-copy strong{font-size:17px;line-height:21px;white-space:nowrap}
+.toir-sidebar .brand-copy small{max-width:160px}
+.toir-sidebar .foot-logo{background:transparent}
+.toir-sidebar .foot-logo img{width:30px;height:30px;border-radius:7px}
 .mobile-close-btn{display:none}
 .toir-nav{display:flex;flex-direction:column;gap:4px;flex:1;min-height:0;overflow:auto;padding:16px 12px}
 .toir-nav-item{display:flex;align-items:center;gap:12px;min-height:43px;padding:10px 12px;border-radius:var(--radius-sm);color:var(--color-text);font-size:13px;font-weight:600;line-height:20px;white-space:nowrap}
@@ -59,10 +68,10 @@
 .sidebar-user-copy{display:grid;min-width:0;gap:2px}
 .sidebar-user-copy strong,.sidebar-user-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sidebar-user-copy strong{font-size:12px}.sidebar-user-copy small{font-size:11px;color:var(--color-muted)}
-.toir-sidebar--collapsed .brand-copy,.toir-sidebar--collapsed .toir-nav-item span,.toir-sidebar--collapsed .nav-caption,.toir-sidebar--collapsed .sidebar-user-copy,.toir-sidebar--collapsed .sidebar-collapse-btn,.toir-sidebar--collapsed .nav-separator{display:none}
-.toir-sidebar--collapsed .brand-link img{width:39px}
-.toir-sidebar--collapsed .toir-sidebar-head{padding:0 10px}
-.toir-sidebar--collapsed .toir-nav{padding:16px 9px}
+.toir-sidebar--collapsed .brand-copy,.toir-sidebar--collapsed .toir-nav-item span,.toir-sidebar--collapsed .nav-caption,.toir-sidebar--collapsed .sidebar-user-copy{display:none}
+.toir-sidebar--collapsed .brand-link{display:none}
+.toir-sidebar--collapsed .toir-sidebar-head{padding:0 7px;justify-content:center}
+.toir-sidebar--collapsed .toir-nav{padding:15px 7px}
 .toir-sidebar--collapsed .toir-nav-item{justify-content:center;padding:10px}
 .toir-sidebar--collapsed .toir-sidebar-foot{justify-content:center;padding:12px}
 .toir-topbar{min-height:70px;position:sticky;z-index:15}

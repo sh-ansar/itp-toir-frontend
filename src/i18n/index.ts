@@ -1,7 +1,7 @@
 import { usePreferencesStore, type Locale } from '../stores/preferences'
 
 const ru = {
-  product: 'ITP ТОИР',
+  product: 'ITP ТОиР',
   subtitle: 'Техническое обслуживание и ремонт',
   signIn: 'Вход в систему',
   signInHint: 'Введите данные вашей учётной записи ТОИР.',
@@ -117,7 +117,7 @@ const en: Record<Key, string> = {
   independent: 'Independent ITP corporate product'
 }
 const ka: Record<Key, string> = {
-  product: 'ITP ТОИР',
+  product: 'ITP ТОиР',
   subtitle: 'ტექნიკური მომსახურება და შეკეთება',
   signIn: 'სისტემაში შესვლა',
   signInHint: 'შეიყვანეთ ТОИР-ის ანგარიშის მონაცემები.',

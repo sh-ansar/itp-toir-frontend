@@ -41,7 +41,7 @@ async function submit() {
     message.value = error instanceof Error ? error.message : t('operationError')
   }
 }
-const logoSrc = import.meta.env.BASE_URL + 'brand/itp-mark.svg'
+const logoSrc = import.meta.env.BASE_URL + 'brand/toir-gear.svg'
 </script>
 
 <template>
@@ -49,7 +49,7 @@ const logoSrc = import.meta.env.BASE_URL + 'brand/itp-mark.svg'
     <div class="auth-wrap">
       <AuthPreferences />
       <header class="auth-brand">
-        <img :src="logoSrc" alt="ITP" width="62" height="47" />
+        <img :src="logoSrc" alt="ITP ТОиР" width="58" height="58" />
         <div>
           <strong>{{ t('product') }}</strong>
           <span>{{ t('subtitle') }}</span>

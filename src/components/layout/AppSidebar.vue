@@ -4,13 +4,13 @@ import { useRoute } from 'vue-router'
 import {
   Wrench, ClipboardList, CalendarDays, Users, FolderKanban,
   Boxes, Package, Warehouse, Hammer, Cog, Truck, Bell, MessageCircle,
-  FileBarChart, Settings, ChevronDown, PanelLeftClose, PanelLeftOpen,
+  FileBarChart, Settings, ChevronDown,
   X, LayoutDashboard, BriefcaseBusiness, ShieldAlert, Network, UsersRound
 } from 'lucide-vue-next'
 import { usePreferencesStore } from '../../stores/preferences'
 import { useSessionStore } from '../../stores/session'
 
-defineProps<{mobileOpen:boolean}>()
+const props=defineProps<{mobileOpen:boolean}>()
 const emit=defineEmits<{'update:mobileOpen':[v:boolean]}>()
 const route=useRoute()
 const ui=usePreferencesStore()
@@ -53,21 +53,32 @@ function isActive(path:string){
   if(path.includes('?'))return pageKey.value===path
   return route.path===path && (path!=='/assets'||!route.query.category)
 }
-function toggle(key:string){expanded.value[key]=!expanded.value[key]}
-const logoSrc = import.meta.env.BASE_URL + 'brand/itp-mark.svg'
+function toggle(key:string){
+  if(ui.sidebarCollapsed && !props.mobileOpen){
+    // A compact icon must always be able to reveal its group's destinations.
+    ui.toggleSidebar()
+    expanded.value[key]=true
+    return
+  }
+  expanded.value[key]=!expanded.value[key]
+}
+const logoSrc = import.meta.env.BASE_URL + 'brand/toir-gear.svg'
+const menuToggleSrc = import.meta.env.BASE_URL + 'brand/menu-toggle.svg'
 </script>
 
 <template>
-  <aside class="sidebar toir-sidebar" :class="{'toir-sidebar--collapsed':ui.sidebarCollapsed,'sidebar--open':mobileOpen}">
+  <aside class="sidebar toir-sidebar" :class="{'toir-sidebar--collapsed':ui.sidebarCollapsed && !mobileOpen,'sidebar--open':mobileOpen}">
     <div class="toir-sidebar-head">
-      <RouterLink to="/" class="brand-link" @click="close">
-        <img :src="logoSrc" alt="ITP" width="45" height="34" />
-        <span class="brand-copy"><strong>ТО и Р</strong><small>Техническое обслуживание</small></span>
+      <RouterLink to="/" class="brand-link" title="ITP ТОиР" @click="close">
+        <img class="toir-brand-icon" :src="logoSrc" alt="ITP ТОиР" width="42" height="42" />
+        <span class="brand-copy"><strong>ITP ТОиР</strong><small>Техническое обслуживание и ремонт</small></span>
       </RouterLink>
-      <button class="sidebar-collapse-btn" type="button" :title="ui.sidebarCollapsed?'Развернуть меню':'Свернуть меню'"
-        :aria-label="ui.sidebarCollapsed?'Развернуть меню':'Свернуть меню'"
-        @click="ui.sidebarCollapsed=!ui.sidebarCollapsed">
-        <PanelLeftOpen v-if="ui.sidebarCollapsed" :size="19" /><PanelLeftClose v-else :size="19" />
+      <button class="sidebar-collapse-btn" type="button"
+        :title="ui.sidebarCollapsed ? 'Развернуть меню' : 'Свернуть меню'"
+        :aria-label="ui.sidebarCollapsed ? 'Развернуть меню' : 'Свернуть меню'"
+        :aria-expanded="!ui.sidebarCollapsed"
+        @click="ui.toggleSidebar()">
+        <img :src="menuToggleSrc" alt="" aria-hidden="true" width="20" height="20" />
       </button>
       <button class="mobile-close-btn" type="button" aria-label="Закрыть меню" @click="close"><X :size="20" /></button>
     </div>
@@ -77,13 +88,13 @@ const logoSrc = import.meta.env.BASE_URL + 'brand/itp-mark.svg'
       </RouterLink>
       <div class="nav-separator"></div>
       <div v-for="group in groups" :key="group.key" class="nav-group">
-        <button type="button" class="group-toggle" :aria-expanded="!!expanded[group.key]"
+        <button type="button" class="group-toggle" :aria-expanded="(!ui.sidebarCollapsed || props.mobileOpen) && !!expanded[group.key]"
           :title="group.label" @click="toggle(group.key)">
           <component :is="group.icon" :size="19" aria-hidden="true" />
           <span>{{ group.label }}</span>
           <ChevronDown class="group-chevron" :class="{up:expanded[group.key]}" :size="15" />
         </button>
-        <div v-if="expanded[group.key]&&!ui.sidebarCollapsed" class="group-subnav">
+        <div v-if="expanded[group.key]&&(!ui.sidebarCollapsed || props.mobileOpen)" class="group-subnav">
           <RouterLink v-for="link in group.children" :key="link.path" :to="link.path" class="subnav-link"
             :class="{active:isActive(link.path)}" @click="close">{{ link.label }}</RouterLink>
         </div>
@@ -100,7 +111,7 @@ const logoSrc = import.meta.env.BASE_URL + 'brand/itp-mark.svg'
       </RouterLink>
     </nav>
     <div class="toir-sidebar-foot">
-      <div class="foot-logo"><Wrench :size="19" aria-hidden="true" /></div>
+      <div class="foot-logo"><img :src="logoSrc" alt="" width="28" height="28" aria-hidden="true" /></div>
       <div class="sidebar-user-copy">
         <strong>{{ session.session?.user.name }}</strong>
         <small>{{ session.session?.user.email }}</small>
