@@ -10,6 +10,10 @@ export interface CompanyMember {
   account_active:boolean
   email_verified:boolean
 }
+export async function getCompanyMailStatus():Promise<{delivery_enabled:boolean}>{
+  const r=await api<{data:{delivery_enabled:boolean}}>('/api/v1/company/members/mail-status')
+  return r.data
+}
 export async function listCompanyMembers():Promise<CompanyMember[]>{
   const r=await api<{data:CompanyMember[]}>('/api/v1/company/members')
   return r.data

@@ -7,7 +7,7 @@ import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseNotice from '../../components/ui/BaseNotice.vue'
 import { useSessionStore } from '../../stores/session'
 import { usePreviewStore } from '../../stores/preview'
-import { listCompanyMembers, inviteCompanyMember, changeCompanyMember, resendCompanyInvite,
+import { listCompanyMembers, getCompanyMailStatus, inviteCompanyMember, changeCompanyMember, resendCompanyInvite,
   type CompanyMember, type MemberRole } from '../../api/members'
 
 const session=useSessionStore()
@@ -16,6 +16,7 @@ const company=computed(()=>session.session?.companies.find(x=>x.id===session.ses
 const canManage=computed(()=>['owner','admin'].includes(session.session?.active_role||''))
 const isOwner=computed(()=>session.session?.active_role==='owner')
 const members=ref<CompanyMember[]>([])
+const mailEnabled=ref(false)
 const loading=ref(false)
 const saving=ref<number|null>(null)
 const error=ref('')
@@ -32,14 +33,17 @@ const availableRoles=computed<MemberRole[]>(()=>isOwner.value?
  ['owner','admin','manager','engineer','technician','viewer']:
  ['admin','manager','engineer','technician','viewer'])
 async function refresh(){
- if(!canManage.value||preview.enabled){members.value=[];return}
+ if(!canManage.value||preview.enabled){members.value=[];mailEnabled.value=false;return}
  loading.value=true;error.value=''
- try{members.value=await listCompanyMembers()}
+ try{
+   const [rows,mail]=await Promise.all([listCompanyMembers(),getCompanyMailStatus()])
+   members.value=rows;mailEnabled.value=mail.delivery_enabled
+ }
  catch(e){error.value=e instanceof Error?e.message:'Не удалось загрузить участников'}
  finally{loading.value=false}
 }
 async function invite(){
- if(preview.enabled||saving.value!==null)return
+ if(preview.enabled||!mailEnabled.value||saving.value!==null)return
  saving.value=0;error.value='';notice.value=''
  try{
   await inviteCompanyMember({name:inviteName.value.trim(),email:inviteEmail.value.trim(),role:inviteRole.value})
@@ -62,7 +66,7 @@ async function update(member:CompanyMember,role:MemberRole,active:boolean){
  finally{saving.value=null}
 }
 async function resend(member:CompanyMember){
- if(preview.enabled||saving.value!==null)return
+ if(preview.enabled||!mailEnabled.value||saving.value!==null)return
  saving.value=member.id;error.value='';notice.value=''
  try{await resendCompanyInvite(member.id);notice.value='Письмо активации повторно отправлено.'}
  catch(e){error.value=e instanceof Error?e.message:'Не удалось отправить приглашение'}
@@ -108,10 +112,11 @@ onMounted(()=>void refresh())
           <p class="muted">Приглашение по email, права участников и доступ к текущей компании.</p></div>
         <div class="members-actions">
           <button class="toolbar-icon" type="button" aria-label="Обновить участников" :disabled="loading" @click="refresh"><RefreshCw :size="17"/></button>
-          <BaseButton type="button" :disabled="preview.enabled" @click="showInvite=true;error=''"><UserPlus :size="16"/>Пригласить</BaseButton>
+          <BaseButton type="button" :disabled="preview.enabled||!mailEnabled" @click="showInvite=true;error=''"><UserPlus :size="16"/>Пригласить</BaseButton>
         </div>
       </div>
       <BaseNotice v-if="preview.enabled" tone="info">В демо-режиме управление пользователями отключено.</BaseNotice>
+      <BaseNotice v-else-if="!loading&&!mailEnabled" tone="warning">Почтовая отправка не настроена. Приглашения и повторная отправка писем недоступны, пока администратор сервера не подключит SMTP.</BaseNotice>
       <div class="toir-table-scroll">
         <table class="toir-table members-table">
           <thead><tr><th>Сотрудник</th><th>Email</th><th>Роль</th><th>Статус</th><th>Действия</th></tr></thead>
@@ -133,7 +138,7 @@ onMounted(()=>void refresh())
                   <ShieldCheck :size="17"/>
                 </button>
                 <button v-if="!member.email_verified&&member.membership_active" type="button" class="toolbar-icon"
-                  :disabled="saving!==null||preview.enabled" :title="'Отправить приглашение '+member.name"
+                  :disabled="saving!==null||preview.enabled||!mailEnabled" :title="'Отправить приглашение '+member.name"
                   :aria-label="'Повторить приглашение '+member.name" @click="resend(member)"><Send :size="17"/></button>
               </div></td>
             </tr>
@@ -156,7 +161,7 @@ onMounted(()=>void refresh())
               <option v-for="role in availableRoles" :key="role" :value="role">{{ roleLabels[role] }}</option></select></label>
             <div class="category-dialog-footer">
               <BaseButton variant="secondary" type="button" :disabled="saving!==null" @click="showInvite=false">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="saving!==null||preview.enabled"><Save :size="16"/>Пригласить</BaseButton>
+              <BaseButton type="submit" :disabled="saving!==null||preview.enabled||!mailEnabled"><Save :size="16"/>Пригласить</BaseButton>
             </div>
           </form>
         </section>
