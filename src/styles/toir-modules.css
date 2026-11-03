@@ -741,3 +741,76 @@
   .dashboard-risk-item{gap:7px}
   .dashboard-risk-summary>span{flex:1 1 auto}
 }
+
+
+/* Digital TOIR: reusable plan template / work-order execution checklist */
+.toir-checklist-panel{display:grid;gap:17px;min-width:0}
+.checklist-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.checklist-top>div{display:grid;gap:8px;min-width:0;flex:1 1 280px}
+.checklist-top h2{margin:0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:9px}
+.checklist-top h2 svg{color:var(--color-primary);flex:none}
+.checklist-top p{max-width:730px}
+.checklist-progress{display:grid;gap:8px;border:1px solid var(--color-stroke);
+  border-radius:9px;padding:13px 15px;background:var(--color-surface-raised)}
+.checklist-progress>div:first-child{display:flex;justify-content:space-between;gap:10px;font-size:12px}
+.checklist-progress>div:first-child span,.checklist-progress small{color:var(--color-muted)}
+.checklist-progress>div:first-child strong{font-variant-numeric:tabular-nums;font-weight:650}
+.checklist-progress-track{height:7px;border-radius:8px;background:var(--color-stroke);overflow:hidden}
+.checklist-progress-track span{height:100%;border-radius:8px;background:var(--color-primary);display:block;
+  transition:width .2s ease}
+.checklist-list{display:grid;gap:10px}
+.checklist-step{display:flex;gap:14px;border:1px solid var(--color-stroke);
+  background:var(--color-surface);padding:14px;border-radius:10px}
+.checklist-step-index{width:28px;height:28px;flex:none;display:grid;place-items:center;
+  color:var(--color-primary);background:var(--color-accent-soft);border-radius:7px;
+  font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.checklist-step-body{display:grid;gap:11px;flex:1;min-width:0}
+.checklist-step-heading{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.checklist-step-heading>strong{flex:1 1 190px;min-width:0;font-size:13px;line-height:1.45}
+.checklist-step-heading .operations-small-tag{white-space:nowrap}
+.checklist-required{display:inline-flex;align-items:center;gap:4px;font-size:10px;
+  border:1px solid var(--color-primary-stroke);border-radius:6px;padding:5px 7px;
+  background:var(--color-accent-soft);color:var(--color-primary);font-weight:650}
+.checklist-step-result{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.checklist-step-result>span{display:inline-flex;align-items:center;gap:5px;
+  color:var(--color-muted);font-size:11px}
+.checklist-step-result .checklist-state{font-weight:650}
+.checklist-state--done{color:var(--color-success)!important}
+.checklist-state--skipped{color:var(--color-warning)!important}
+.checklist-state--pending{color:var(--color-muted)!important}
+.checklist-comment{font-size:12px;margin:0;padding:9px 11px;border-left:2px solid var(--color-primary-stroke);
+  border-radius:5px;color:var(--color-text);background:var(--color-surface-raised);line-height:1.55;
+  white-space:pre-wrap;overflow-wrap:anywhere}
+.checklist-actions{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:7px}
+.checklist-actions .base-button{min-height:34px;height:34px}
+.checklist-actions .toolbar-icon{height:32px;width:32px}
+.checklist-empty{min-height:155px;border:1px dashed var(--color-stroke);border-radius:9px}
+.checklist-template-form,.checklist-inline-form{border:1px solid var(--color-stroke);
+  border-radius:10px;background:var(--color-surface-raised);padding:17px;display:grid;gap:14px;
+  max-width:750px}
+.checklist-template-form>label,.checklist-inline-form>label,
+.checklist-template-form .operations-form-two>label{display:grid;gap:7px;font-size:12px;
+  line-height:1.45;color:var(--color-text);font-weight:500}
+.checklist-template-form input:not([type=checkbox]),.checklist-template-form textarea,
+.checklist-template-form select,.checklist-inline-form input,.checklist-inline-form textarea,
+.checklist-inline-form select{width:100%;min-width:0;border:1px solid var(--color-stroke);
+  background:var(--color-surface);color:var(--color-text);border-radius:8px;padding:9px 11px;
+  min-height:39px;outline-offset:1px}
+.checklist-template-form input:focus-visible,.checklist-template-form textarea:focus-visible,
+.checklist-template-form select:focus-visible,.checklist-inline-form input:focus-visible,
+.checklist-inline-form textarea:focus-visible,.checklist-inline-form select:focus-visible{
+  outline:2px solid var(--color-primary)}
+.checklist-form-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.checklist-form-heading h3,.checklist-form-heading strong{margin:0;font-size:14px}
+.checklist-required-toggle{display:flex!important;align-items:center!important;flex-direction:row!important;
+  gap:10px!important;font-size:12px!important;line-height:1.5}
+.checklist-required-toggle input{width:16px!important;height:16px!important;min-height:0!important}
+.checklist-inline-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:9px}
+.checklist-inline-form{margin-top:5px}
+@media(max-width:650px){
+  .checklist-step{padding:12px;gap:10px}
+  .checklist-top>.base-button{width:100%}
+  .checklist-template-form,.checklist-inline-form{padding:12px}
+  .checklist-step-heading{gap:6px}
+  .checklist-inline-actions .base-button{flex:1 1 auto}
+}

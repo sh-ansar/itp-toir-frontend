@@ -58,6 +58,7 @@ export interface ToirRecord {
   asset?: ToirRecord | null
   employee?: ToirRecord | null
   crew?: ToirRecord | null
+  members?: Array<Pick<ToirRecord,'id'|'name'|'status'|'user_id'>>
   project?: ToirRecord | null
   parent?: ToirRecord | null
   maintenance_plan?: ToirRecord | null

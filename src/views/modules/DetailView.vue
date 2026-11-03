@@ -9,6 +9,7 @@ import BaseStatusPill from '../../components/ui/BaseStatusPill.vue'
 import ToirEditorDrawer from '../../components/toir/ToirEditorDrawer.vue'
 import ToirRegistryTable from '../../components/toir/ToirRegistryTable.vue'
 import ToirOrderMaterials from '../../components/toir/ToirOrderMaterials.vue'
+import ToirChecklistPanel from '../../components/toir/ToirChecklistPanel.vue'
 import { getStock, receiveSupply, type StockItem } from '../../api/stock'
 import { loadResource, listResources, deleteResource, transitionWorkOrder, issuePlanOrder, type WorkOrderAction } from '../../api/resources'
 import { specs, STATUS_LABELS, canEdit } from '../../config/toirModules'
@@ -44,8 +45,12 @@ const canReceiveSupply=computed(()=>props.resource==='supplies' && record.value 
 const canOperateOrder=computed(()=>{
   const role=session.session?.active_role
   if(['owner','admin','manager','engineer'].includes(role||''))return true
-  return role==='technician' && record.value?.employee?.user_id===session.session?.user.id
-    && record.value?.employee?.status==='active'
+  return role==='technician' && (
+    record.value?.employee?.user_id===session.session?.user.id
+      && record.value?.employee?.status==='active'
+    || !!record.value?.crew?.members?.some(m=>
+      m.user_id===session.session?.user.id&&m.status==='active')
+  )
 })
 const canReopen=computed(()=>['owner','admin','manager'].includes(session.session?.active_role||'')
   && !record.value?.maintenance_plan_id)
@@ -54,14 +59,14 @@ const canIssuePlan=computed(()=>['owner','admin','manager','engineer'].includes(
 const title=computed(()=>record.value?.title||record.value?.name||record.value?.number||'Запись '+props.id)
 const infoTabs=computed(()=>{
   if(props.resource==='work-orders')return [
-    {key:'overview',name:'Общее'},{key:'events',name:'Операции к заданию'},
+    {key:'overview',name:'Общее'},{key:'checklist',name:'Чек-лист'},{key:'events',name:'Операции к заданию'},
     {key:'assets',name:'Связанные активы'},{key:'resources',name:'Ресурсы'},
     {key:'files',name:'Приложенные файлы'},{key:'log',name:'Log'}]
   if(props.resource==='assets')return [
     {key:'overview',name:'Общее'},{key:'children',name:'Связанные активы'},
     {key:'orders',name:'Планирование и обслуживание'},{key:'history',name:'История ремонта'},
     {key:'files',name:'Документы'}]
-  if(props.resource==='plans')return [{key:'overview',name:'Общее'},{key:'orders',name:'Выпущенные наряды'}]
+  if(props.resource==='plans')return [{key:'checklist',name:'Технологическая карта'},{key:'overview',name:'Общее'},{key:'orders',name:'Выпущенные наряды'}]
   return [{key:'overview',name:'Общее'},{key:'history',name:'История'}]
 })
 const displayFields=computed(()=>spec.value.fields.filter(f=>f.key!=='name'&&f.key!=='title'))
@@ -229,6 +234,11 @@ async function confirmOperation(){
           </template></dl>
         </div>
       </section>
+      <section v-else-if="tab==='checklist'&&(resource==='plans'||resource==='work-orders')" class="detail-panel">
+        <ToirChecklistPanel :entity="resource" :id="record.id" :status="record.status||''"
+          :can-manage="resource==='plans'?editable:canOperateOrder"
+          @changed="refresh"/>
+      </section>
       <section v-else-if="tab==='events'||tab==='log'||tab==='history'" class="detail-panel">
         <h2><History :size="18" /> История действий</h2>
         <template v-if="record.events?.length">
@@ -237,7 +247,7 @@ async function confirmOperation(){
             <strong>{{ ({
               created:'Создано',updated:'Изменено',deleted:'Удалено',
               start:'Начало работ',complete:'Работы завершены',reopen:'Повторное открытие',
-              issued_from_plan:'Выпущен из плана ТО',overdue:'Срок выполнения истёк',
+              issued_from_plan:'Выпущен из плана ТО',issued_from_meter:'ТО по наработке',checklist_step_updated:'Результат чек-листа',overdue:'Срок выполнения истёк',
               material_reserve:'Резерв материалов',material_consume:'Списание материалов',material_release:'Снятие резерва'
             } as Record<string,string>)[item.action]||item.action }}</strong>
             <span v-if="item.changes?.to" class="event-state">{{ STATUS_LABELS[String(item.changes.to)]||item.changes.to }}</span>
