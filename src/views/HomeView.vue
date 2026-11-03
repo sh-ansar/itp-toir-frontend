@@ -43,8 +43,7 @@ const tiles=[
 </script>
 <template>
   <div class="toir-dashboard">
-    <div class="toir-breadcrumb">Ремонт и обслуживание / Рабочий стол</div>
-    <BasePageHeading title="Рабочий стол" description="Контроль работ и оборудования компании">
+    <BasePageHeading title="Рабочий стол">
       <button class="toolbar-icon" type="button" aria-label="Обновить показатели" :disabled="busy" @click="refresh">
         <RefreshCcw :size="18" />
       </button>
@@ -61,7 +60,7 @@ const tiles=[
     <div class="operations-two-pane dashboard-operations-panels">
       <BaseCard>
         <div class="panel-heading">
-          <div><h2>Объекты в зоне риска</h2><p>Приоритеты обслуживания по техническому состоянию и регламентам</p></div>
+          <div><h2>Объекты в зоне риска</h2></div>
           <RouterLink to="/risk">Все риски <ArrowUpRight :size="15"/></RouterLink>
         </div>
         <div class="dashboard-risk-summary">
@@ -85,7 +84,7 @@ const tiles=[
       </BaseCard>
       <BaseCard>
         <div class="panel-heading">
-          <div><h2>Ближайшее плановое ТО</h2><p>Просроченные регламенты и задачи на следующую неделю</p></div>
+          <div><h2>Ближайшее плановое ТО</h2></div>
           <RouterLink to="/crews">Графики бригад <ArrowUpRight :size="15"/></RouterLink>
         </div>
         <RouterLink v-for="(row,i) in upcoming" :key="row.plan_id+'-'+row.date+'-'+i"
@@ -104,7 +103,7 @@ const tiles=[
     </div>
     <div class="dashboard-panels">
       <BaseCard>
-        <div class="panel-heading"><div><h2>Последние наряды</h2><p>Актуальные работы по выбранной компании</p></div>
+        <div class="panel-heading"><div><h2>Последние наряды</h2></div>
           <RouterLink to="/work-orders">Все наряды <ArrowUpRight :size="15" /></RouterLink>
         </div>
         <div v-if="!orders.length" class="blank-panel">
@@ -120,14 +119,13 @@ const tiles=[
           <ArrowUpRight :size="16" /></RouterLink>
       </BaseCard>
       <BaseCard>
-        <div class="panel-heading"><div><h2>Быстрые действия</h2><p>Основные разделы технического обслуживания</p></div></div>
+        <div class="panel-heading"><div><h2>Быстрые действия</h2></div></div>
         <div class="quick-actions">
           <RouterLink to="/work-orders"><ClipboardList :size="20" />Наряд-задания<ArrowUpRight :size="16" /></RouterLink>
           <RouterLink to="/assets"><Package :size="20" />Реестр активов<ArrowUpRight :size="16" /></RouterLink>
           <RouterLink to="/plans"><Wrench :size="20" />Планы ТО<ArrowUpRight :size="16" /></RouterLink>
           <RouterLink to="/schedule"><CalendarDays :size="20" />Расписание<ArrowUpRight :size="16" /></RouterLink>
         </div>
-        <div class="company-hint">Текущая компания: <strong>{{ session.session?.companies.find(c=>c.id===session.session?.active_company_id)?.name||'Не выбрана' }}</strong></div>
       </BaseCard>
     </div>
   </div>

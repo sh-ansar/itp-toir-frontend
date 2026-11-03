@@ -45,7 +45,6 @@ async function logout() {
         :aria-label="t('openMenu')" @click="$emit('open-menu')">
         <Menu :size="21" aria-hidden="true" />
       </button>
-      <span class="topbar-heading">{{ t('product') }}</span>
     </div>
     <div class="topbar-actions">
       <div class="topbar-company">

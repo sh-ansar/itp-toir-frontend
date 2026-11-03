@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { ShieldCheck, Building2, Users, Layers3, Settings2, UserPlus, RefreshCw, Send, Save } from 'lucide-vue-next'
+import { ShieldCheck, Building2, Users, UserPlus, RefreshCw, Send, Save } from 'lucide-vue-next'
 import BasePageHeading from '../../components/ui/BasePageHeading.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
 import BaseButton from '../../components/ui/BaseButton.vue'
@@ -78,8 +78,7 @@ onMounted(()=>void refresh())
 
 <template>
   <div class="settings-page">
-    <div class="toir-breadcrumb">Конфигурация</div>
-    <BasePageHeading title="Конфигурация" description="Параметры компании, пользователи и права доступа" />
+    <BasePageHeading title="Конфигурация" />
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <BaseNotice v-if="notice" tone="success">{{ notice }}</BaseNotice>
     <div class="settings-grid">
@@ -93,30 +92,19 @@ onMounted(()=>void refresh())
       </BaseCard>
       <BaseCard>
         <div class="card-section-heading"><ShieldCheck :size="19"/><h2>Контроль доступа</h2></div>
-        <p class="muted">Права привязаны к компании. Изменения доступа применяются на сервере и фиксируются в журнале безопасности.</p>
-        <p class="settings-info"><Users :size="17"/>Шесть ролей с разграничением операций.</p>
+        <p class="muted">Права действуют в пределах выбранной компании.</p>
         <RouterLink class="blank-link" to="/profile">Мой профиль и пароль</RouterLink>
-      </BaseCard>
-      <BaseCard>
-        <div class="card-section-heading"><Layers3 :size="19"/><h2>Модули</h2></div>
-        <p>Активы, наряды, планы ТО, сотрудники, проекты, склад, поставки, тендеры и отчёты.</p>
-      </BaseCard>
-      <BaseCard>
-        <div class="card-section-heading"><Settings2 :size="19"/><h2>Интеграции</h2></div>
-        <p class="muted">ТОиР использует собственную базу данных. HRM, Inventory и Portal не изменяются.</p>
       </BaseCard>
     </div>
     <section v-if="canManage" class="members-section">
       <div class="members-heading">
-        <div><h2><Users :size="20"/> Пользователи и роли</h2>
-          <p class="muted">Приглашение по email, права участников и доступ к текущей компании.</p></div>
+        <div><h2><Users :size="20"/> Пользователи и роли</h2></div>
         <div class="members-actions">
           <button class="toolbar-icon" type="button" aria-label="Обновить участников" :disabled="loading" @click="refresh"><RefreshCw :size="17"/></button>
           <BaseButton type="button" :disabled="preview.enabled||!mailEnabled" @click="showInvite=true;error=''"><UserPlus :size="16"/>Пригласить</BaseButton>
         </div>
       </div>
-      <BaseNotice v-if="preview.enabled" tone="info">В демо-режиме управление пользователями отключено.</BaseNotice>
-      <BaseNotice v-else-if="!loading&&!mailEnabled" tone="warning">Почтовая отправка не настроена. Приглашения и повторная отправка писем недоступны, пока администратор сервера не подключит SMTP.</BaseNotice>
+      <BaseNotice v-if="!loading&&!mailEnabled" tone="warning">Почтовая отправка не настроена. Приглашения и повторная отправка писем недоступны, пока администратор сервера не подключит SMTP.</BaseNotice>
       <div class="toir-table-scroll">
         <table class="toir-table members-table">
           <thead><tr><th>Сотрудник</th><th>Email</th><th>Роль</th><th>Статус</th><th>Действия</th></tr></thead>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowRight, LockKeyhole, ShieldCheck } from 'lucide-vue-next'
+import { ArrowRight, LockKeyhole } from 'lucide-vue-next'
 import BaseCard from '../components/ui/BaseCard.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseNotice from '../components/ui/BaseNotice.vue'
@@ -52,13 +52,11 @@ const logoSrc = import.meta.env.BASE_URL + 'brand/toir-gear.svg'
         <img :src="logoSrc" alt="ITP ТОиР" width="58" height="58" />
         <div>
           <strong>{{ t('product') }}</strong>
-          <span>{{ t('subtitle') }}</span>
         </div>
       </header>
       <BaseCard>
         <div class="auth-title-icon"><LockKeyhole :size="20" aria-hidden="true" /></div>
         <h1>{{ t('signIn') }}</h1>
-        <p class="muted auth-description">{{ t('signInHint') }}</p>
 
         <BaseNotice v-if="online === false" tone="warning">{{ t('checkServer') }}</BaseNotice>
         <BaseNotice v-if="message" tone="error">{{ message }}</BaseNotice>
@@ -77,7 +75,6 @@ const logoSrc = import.meta.env.BASE_URL + 'brand/toir-gear.svg'
           </BaseButton>
         </form>
       </BaseCard>
-      <div class="auth-footnote"><ShieldCheck :size="15" aria-hidden="true" />{{ t('independent') }}</div>
     </div>
   </main>
 </template>

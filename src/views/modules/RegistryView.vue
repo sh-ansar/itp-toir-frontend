@@ -2,7 +2,7 @@
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Plus, Search, SlidersHorizontal, Settings2, Trash2, RotateCcw, ArrowDownToLine, AlertCircle } from 'lucide-vue-next'
+import { Plus, SlidersHorizontal, Settings2, Trash2, RotateCcw, ArrowDownToLine } from 'lucide-vue-next'
 import BasePageHeading from '../../components/ui/BasePageHeading.vue'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseNotice from '../../components/ui/BaseNotice.vue'
@@ -156,7 +156,6 @@ function saved(id:number){editorOpen.value=false;page.value=1;void load();void r
     <section v-if="filtersOpen" class="filter-strip">
       <BaseSearchField v-model="search" label="Поиск" placeholder="Поиск по реестру" />
       <button class="toir-toolbar-btn" type="button" @click="resetFilters"><RotateCcw :size="16" />Сбросить</button>
-      <span class="filter-help"><AlertCircle :size="14" />Поиск выполняется по текущей компании</span>
     </section>
     <ToirRegistryTable :columns="shownColumns" :rows="rows" :meta="meta" :loading="busy"
       :tree-mode="resource==='assets'&&tab==='all'"

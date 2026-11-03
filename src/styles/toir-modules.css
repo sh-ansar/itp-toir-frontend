@@ -12,7 +12,7 @@
   display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--control-height);
   border:1px solid var(--color-stroke);background:var(--color-surface);
   color:var(--color-text);border-radius:var(--radius-sm);padding:6px 12px;font-size:var(--font-label-size);line-height:19px;
-  box-shadow:var(--shadow-control);font-weight:600
+  box-shadow:var(--shadow-control);font-weight:500
 }
 .toir-toolbar-btn:hover,.toolbar-icon:hover,.detail-back:hover,.schedule-controls button:hover,.gantt-footer button:hover{
   background:var(--color-hover);border-color:var(--color-primary-stroke)
@@ -24,7 +24,7 @@
 .status-tabs,.switch-tabs{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid var(--color-stroke);
   border-radius:10px;background:var(--color-surface);box-shadow:var(--shadow-control);max-width:100%;overflow-x:auto}
 .status-tabs button,.switch-tabs button{min-height:30px;padding:5px 9px;border:0;border-radius:7px;background:transparent;
-  color:var(--color-text);white-space:nowrap;font-weight:600;font-size:var(--font-caption-size)}
+  color:var(--color-text);white-space:nowrap;font-weight:500;font-size:var(--font-caption-size)}
 .status-tabs button:hover,.switch-tabs button:hover{background:var(--color-hover)}
 .status-tabs button.active,.switch-tabs button.active{background:var(--color-primary);color:var(--color-on-primary)}
 .filter-strip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;
@@ -136,7 +136,7 @@
 .gantt-row.gantt-head{min-height:57px;background:var(--color-table-heading);color:var(--color-muted)}
 .gantt-name{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:9px 14px;
   text-align:left;border:0;border-right:1px solid var(--color-table-border);background:transparent;color:var(--color-text)}
-.gantt-name strong{font-size:var(--font-caption-size);font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gantt-name strong{font-size:var(--font-caption-size);font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .gantt-name small{font-size:10px;color:var(--color-muted)}
 .gantt-days{display:grid;grid-template-columns:repeat(21,minmax(34px,1fr))}
 .gantt-days>div{position:relative;display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;
@@ -155,7 +155,7 @@
 .schedule-cell{min-height:63px;border-bottom:1px solid var(--color-table-border);
   border-right:1px solid var(--color-table-border);padding:10px 12px}
 .day-head,.team-head{display:grid;align-content:center;gap:5px;background:var(--color-table-heading);font-size:var(--font-caption-size)}
-.day-head span{color:var(--color-muted)}.employee-head{font-size:var(--font-caption-size);font-weight:600}
+.day-head span{color:var(--color-muted)}.employee-head{font-size:var(--font-caption-size);font-weight:500}
 .day-slot{display:flex;flex-direction:column;gap:6px}
 .schedule-event{display:grid;gap:4px;padding:7px;border:0;border-radius:6px;background:var(--color-accent-soft);
   color:var(--color-primary);text-align:left;font-size:11px}
@@ -213,7 +213,7 @@
 .settings-grid .base-card{min-height:190px}.settings-grid p{line-height:1.65;font-size:var(--font-label-size)}
 .settings-info{display:flex;align-items:center;gap:7px;color:var(--color-muted)}
 .nav-group{display:grid;gap:2px}.group-toggle{display:flex;align-items:center;gap:12px;min-height:44px;width:100%;
-  border:0;border-radius:8px;background:transparent;color:var(--color-text);font-weight:650;font-size:var(--font-label-size);text-align:left;padding:10px 12px}
+  border:0;border-radius:8px;background:transparent;color:var(--color-text);font-weight:500;font-size:var(--font-label-size);text-align:left;padding:10px 12px}
 .group-toggle:hover{background:var(--color-hover);color:var(--color-primary)}
 .group-toggle>svg:first-child{flex:none;color:var(--color-muted)}
 .group-toggle span{flex:1;white-space:normal;line-height:18px}
@@ -453,7 +453,7 @@
 .messenger-filters{display:flex;gap:4px;padding:3px 12px 10px;overflow-x:auto;scrollbar-width:thin}
 .messenger-filters button{flex:1;white-space:nowrap;min-height:31px;
   padding:5px 7px;border:0;border-radius:7px;background:transparent;
-  color:var(--color-muted);font-size:var(--font-caption-size);font-weight:650}
+  color:var(--color-muted);font-size:var(--font-caption-size);font-weight:500}
 .messenger-filters button:hover{background:var(--color-hover)}
 .messenger-filters button.active{background:var(--color-accent-soft);color:var(--color-primary)}
 .messenger-search-wrap{margin:0 12px 10px;min-width:0}
@@ -466,7 +466,7 @@
 .messenger-conversation.active{background:var(--color-accent-soft)}
 .messenger-avatar{display:flex;align-items:center;justify-content:center;flex:none;
   width:41px;height:41px;border-radius:50%;background:var(--color-accent-soft);
-  color:var(--color-primary);font-size:var(--font-label-size);font-weight:750;text-transform:uppercase}
+  color:var(--color-primary);font-size:var(--font-label-size);font-weight:600;text-transform:uppercase}
 .messenger-avatar--small{width:38px;height:38px}
 .messenger-conversation-body{flex:1;min-width:0;display:grid;gap:6px}
 .messenger-title-row,.messenger-last-row{display:flex;justify-content:space-between;align-items:center;gap:7px;min-width:0}
@@ -559,7 +559,7 @@
 }
 @media(prefers-reduced-motion:reduce){.messenger-message-actions{transition:none}}
 
-.messenger-realtime-connected{color:var(--color-success);font-weight:650}
+.messenger-realtime-connected{color:var(--color-success);font-weight:500}
 .messenger-typing{color:var(--color-primary);font-weight:600}
 
 /* Realtime indicator and correct multi-recipient read receipt UX */
@@ -581,7 +581,7 @@
 .operations-two-pane{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(350px,1.1fr);gap:14px;align-items:start;min-width:0}
 .operations-two-pane>.base-card{display:flex;flex-direction:column;gap:16px;min-width:0;overflow:hidden;min-height:420px}
 .operations-panel-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.operations-panel-heading h2,.operations-panel-heading h3{display:flex;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:650}
+.operations-panel-heading h2,.operations-panel-heading h3{display:flex;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:600}
 .operations-panel-heading small{color:var(--color-muted);font-size:11px;white-space:nowrap}
 .operations-panel-heading .base-button{height:34px;min-height:34px}
 .operations-search{display:flex;align-items:center;gap:8px;min-height:39px;min-width:0;width:min(410px,100%);
@@ -607,7 +607,7 @@
 .asset-tree-toggle{border:0;background:transparent;color:var(--color-muted);cursor:pointer}
 .asset-node-link{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;
   padding:2px 0;color:var(--color-text);border:0;background:transparent;text-align:left;cursor:pointer}
-.asset-node-link strong{font-size:var(--font-caption-size);font-weight:650;overflow-wrap:anywhere}
+.asset-node-link strong{font-size:var(--font-caption-size);font-weight:550;overflow-wrap:anywhere}
 .asset-node-link small{font-size:11px;color:var(--color-muted)}
 .operations-risk-chip{display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:none;
   padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid var(--color-stroke);
@@ -619,13 +619,13 @@
 .asset-inspector-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-width:0}
 .asset-inspector-head>div{min-width:0}
 .asset-inspector-head small{font-size:11px;color:var(--color-muted)}
-.asset-inspector-head h2{font-size:20px;line-height:1.3;font-weight:700;margin:6px 0}
+.asset-inspector-head h2{font-size:20px;line-height:1.3;font-weight:600;margin:6px 0}
 .asset-inspector-head p{color:var(--color-muted);font-size:var(--font-caption-size);line-height:1.6;margin:0}
 .operations-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .operations-info-grid>div{display:flex;flex-direction:column;gap:7px;border:1px solid var(--color-stroke);
   border-radius:8px;background:var(--color-surface-raised);min-height:70px;padding:12px}
 .operations-info-grid>div span{font-size:11px;color:var(--color-muted)}
-.operations-info-grid>div strong{font-size:var(--font-label-size);line-height:1.3;font-weight:650;overflow-wrap:anywhere}
+.operations-info-grid>div strong{font-size:var(--font-label-size);line-height:1.3;font-weight:500;overflow-wrap:anywhere}
 .asset-inspector-actions{justify-content:flex-start}
 .asset-inspector-actions .base-button{min-height:35px;height:35px;padding:5px 9px}
 .operations-reasons{display:flex;flex-direction:column;gap:9px;padding:13px;border:1px solid var(--color-stroke);
@@ -743,14 +743,14 @@
 .toir-checklist-panel{display:grid;gap:17px;min-width:0}
 .checklist-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .checklist-top>div{display:grid;gap:8px;min-width:0;flex:1 1 280px}
-.checklist-top h2{margin:0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:9px}
+.checklist-top h2{margin:0;font-size:16px;font-weight:600;display:flex;align-items:center;gap:9px}
 .checklist-top h2 svg{color:var(--color-primary);flex:none}
 .checklist-top p{max-width:730px}
 .checklist-progress{display:grid;gap:8px;border:1px solid var(--color-stroke);
   border-radius:9px;padding:13px 15px;background:var(--color-surface-raised)}
 .checklist-progress>div:first-child{display:flex;justify-content:space-between;gap:10px;font-size:var(--font-caption-size)}
 .checklist-progress>div:first-child span,.checklist-progress small{color:var(--color-muted)}
-.checklist-progress>div:first-child strong{font-variant-numeric:tabular-nums;font-weight:650}
+.checklist-progress>div:first-child strong{font-variant-numeric:tabular-nums;font-weight:600}
 .checklist-progress-track{height:7px;border-radius:8px;background:var(--color-stroke);overflow:hidden}
 .checklist-progress-track span{height:100%;border-radius:8px;background:var(--color-primary);display:block;
   transition:width .2s ease}
@@ -770,7 +770,7 @@
 .checklist-step-result{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .checklist-step-result>span{display:inline-flex;align-items:center;gap:5px;
   color:var(--color-muted);font-size:11px}
-.checklist-step-result .checklist-state{font-weight:650}
+.checklist-step-result .checklist-state{font-weight:500}
 .checklist-state--done{color:var(--color-success)!important}
 .checklist-state--skipped{color:var(--color-warning)!important}
 .checklist-state--pending{color:var(--color-muted)!important}
@@ -815,14 +815,14 @@
 .asset-history-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 20px}
 .asset-history-summary>div{display:grid;gap:8px;padding:16px;border:1px solid var(--color-stroke);border-radius:var(--radius-sm);background:var(--color-surface-raised)}
 .asset-history-summary small{color:var(--color-muted);font-size:var(--font-caption-size)}
-.asset-history-summary strong{font-size:23px;line-height:1.2;font-weight:750}
+.asset-history-summary strong{font-size:23px;line-height:1.2;font-weight:700}
 .asset-reading-list{display:grid;gap:4px}
 @media(max-width:760px){.asset-history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* Operational control report uses the same cards and table primitives as other modules. */
 .work-control-report{display:grid;gap:14px;margin:18px 0 26px;min-width:0}
 .work-control-report .report-kpis{margin:0}
-.work-control-report h3{font-size:var(--font-body-size);font-weight:700;margin:8px 0 0}
+.work-control-report h3{font-size:var(--font-body-size);font-weight:600;margin:8px 0 0}
 .work-control-report .toir-table-scroll{min-width:0}
 .work-control-report .danger-text{color:var(--color-danger);font-weight:700}
 
