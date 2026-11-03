@@ -109,4 +109,9 @@
 @media(max-width:1120px){.module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-grid{grid-template-columns:1fr}}
 @media(max-width:860px){.toir-sidebar{position:fixed;top:0;left:0;z-index:51;width:min(310px,86vw);transform:translateX(-105%);transition:transform .2s ease;box-shadow:var(--shadow-float)}.toir-sidebar.sidebar--open{transform:translateX(0)}.sidebar-shade{position:fixed;z-index:50;inset:0;width:100%;height:100%;border:0;background:var(--color-overlay)}.mobile-hamburger{display:grid}.sidebar-collapse-btn{display:none}.mobile-close-btn{display:grid}.toir-sidebar--collapsed .brand-copy,.toir-sidebar--collapsed .toir-nav-item span,.toir-sidebar--collapsed .sidebar-user-copy,.toir-sidebar--collapsed .nav-separator,.toir-sidebar--collapsed .nav-caption{display:initial}.topbar-company select{max-width:140px}}
 @media(max-width:600px){.auth-page{padding:18px 14px}.auth-wrap .base-card{padding:22px 18px}.auth-brand strong{font-size:22px}.module-grid{grid-template-columns:1fr}.topbar-heading{display:none}.company-name{max-width:90px}.topbar-company select{max-width:110px}.topbar-actions{gap:5px}.topbar-language{width:56px}.icon-control{width:32px;height:32px}.profile-toplink{display:none}.welcome-panel{gap:13px}.welcome-symbol{width:44px;height:44px;flex-basis:44px}.welcome-panel h2{font-size:18px}.profile-properties{grid-template-columns:1fr;gap:5px}.profile-properties dd{margin-bottom:10px}}
+@media(max-width:860px){
+  /* Off-screen sidebar shadow must not cover the first 20px of page content. */
+  .toir-sidebar:not(.sidebar--open){box-shadow:none;pointer-events:none}
+  .toir-sidebar.sidebar--open{box-shadow:var(--shadow-float);pointer-events:auto}
+}
 @media(prefers-reduced-motion:reduce){.toir-sidebar{transition:none}}
