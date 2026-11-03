@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ShieldAlert, Search, RefreshCcw, ArrowUpRight, Activity, CalendarClock, Gauge, Info } from 'lucide-vue-next'
@@ -64,10 +65,7 @@ onMounted(()=>void load())
     </div>
     <div class="registry-toolbar">
       <div class="toolbar-leading">
-        <label class="operations-search"><Search :size="16"/>
-          <input v-model="search" type="search" placeholder="Название или код оборудования"
-            aria-label="Поиск по аналитике"/>
-        </label>
+        <BaseSearchField v-model="search" label="Поиск по аналитике" placeholder="Название или код оборудования" />
         <select v-model="level" class="operations-select" aria-label="Фильтр по уровню риска">
           <option value="all">Все уровни риска</option>
           <option value="critical">Критический</option><option value="high">Высокий</option>

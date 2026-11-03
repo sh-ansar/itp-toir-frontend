@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Plus, Search, SlidersHorizontal, Settings2, Trash2, RotateCcw, ArrowDownToLine, AlertCircle } from 'lucide-vue-next'
@@ -153,10 +154,7 @@ function saved(id:number){editorOpen.value=false;page.value=1;void load();void r
       </div>
     </div>
     <section v-if="filtersOpen" class="filter-strip">
-      <label class="registry-search">
-        <Search :size="17" aria-hidden="true" />
-        <input v-model="search" type="search" placeholder="Поиск по реестру" aria-label="Поиск" />
-      </label>
+      <BaseSearchField v-model="search" label="Поиск" placeholder="Поиск по реестру" />
       <button class="toir-toolbar-btn" type="button" @click="resetFilters"><RotateCcw :size="16" />Сбросить</button>
       <span class="filter-help"><AlertCircle :size="14" />Поиск выполняется по текущей компании</span>
     </section>

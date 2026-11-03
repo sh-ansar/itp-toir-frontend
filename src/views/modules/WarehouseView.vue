@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { Package, Plus, Search, RefreshCcw, ArrowDownToLine, History, X, AlertTriangle, Pencil } from 'lucide-vue-next'
 import BasePageHeading from '../../components/ui/BasePageHeading.vue'
@@ -117,8 +118,7 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
     </div>
     <div class="registry-toolbar">
       <div class="toolbar-leading">
-        <label class="warehouse-search"><Search :size="16"/><input v-model="search" type="search" aria-label="Поиск по складу"
-          placeholder="Поиск по артикулу или названию"/></label>
+        <BaseSearchField v-model="search" label="Поиск по складу" placeholder="Поиск по артикулу или названию" />
         <label class="planning-orders-toggle"><input v-model="lowOnly" type="checkbox"/>Ниже минимального остатка</label>
       </div>
       <div class="toolbar-actions">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   MessageCircle, Search, Plus, Send, Users, ChevronLeft, Check, CheckCheck,
@@ -307,8 +308,7 @@ onBeforeUnmount(()=>{
           <button v-for="f in filterOptions" :key="f.key" type="button"
             :class="{active:filter===f.key}" @click="filter=f.key">{{ f.label }}</button>
         </div>
-        <label class="messenger-search"><Search :size="17"/><input v-model="search" placeholder="Поиск чатов"
-          type="search" aria-label="Поиск чатов"/></label>
+        <div class="messenger-search-wrap"><BaseSearchField v-model="search" label="Поиск чатов" placeholder="Поиск чатов" /></div>
         <div class="messenger-list" role="list">
           <button v-for="chat in visibleChats" :key="chat.id" type="button" role="listitem"
             class="messenger-conversation" :class="{active:active?.id===chat.id}" @click="openChat(chat)">

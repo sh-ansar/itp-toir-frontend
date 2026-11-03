@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, CalendarDays, RefreshCcw, Search, X, ArrowUpRight, Clock3 } from 'lucide-vue-next'
 import BasePageHeading from '../../components/ui/BasePageHeading.vue'
@@ -128,10 +129,7 @@ onMounted(()=>void load())
         </div>
       </div>
       <div class="toolbar-actions">
-        <label class="schedule-search"><Search :size="15" aria-hidden="true"/>
-          <input v-model="search" type="search" placeholder="Поиск по работам и сотрудникам"
-            aria-label="Поиск в календаре"/>
-        </label>
+        <BaseSearchField v-model="search" label="Поиск в календаре" placeholder="Поиск по работам и сотрудникам" />
         <button type="button" class="toolbar-icon" aria-label="Обновить календарь" :disabled="loading" @click="load">
           <RefreshCcw :size="18"/>
         </button>

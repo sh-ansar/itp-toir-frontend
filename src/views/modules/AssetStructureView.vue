@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Boxes, ChevronDown, ChevronRight, Plus, RefreshCcw, Activity, ClipboardList, Layers3, X } from 'lucide-vue-next'
@@ -169,10 +170,8 @@ onMounted(()=>void load())
       <BaseCard><span>Не хватает данных</span><strong>{{ metrics.incomplete }}</strong><small>Показания не заполнены или устарели</small></BaseCard>
     </div>
     <div class="registry-toolbar">
-      <label class="operations-search"><Boxes :size="17"/>
-        <input v-model="search" type="search" placeholder="Найти объект, узел, инвентарный код"
-          aria-label="Поиск по дереву оборудования"/>
-      </label>
+      <BaseSearchField v-model="search" label="Поиск по дереву оборудования"
+        placeholder="Найти объект, узел, инвентарный код" />
       <div class="toolbar-actions">
         <BaseButton v-if="editable" @click="openCreate(null)"><Plus :size="16"/> Создать объект</BaseButton>
         <button class="toolbar-icon" type="button" aria-label="Обновить дерево" :disabled="loading" @click="load"><RefreshCcw :size="17"/></button>
