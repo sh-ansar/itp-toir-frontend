@@ -46,9 +46,11 @@ async function invite(){
  if(preview.enabled||!mailEnabled.value||saving.value!==null)return
  saving.value=0;error.value='';notice.value=''
  try{
-  await inviteCompanyMember({name:inviteName.value.trim(),email:inviteEmail.value.trim(),role:inviteRole.value})
+  const result=await inviteCompanyMember({name:inviteName.value.trim(),email:inviteEmail.value.trim(),role:inviteRole.value})
   showInvite.value=false;inviteName.value='';inviteEmail.value='';inviteRole.value='viewer'
-  notice.value='Участник добавлен. Неподтверждённой почте отправлено письмо активации.'
+  notice.value=result.message || (result.email_sent
+    ? 'Участник добавлен. Ссылка активации отправлена.'
+    : 'Доступ участнику предоставлен.')
   await refresh()
  }catch(e){error.value=e instanceof Error?e.message:'Не удалось пригласить участника'}
  finally{saving.value=null}
