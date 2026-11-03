@@ -5,7 +5,7 @@ export class ApiError extends Error {
   }
 }
 
-const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const base = (import.meta.env.VITE_API_BASE_URL || (import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL)).replace(/\/$/, '')
 
 function csrfHeader(): string | undefined {
   const item = document.cookie.split('; ').find((cookie) => cookie.startsWith('XSRF-TOKEN='))
