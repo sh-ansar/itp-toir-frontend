@@ -119,15 +119,15 @@ onMounted(()=>void refresh())
                 @change="update(member,($event.target as HTMLSelectElement).value as MemberRole,member.membership_active)">
                 <option v-for="role in (member.role==='owner'&&!isOwner?(['owner'] as MemberRole[]):availableRoles)" :key="role" :value="role">{{ roleLabels[role] }}</option>
               </select></td>
-              <td>{{ !member.membership_active?'Доступ отключён':!member.email_verified?'Ожидает подтверждения':'Активен' }}</td>
+              <td>{{ !member.account_active?'Учётная запись отключена':!member.membership_active?'Доступ отключён':!member.email_verified?'Ожидает подтверждения':'Активен' }}</td>
               <td><div class="members-actions">
-                <button type="button" class="toolbar-icon" :disabled="saving!==null||preview.enabled||(!isOwner&&member.role==='owner')"
-                  :title="member.membership_active?'Отключить доступ':'Включить доступ'"
+                <button type="button" class="toolbar-icon" :disabled="saving!==null||preview.enabled||!member.account_active||(!isOwner&&member.role==='owner')"
+                  :title="!member.account_active?'Учётная запись отключена на уровне системы':member.membership_active?'Отключить доступ':'Включить доступ'"
                   :aria-label="(member.membership_active?'Отключить ':'Включить ')+member.name"
                   @click="update(member,member.role,!member.membership_active)">
                   <ShieldCheck :size="17"/>
                 </button>
-                <button v-if="!member.email_verified&&member.membership_active" type="button" class="toolbar-icon"
+                <button v-if="member.account_active&&!member.email_verified&&member.membership_active" type="button" class="toolbar-icon"
                   :disabled="saving!==null||preview.enabled||!mailEnabled" :title="'Отправить приглашение '+member.name"
                   :aria-label="'Повторить приглашение '+member.name" @click="resend(member)"><Send :size="17"/></button>
               </div></td>
