@@ -16,4 +16,11 @@ jobs:
           cache: npm
       - run: npm ci --no-audit
       - run: npm run typecheck
-      - run: npm run build
+      - name: Build production app under /mro/
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /mro/
+      - name: Verify production assets
+        run: |
+          grep -q '/mro/' dist/index.html
+          test -s dist/fonts.css
