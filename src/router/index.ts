@@ -3,21 +3,21 @@ import { useSessionStore } from '../stores/session'
 import LoginView from '../views/LoginView.vue'
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
-import HomeView from '../views/HomeView.vue'
-import ProfileView from '../views/ProfileView.vue'
-import NotFoundView from '../views/NotFoundView.vue'
-import RegistryView from '../views/modules/RegistryView.vue'
-import DetailView from '../views/modules/DetailView.vue'
-import PlanningView from '../views/modules/PlanningView.vue'
-import ScheduleView from '../views/modules/ScheduleView.vue'
-import ReportsView from '../views/modules/ReportsView.vue'
-import NotificationsView from '../views/modules/NotificationsView.vue'
-import ChatView from '../views/modules/ChatView.vue'
-import AssetStructureView from '../views/modules/AssetStructureView.vue'
-import WorkforcePlanningView from '../views/modules/WorkforcePlanningView.vue'
-import RiskIntelligenceView from '../views/modules/RiskIntelligenceView.vue'
-import WarehouseView from '../views/modules/WarehouseView.vue'
-import SettingsView from '../views/modules/SettingsView.vue'
+const HomeView = () => import('../views/HomeView.vue')
+const ProfileView = () => import('../views/ProfileView.vue')
+const NotFoundView = () => import('../views/NotFoundView.vue')
+const RegistryView = () => import('../views/modules/RegistryView.vue')
+const DetailView = () => import('../views/modules/DetailView.vue')
+const PlanningView = () => import('../views/modules/PlanningView.vue')
+const ScheduleView = () => import('../views/modules/ScheduleView.vue')
+const ReportsView = () => import('../views/modules/ReportsView.vue')
+const NotificationsView = () => import('../views/modules/NotificationsView.vue')
+const ChatView = () => import('../views/modules/ChatView.vue')
+const AssetStructureView = () => import('../views/modules/AssetStructureView.vue')
+const WorkforcePlanningView = () => import('../views/modules/WorkforcePlanningView.vue')
+const RiskIntelligenceView = () => import('../views/modules/RiskIntelligenceView.vue')
+const WarehouseView = () => import('../views/modules/WarehouseView.vue')
+const SettingsView = () => import('../views/modules/SettingsView.vue')
 import type { ResourceName } from '../types/toir'
 
 const resourceRoutes = [
