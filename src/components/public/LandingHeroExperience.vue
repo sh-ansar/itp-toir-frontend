@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Button } from '@itpmining/vue-basic-components'
-import heroImage from '@/assets/img/landing-hero-clean.webp'
+import heroImage from '@/assets/img/mro-maintenance-panorama.svg'
 import leftShape from '@/assets/img/landing-shape-left-clean.webp'
 import rightShape from '@/assets/img/landing-shape-right-clean.webp'
 import { landingCopy } from './landingCopy.js'
@@ -22,8 +22,8 @@ function showDemo() {
 <template>
   <section id="product" class="portal-hero" aria-labelledby="portal-hero-heading">
     <div class="portal-hero__inner">
-      <!-- The clean 1440x480 panorama is a single continuous image. Only the two
-           transparent diamond layers float, never the interface itself. -->
+      <!-- MRO-specific asset structure, maintenance and work-order demo. The two
+           transparent diamond layers remain independently animated, like Portal. -->
       <div class="portal-hero__visual" role="img"
            :aria-label="[copy.sceneWorkspace, copy.scenePeople, copy.sceneTasks].join(', ') + ' — ITP ТОиР'">
         <img class="portal-hero__panorama" :src="heroImage" alt="" aria-hidden="true"
