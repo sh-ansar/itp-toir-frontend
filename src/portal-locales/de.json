@@ -1168,6 +1168,9 @@
     "invoiceHistory": "Rechnungshistorie",
     "openPdf": "PDF öffnen",
     "uploadProof": "Zahlungsnachweis hochladen",
-    "noInvoices": "Keine Rechnungen."
+    "noInvoices": "Keine Rechnungen.",
+    "registrationUnavailable": "Registrierung derzeit nicht verfügbar",
+    "registrationUnavailableHint": "Die Anmeldung neuer Unternehmen wird nach Veröffentlichung der erforderlichen Rechtsdokumente freigeschaltet.",
+    "reviewLegal": "Prüfen Sie die veröffentlichten Dokumentversionen"
   }
 }

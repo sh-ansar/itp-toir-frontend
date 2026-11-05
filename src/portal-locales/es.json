@@ -1168,6 +1168,9 @@
     "invoiceHistory": "Historial de facturas",
     "openPdf": "Abrir PDF",
     "uploadProof": "Subir comprobante de pago",
-    "noInvoices": "No hay facturas."
+    "noInvoices": "No hay facturas.",
+    "registrationUnavailable": "El registro aún no está disponible",
+    "registrationUnavailableHint": "El registro de nuevas empresas se habilitará cuando se publiquen los documentos legales requeridos.",
+    "reviewLegal": "Revise las versiones publicadas de los documentos"
   }
 }

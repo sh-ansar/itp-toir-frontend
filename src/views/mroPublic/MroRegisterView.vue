@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '../../api/mroCommercialAdapter'
@@ -7,14 +7,42 @@ import PublicSiteHeader from '../../components/public/PublicSiteHeader.vue'
 import PublicSiteFooter from '../../components/public/PublicSiteFooter.vue'
 const { t, locale } = useI18n()
 const route = useRoute(), router = useRouter()
-const form = reactive({ name:'',email:'',company_name:'',consent:false })
+const form = reactive({ name:'',email:'',company_name:'' })
+const legalChoices=reactive<Record<string, boolean>>({})
 const plan = computed(() => typeof route.query.plan==='string'?route.query.plan:'')
 const busy=ref(false),error=ref(''),sent=ref(false)
+const checking=ref(true),enabled=ref(false)
+type PublicLegal = { id:number; type:string; title:string; sha256:string; required:boolean }
+const legalDocs=ref<PublicLegal[]>([])
+const legalReady=computed(()=>enabled.value && ['offer','privacy'].every(type=>legalDocs.value.some(doc=>doc.type===type)))
+const acceptedRequired=computed(()=>legalDocs.value.filter(doc=>doc.required || ['offer','privacy'].includes(doc.type)).every(doc=>legalChoices[doc.type]===true))
+let request=0
+async function checkReadiness(){
+ const current=++request
+ checking.value=true
+ try {
+  const language=locale.value==='ka'?'ge':locale.value
+  const [plans,legal]=await Promise.all([
+   api.get('/public/plans'),
+   api.get('/public/legal',{params:{locale:language,jurisdiction:'KZ'}})
+  ])
+  if(current!==request)return
+  enabled.value=plans.data?.registration_enabled === true
+  legalDocs.value=Array.isArray(legal.data?.data)?legal.data.data:[]
+  for(const doc of legalDocs.value) {
+   if(!(doc.type in legalChoices))legalChoices[doc.type]=false
+  }
+ } catch {
+  if(current===request){enabled.value=false;legalDocs.value=[]}
+ } finally {if(current===request)checking.value=false}
+}
+onMounted(checkReadiness)
+watch(locale,checkReadiness)
 async function submit(){
- if(busy.value) return
+ if(busy.value || !legalReady.value || !acceptedRequired.value) return
  busy.value=true;error.value=''
  try {
-  await api.post('/public/register/start',{...form,locale:locale.value,plan:plan.value||undefined})
+  await api.post('/public/register/start',{...form,consent:true,legal_choices:{...legalChoices},locale:locale.value,plan:plan.value||undefined})
   sent.value=true
  } catch(cause) { error.value=cause instanceof Error?cause.message:t('mroPublic.failed') }
  finally{busy.value=false}
@@ -36,6 +64,14 @@ async function submit(){
     <p>{{t('mroPublic.mailInstruction')}}</p>
     <RouterLink to="/login">{{t('mroPublic.backLogin')}}</RouterLink>
    </template>
+   <template v-else-if="checking">
+    <h2 id="mro-register-title">{{t('adminPortal.loading')}}</h2>
+   </template>
+   <template v-else-if="!legalReady">
+    <h2 id="mro-register-title">{{t('mroPublic.registrationUnavailable')}}</h2>
+    <p>{{t('mroPublic.registrationUnavailableHint')}}</p>
+    <RouterLink to="/legal">{{t('mroPublic.legalDocs')}}</RouterLink>
+   </template>
    <template v-else>
     <h2 id="mro-register-title">{{t('mroPublic.companyAccess')}}</h2>
     <p v-if="plan" class="muted">{{t('adminPortal.plan')}}: {{plan}}</p>
@@ -43,9 +79,18 @@ async function submit(){
      <label>{{t('mroPublic.name')}}<input v-model.trim="form.name" autocomplete="name" required minlength="2" maxlength="120"/></label>
      <label>{{t('mroPublic.email')}}<input v-model.trim="form.email" type="email" autocomplete="email" required/></label>
      <label>{{t('mroPublic.company')}}<input v-model.trim="form.company_name" autocomplete="organization" required minlength="2" maxlength="200"/></label>
-     <label class="mro-consent"><input v-model="form.consent" type="checkbox" required/><span>{{t('mroPublic.acceptTerms')}} <RouterLink to="/legal">{{t('mroPublic.legalDocs')}}</RouterLink></span></label>
+     <div class="mro-legal-versions">
+      <p>{{t('mroPublic.reviewLegal')}}:</p>
+      <ul><li v-for="doc in legalDocs" :key="doc.id">
+       <label class="mro-consent">
+        <input v-model="legalChoices[doc.type]" type="checkbox" :required="doc.required || ['offer','privacy'].includes(doc.type)"/>
+        <span><RouterLink :to="'/legal/version/'+doc.id" target="_blank">{{doc.title}}</RouterLink><span v-if="doc.required || ['offer','privacy'].includes(doc.type)"> *</span></span>
+       </label>
+      </li></ul>
+      <p>{{t('mroPublic.acceptTerms')}}</p>
+     </div>
      <p v-if="error" role="alert" class="mro-error">{{error}}</p>
-     <button type="submit" :disabled="busy||!form.consent">{{busy?t('adminPortal.loading'):t('mroPublic.send')}}</button>
+     <button type="submit" :disabled="busy||!acceptedRequired">{{busy?t('adminPortal.loading'):t('mroPublic.send')}}</button>
     </form>
     <p class="muted">{{t('mroPublic.haveAccount')}} <RouterLink to="/login">{{t('mroPublic.backLogin')}}</RouterLink></p>
    </template>
@@ -70,7 +115,13 @@ async function submit(){
 .mro-form-card button{width:100%;border:0;border-radius:8px;background:#078fd1;color:#fff;padding:14px;cursor:pointer;font:inherit}
 .mro-form-card button:disabled{opacity:.6;cursor:not-allowed}
 .mro-form-card .mro-consent{display:flex;align-items:flex-start;font-size:13px;gap:9px;line-height:1.5}
-.mro-consent input{margin-top:4px}.muted{font-size:13px;color:#68818c}.mro-error{color:#ad333a;font-size:14px}
+.mro-consent input{margin-top:4px}
+.mro-legal-versions{font-size:13px;line-height:1.6}
+.mro-legal-versions p{margin:0 0 6px;color:#536b78}
+.mro-legal-versions ul{margin:0;padding-left:20px}
+.mro-legal-versions li{margin:4px 0;list-style:none}
+.mro-legal-versions ul{padding-left:0}
+.mro-legal-versions .mro-consent{display:flex;align-items:flex-start;gap:8px}.muted{font-size:13px;color:#68818c}.mro-error{color:#ad333a;font-size:14px}
 @media(max-width:850px){.mro-register-main{grid-template-columns:1fr;gap:28px;padding:38px 20px 64px}.mro-form-card{max-width:560px}}
 @media(max-width:460px){.mro-register-main{padding:26px 14px 42px}.mro-form-card{padding:22px}}
 </style>

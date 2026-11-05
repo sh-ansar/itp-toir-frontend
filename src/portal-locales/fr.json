@@ -1168,6 +1168,9 @@
     "invoiceHistory": "Historique des factures",
     "openPdf": "Ouvrir le PDF",
     "uploadProof": "Déposer un justificatif",
-    "noInvoices": "Aucune facture."
+    "noInvoices": "Aucune facture.",
+    "registrationUnavailable": "Inscription indisponible pour le moment",
+    "registrationUnavailableHint": "L’inscription des nouvelles entreprises sera activée après publication des documents juridiques requis.",
+    "reviewLegal": "Consultez les versions publiées des documents"
   }
 }

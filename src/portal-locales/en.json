@@ -1223,6 +1223,9 @@
     "invoiceHistory": "Invoice history",
     "openPdf": "Open PDF",
     "uploadProof": "Upload payment proof",
-    "noInvoices": "No invoices yet."
+    "noInvoices": "No invoices yet.",
+    "registrationUnavailable": "Registration is not available yet",
+    "registrationUnavailableHint": "New company registration will open after the required ITP MRO legal terms are published.",
+    "reviewLegal": "Review the published document versions"
   }
 }

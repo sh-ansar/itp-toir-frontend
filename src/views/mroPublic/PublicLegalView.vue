@@ -18,7 +18,7 @@ const labels = computed(() => ({
   ru: { published:'Опубликованные документы', back:'Все юридические документы', version:'Версия', updated:'Действует с', download:'Скачать PDF', integrity:'Контрольная сумма', legal:'Правовая информация', details:'Сведения о документе' },
   en: { published:'Published documents', back:'All legal documents', version:'Version', updated:'Effective from', download:'Download PDF', integrity:'Checksum', legal:'Legal information', details:'Document information' },
   ge: { published:'გამოქვეყნებული დოკუმენტები', back:'ყველა იურიდიული დოკუმენტი', version:'ვერსია', updated:'ძალაში შესვლის თარიღი', download:'PDF ჩამოტვირთვა', integrity:'საკონტროლო ჯამი', legal:'იურიდიული ინფორმაცია', details:'დოკუმენტის ინფორმაცია' }
-})[locale.value] || {
+})[locale.value === 'ka' ? 'ge' : locale.value] || {
   published:'Published documents',back:'All legal documents',version:'Version',updated:'Effective from',download:'Download PDF',integrity:'Checksum',legal:'Legal information',details:'Document information'
 })
 const isDocument = computed(() => Boolean(route.params.document || route.params.version))
@@ -35,7 +35,7 @@ async function load() {
   error.value = ''
   currentDocument.value = null
   try {
-    const response = await api.get('/public/legal', { params: { locale: locale.value, jurisdiction: 'KZ' }, silent: true })
+    const response = await api.get('/public/legal', { params: { locale: locale.value === 'ka' ? 'ge' : locale.value, jurisdiction: 'KZ' }, silent: true })
     const items = response.data?.data || []
     const type = route.params.document?.replaceAll('-', '_')
     const id = route.params.version || items.find(item => item.type === type)?.id
