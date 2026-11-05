@@ -7,6 +7,7 @@
 const fs = require('node:fs')
 const path = require('node:path')
 const vm = require('node:vm')
+const { spawnSync } = require('node:child_process')
 
 const root = path.resolve(__dirname, '../src/components/public')
 const hero = fs.readFileSync(path.join(root, 'LandingHeroExperience.vue'), 'utf8')
@@ -31,6 +32,32 @@ check(component.includes('orderFilter = f'), 'Work order filters cannot be chang
 check(component.includes('mro-live__screen-tabs'), 'Mobile screen switching is missing')
 check(!/(?:fetch\s*\(|axios|from\s+['"][^'"]*\/api\/)/i.test(component),
   'Public demo must not request actual tenant information')
+
+for (const source of [hero, component]) {
+  const match = source.match(/<script\s+setup[^>]*>([\s\S]*?)<\/script>/)
+  check(!!match, 'Missing Vue script setup block')
+  if (match) {
+    const result = spawnSync(process.execPath, ['--input-type=module', '--check'], {
+      input:match[1], encoding:'utf8',
+    })
+    check(result.status === 0, 'Invalid Vue setup JS syntax: ' + (result.stderr || '').trim())
+  }
+  const template = source.match(/<template>([\s\S]*?)<\/template>/)
+  check(!!template, 'Missing Vue template')
+  if (template) {
+    const tags = []
+    for (const token of template[1].matchAll(/<\/?[A-Za-z][\w-]*\b[^>]*>/g)) {
+      const tag = token[0]
+      const name = tag.match(/^<\/?([A-Za-z][\w-]*)/)[1]
+      if (tag.startsWith('</')) {
+        check(tags.pop() === name, 'Unbalanced template tag: ' + name)
+      } else if (!tag.endsWith('/>') && !['input','br','hr'].includes(name)) {
+        tags.push(name)
+      }
+    }
+    check(tags.length === 0, 'Unclosed Vue template tags: ' + tags.join(','))
+  }
+}
 
 let languages = null
 try {
