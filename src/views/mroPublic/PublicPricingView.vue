@@ -24,7 +24,7 @@ const { t } = useI18n()
 .pricing-breadcrumb{display:flex;gap:12px;font-size:13px;color:var(--text-weak,#718995);margin-bottom:44px;}
 .pricing-breadcrumb a{color:inherit;text-decoration:none;}
 .pricing-intro{margin-bottom:36px;}
-.pricing-intro h1{font-size:clamp(32px,4vw,48px);letter-spacing:-.04em;font-weight:650;margin:0 0 16px;}
+.pricing-intro h1{font-size:clamp(32px,4vw,48px);line-height:1;letter-spacing:-.04em;font-weight:650;margin:0 0 16px;}
 .pricing-intro p{line-height:1.7;max-width:700px;color:var(--text-weak,#6e8b99);margin:0;}
 @media(max-width:700px){.pricing-main{padding:24px 16px 56px;}.pricing-breadcrumb{margin-bottom:26px;}}
 </style>
