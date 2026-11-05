@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   Activity, AlertTriangle, CalendarDays, CheckCircle2, ClipboardList,
-  Factory, Gauge, Layers, ListTodo, Settings2, Wrench,
+  Factory, Gauge, Layers, RotateCcw, Wrench,
 } from 'lucide-vue-next'
 import { mroHeroDemoCopy } from './mroHeroDemoCopy.js'
 
@@ -61,7 +61,7 @@ function resetDemo() {
     <div class="mro-live__topline">
       <span class="mro-live__sample"><span class="mro-live__pulse" aria-hidden="true"></span>{{ copy.example }}</span>
       <button type="button" class="mro-live__reset" @click="resetDemo">
-        <Settings2 :size="14" aria-hidden="true" /> {{ copy.overview }}
+        <RotateCcw :size="14" aria-hidden="true" /> {{ copy.reset }}
       </button>
     </div>
     <nav class="mro-live__screen-tabs" :aria-label="copy.navigation">
