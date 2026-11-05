@@ -8,7 +8,8 @@
     "build": "vue-tsc --noEmit && vite build",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview --host 127.0.0.1",
-    "check:ui": "node scripts/check-ui-contract.cjs"
+    "check:ui": "node scripts/check-ui-contract.cjs",
+    "check:hero": "node scripts/check-mro-hero.cjs"
   },
   "dependencies": {
     "laravel-echo": "^2.6.3",
