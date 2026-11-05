@@ -438,7 +438,16 @@
       "messenger": "Teamchat",
       "documents": "Wartungsberichte",
       "learning": "Schulungen",
-      "catering": "Verpflegung"
+      "catering": "Verpflegung",
+      "assets": "Anlagen und Baugruppen",
+      "work_orders": "Wartungsaufträge",
+      "plans": "Wartungspläne",
+      "schedule": "Arbeitspläne",
+      "crews": "Teams und Techniker",
+      "risk": "Prognostische Risiken",
+      "warehouse": "Ersatzteile und Lager",
+      "reports": "Berichte und Analysen",
+      "chat": "Teamchat"
     },
     "comingSoon": "Demnächst",
     "moduleSettings": "Einstellungen: {module}",
@@ -1116,7 +1125,8 @@
     "it": "Für Öl und Gas",
     "manufacturing": "Für die Fertigung",
     "education": "Für den Bergbau",
-    "services": "Für Servicedienstleister"
+    "services": "Für Servicedienstleister",
+    "appName": "ITP MRO"
   },
   "mroPublic": {
     "unlimited": "Unbegrenzt",

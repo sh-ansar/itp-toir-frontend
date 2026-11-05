@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import api from '../../api/mroCommercialAdapter'
 import PublicSiteHeader from '../../components/public/PublicSiteHeader.vue'
 import PublicSiteFooter from '../../components/public/PublicSiteFooter.vue'
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute(), router = useRouter()
 const form = reactive({ name:'',email:'',company_name:'',consent:false })
 const plan = computed(() => typeof route.query.plan==='string'?route.query.plan:'')
@@ -14,7 +14,7 @@ async function submit(){
  if(busy.value) return
  busy.value=true;error.value=''
  try {
-  await api.post('/public/register/start',{...form,plan:plan.value||undefined})
+  await api.post('/public/register/start',{...form,locale:locale.value,plan:plan.value||undefined})
   sent.value=true
  } catch(cause) { error.value=cause instanceof Error?cause.message:t('mroPublic.failed') }
  finally{busy.value=false}

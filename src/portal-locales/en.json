@@ -836,7 +836,16 @@
       "messenger": "Team chat",
       "documents": "MRO reports",
       "learning": "Learning",
-      "catering": "Catering"
+      "catering": "Catering",
+      "assets": "Assets and components",
+      "work_orders": "Maintenance work orders",
+      "plans": "Maintenance plans",
+      "schedule": "Work schedules",
+      "crews": "Crews and technicians",
+      "risk": "Predictive risk",
+      "warehouse": "Spare parts and inventory",
+      "reports": "Reports and analytics",
+      "chat": "Team chat"
     },
     "comingSoon": "Coming soon",
     "moduleSettings": "Settings for {module}",
@@ -1171,7 +1180,8 @@
     "it": "For oil and gas",
     "manufacturing": "For manufacturing",
     "education": "For mining",
-    "services": "For service providers"
+    "services": "For service providers",
+    "appName": "ITP MRO"
   },
   "mroPublic": {
     "unlimited": "Unlimited",

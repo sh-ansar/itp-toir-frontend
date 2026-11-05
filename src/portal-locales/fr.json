@@ -438,7 +438,16 @@
       "messenger": "Messagerie",
       "documents": "Rapports de maintenance",
       "learning": "Formation",
-      "catering": "Restauration"
+      "catering": "Restauration",
+      "assets": "Équipements et composants",
+      "work_orders": "Ordres de travail",
+      "plans": "Plans de maintenance",
+      "schedule": "Calendriers de travail",
+      "crews": "Équipes et techniciens",
+      "risk": "Risques prédictifs",
+      "warehouse": "Stock et pièces détachées",
+      "reports": "Rapports et analyses",
+      "chat": "Messagerie d’équipe"
     },
     "comingSoon": "Bientôt",
     "moduleSettings": "Paramètres : {module}",
@@ -1116,7 +1125,8 @@
     "it": "Pour le pétrole et le gaz",
     "manufacturing": "Pour l’industrie",
     "education": "Pour les mines",
-    "services": "Pour les prestataires de service"
+    "services": "Pour les prestataires de service",
+    "appName": "ITP MRO"
   },
   "mroPublic": {
     "unlimited": "Illimité",

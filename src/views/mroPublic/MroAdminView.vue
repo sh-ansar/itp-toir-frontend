@@ -28,7 +28,7 @@ const status=v=>t('adminPortal.statuses.'+(v||'none'))
 function cells(row){switch(section.value){
  case 'companies':return [row.name,row.email,row.is_verified?status('verified'):status('pending'),row.users_count,row.companies_count,row.plan_code||'—',bytes(row.used_bytes),status(row.subscription_status),date(row.created_at)]
  case 'plans':return [row.code,name(row),row.version,status(row.status),money(row.terms.price_minor,row.terms.currency),t('adminPortal.'+(row.is_public?'publicPlan':'internalPlan'))]
- case 'payments':return [row.number||'#'+row.id,row.customer_id,status(row.status),money(row.total_minor,row.currency),date(row.due_date)]
+ case 'payments':return [row.number||'#'+row.id,row.company_id,status(row.status),money(row.total_minor,row.currency),date(row.due_date)]
  case 'documents':return [row.title,t('adminPortal.'+row.type),row.locale.toUpperCase(),row.version,status(row.status),date(row.effective_at)]
  case 'consents':return [row.email,row.title,row.version,t('adminPortal.'+row.action),date(row.created_at)]
  default:return [row.email,row.permission,date(row.created_at)]}}

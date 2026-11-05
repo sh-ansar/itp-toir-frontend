@@ -1,2 +1,2 @@
-<script setup lang="ts">defineProps<{ isSubSidebar?: boolean }>()</script><template><aside class="mro-admin-sidebar" aria-label="ITP ТОиР — управление"><slot /></aside></template>
+<script setup lang="ts">defineProps<{ isSubSidebar?: boolean }>()</script><template><aside class="sidebar mro-admin-sidebar" aria-label="ITP ТОиР — управление"><slot /></aside></template>
 <style scoped>.mro-admin-sidebar{width:246px;max-width:100%;min-height:100vh;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;background:#f6fafc;border-right:1px solid #dae9ed;padding:24px 16px}@media(max-width:840px){.mro-admin-sidebar{min-height:0;width:100%;flex-direction:row;overflow-x:auto;align-items:center;flex-wrap:nowrap;padding:10px 12px;position:relative;z-index:1}}</style>
