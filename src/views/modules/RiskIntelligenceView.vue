@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../../components/ui/BaseSelect.vue'
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -8,10 +9,8 @@ import BaseNotice from '../../components/ui/BaseNotice.vue'
 import BasePageHeading from '../../components/ui/BasePageHeading.vue'
 import { getRisks, getForecast, type RiskNode, type RiskResponse, type ForecastRow } from '../../api/operations'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 
 const session=useSessionStore()
-const preview=usePreviewStore()
 const response=ref<RiskResponse|null>(null)
 const forecasts=ref<ForecastRow[]>([])
 const loading=ref(false),error=ref('')
@@ -44,7 +43,6 @@ async function load(){
   finally{loading.value=false}
 }
 watch(()=>session.session?.active_company_id,()=>void load())
-watch(()=>preview.enabled,()=>void load())
 onMounted(()=>void load())
 </script>
 
@@ -66,11 +64,11 @@ onMounted(()=>void load())
     <div class="registry-toolbar">
       <div class="toolbar-leading">
         <BaseSearchField v-model="search" label="Поиск по аналитике" placeholder="Название или код оборудования" />
-        <select v-model="level" class="operations-select" aria-label="Фильтр по уровню риска">
+        <BaseSelect v-model="level" class="operations-select" aria-label="Фильтр по уровню риска">
           <option value="all">Все уровни риска</option>
           <option value="critical">Критический</option><option value="high">Высокий</option>
           <option value="medium">Средний</option><option value="low">Низкий</option>
-        </select>
+        </BaseSelect>
       </div>
       <div class="toolbar-actions">
         <RouterLink class="toir-toolbar-btn" to="/asset-tree"><Activity :size="16"/>Структура активов</RouterLink>

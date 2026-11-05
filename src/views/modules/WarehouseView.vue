@@ -9,11 +9,9 @@ import BaseCard from '../../components/ui/BaseCard.vue'
 import ToirRegistryTable from '../../components/toir/ToirRegistryTable.vue'
 import { getStock, getStockMovements, createStockItem, updateStockItem, receiveStock, type StockItem, type StockMovement } from '../../api/stock'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import type { PageMeta } from '../../types/toir'
 
 const session=useSessionStore()
-const preview=usePreviewStore()
 const canManage=computed(()=>['owner','admin','manager'].includes(session.session?.active_role||''))
 const items=ref<StockItem[]>([])
 const meta=ref<PageMeta|null>(null)
@@ -48,7 +46,6 @@ async function load(){
 watch(search,()=>{if(searchTimer)clearTimeout(searchTimer);page.value=1;searchTimer=setTimeout(()=>void load(),300)})
 watch([lowOnly,page,perPage],()=>void load())
 watch(()=>session.session?.active_company_id,()=>{selected.value=null;page.value=1;void load()})
-watch(()=>preview.enabled,()=>{selected.value=null;page.value=1;void load()})
 onMounted(()=>void load())
 async function showItem(id:number){
   selected.value=items.value.find(row=>row.id===id)||null
@@ -71,7 +68,7 @@ function startReceipt(){
   modal.value='receive'
 }
 async function save(){
-  if(saving.value||preview.enabled)return
+  if(saving.value)return
   saving.value=true;error.value='';notice.value=''
   try{
     if(modal.value==='create'){
@@ -145,7 +142,6 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
         <span>Доступно: <strong>{{ selected.available_quantity }}</strong></span>
       </div>
       <h3><History :size="17"/> Журнал движений</h3>
-      <p v-if="preview.enabled" class="muted">Демонстрационные остатки. Настоящий журнал появляется после складских операций.</p>
       <p v-if="viewBusy" class="muted">Загрузка журнала…</p>
       <div v-else class="toir-table-scroll">
         <table class="toir-table warehouse-history-table">
@@ -167,7 +163,6 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
           <header class="category-dialog-head"><div class="category-dialog-icon"><Package :size="19"/></div>
             <button class="drawer-close" type="button" aria-label="Закрыть" :disabled="saving" @click="modal=null"><X :size="17"/></button></header>
           <h2>{{ modal==='create'?'Новая позиция':modal==='edit'?'Редактирование':'Приход на склад' }}</h2>
-          <BaseNotice v-if="preview.enabled" tone="warning">Просмотр макета. Сохранение недоступно.</BaseNotice>
           <form class="warehouse-form" @submit.prevent="save">
             <template v-if="modal!=='receive'">
               <label>Артикул *<input v-model.trim="form.sku" required maxlength="80" :disabled="saving"/></label>
@@ -183,7 +178,7 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
             </template>
             <div class="category-dialog-footer">
               <BaseButton type="button" variant="secondary" :disabled="saving" @click="modal=null">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="saving||preview.enabled">{{ saving?'Сохранение…':modal==='receive'?'Провести приход':'Сохранить' }}</BaseButton>
+              <BaseButton type="submit" :disabled="saving">{{ saving?'Сохранение…':modal==='receive'?'Провести приход':'Сохранить' }}</BaseButton>
             </div>
           </form>
         </section>

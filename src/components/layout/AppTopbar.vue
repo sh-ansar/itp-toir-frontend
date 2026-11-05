@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../ui/BaseSelect.vue'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { LogOut, Menu, Moon, Sun, UserRound } from 'lucide-vue-next'
@@ -49,20 +50,20 @@ async function logout() {
     <div class="topbar-actions">
       <div class="topbar-company">
         <label class="visually-hidden" for="topbar-company">{{ t('company') }}</label>
-        <select v-if="(session.session?.companies.length || 0) > 1" id="topbar-company"
+        <BaseSelect v-if="(session.session?.companies.length || 0) > 1" id="topbar-company"
           :value="session.session?.active_company_id || ''" :disabled="session.loading"
           @change="companyChanged">
           <option v-for="company in session.session?.companies" :key="company.id" :value="company.id">
             {{ company.name }}
           </option>
-        </select>
+        </BaseSelect>
         <span v-else class="company-name">{{ active?.name || t('company') }}</span>
       </div>
       <label class="visually-hidden" for="topbar-language">{{ t('language') }}</label>
-      <select id="topbar-language" class="topbar-language" :value="ui.locale"
+      <BaseSelect id="topbar-language" class="topbar-language" :value="ui.locale"
         @change="ui.locale = ($event.target as HTMLSelectElement).value as Locale">
         <option value="ru">RU</option><option value="en">EN</option><option value="ka">GE</option>
-      </select>
+      </BaseSelect>
       <button type="button" class="icon-control" :aria-label="t('theme')"
         :aria-pressed="ui.theme === 'dark'" @click="ui.toggleTheme()">
         <Sun v-if="ui.theme === 'dark'" :size="19" aria-hidden="true"/>

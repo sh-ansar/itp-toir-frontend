@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../ui/BaseSelect.vue'
 import { computed, reactive, ref, watch } from 'vue'
 import { X, Save } from 'lucide-vue-next'
 import BaseButton from '../ui/BaseButton.vue'
@@ -9,7 +10,7 @@ import type { ResourceName, ToirRecord } from '../../types/toir'
 import { createResource, updateResource, listResources } from '../../api/resources'
 import { getCrews, getAssetTree, type Crew } from '../../api/operations'
 
-const props=defineProps<{open:boolean;spec:ModuleSpec;record?:ToirRecord|null;preview?:boolean;defaults?:Record<string,string>}>()
+const props=defineProps<{open:boolean;spec:ModuleSpec;record?:ToirRecord|null;defaults?:Record<string,string>}>()
 const emit=defineEmits<{close:[];saved:[id:number]}>()
 const form=reactive<Record<string,string>>({})
 const reference=ref<Record<string,ToirRecord[]>>({})
@@ -60,7 +61,7 @@ function convert(){
   return result
 }
 async function submit(){
-  if(busy.value||props.preview)return
+  if(busy.value)return
   busy.value=true
   error.value=''
   try{
@@ -83,13 +84,12 @@ async function submit(){
           <button class="drawer-close" type="button" aria-label="Закрыть" @click="emit('close')"><X :size="21" /></button>
         </header>
         <form id="toir-editor" class="editor-body" @submit.prevent="submit">
-          <BaseNotice v-if="preview" tone="info">Предпросмотр формы. Сохранение в демонстрационном режиме отключено.</BaseNotice>
           <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
           <template v-for="field in spec.fields" :key="field.key">
             <div v-if="field.type==='select'||field.type==='asset'||field.type==='employee'||field.type==='project'||field.type==='parent'||field.type==='crew'"
               class="editor-control">
               <label :for="'edit-'+field.key">{{ field.label }}<span v-if="field.required"> *</span></label>
-              <select :id="'edit-'+field.key" v-model="form[field.key]" :required="field.required" :disabled="busy">
+              <BaseSelect :id="'edit-'+field.key" v-model="form[field.key]" :required="field.required" :disabled="busy">
                 <option value="">{{ field.required?'Выберите':'Не задано' }}</option>
                 <template v-if="field.type==='select'">
                   <option v-for="o in field.options" :key="o.value" :value="o.value">{{ o.label }}</option>
@@ -99,7 +99,7 @@ async function submit(){
                     {{ o.name || o.title }} {{ o.code?'('+o.code+')':'' }}
                   </option>
                 </template>
-              </select>
+              </BaseSelect>
             </div>
             <div v-else-if="field.type==='datetime-local'" class="editor-control">
               <label :for="'edit-'+field.key">{{ field.label }}</label>
@@ -116,7 +116,7 @@ async function submit(){
         </form>
         <footer class="editor-footer">
           <BaseButton variant="secondary" type="button" :disabled="busy" @click="emit('close')">Отмена</BaseButton>
-          <BaseButton type="submit" :disabled="!ready||preview" @click="submit">
+          <BaseButton type="submit" :disabled="!ready" @click="submit">
             <Save :size="17" />{{ busy?'Сохранение…':'Сохранить' }}
           </BaseButton>
         </footer>

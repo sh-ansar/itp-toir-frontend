@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../ui/BaseSelect.vue'
 import { computed, ref, watch } from 'vue'
 import { ChevronUp, ChevronDown, ChevronRight, Inbox } from 'lucide-vue-next'
 import BaseStatusPill from '../ui/BaseStatusPill.vue'
@@ -180,11 +181,11 @@ function tone(status:string):'success'|'warning'|'danger'|'info'|'neutral'{
     </div>
     <div v-if="meta" class="registry-pagination">
       <div>Всего {{ meta.total.toLocaleString('ru-RU') }} записей ·
-        <select :value="meta.per_page" aria-label="Записей на странице"
+        <BaseSelect :value="meta.per_page" aria-label="Записей на странице"
           @change="emit('pageSize',Number(($event.target as HTMLSelectElement).value))">
           <option :value="15">15 на странице</option><option :value="25">25 на странице</option>
           <option :value="50">50 на странице</option>
-        </select>
+        </BaseSelect>
       </div>
       <nav class="page-list" aria-label="Страницы">
         <button type="button" :disabled="meta.current_page<=1" @click="emit('page',meta.current_page-1)">‹</button>

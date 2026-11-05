@@ -9,13 +9,11 @@ import { loadSchedule } from '../../api/resources'
 import { getShifts, type CrewShift } from '../../api/operations'
 import { STATUS_LABELS } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import type { ToirRecord } from '../../types/toir'
 
 type GroupMode='crew'|'employee'
 interface ScheduleRow {id:string;label:string;type:'crew'|'employee'|'unassigned';sourceId:number|null}
 const session=useSessionStore()
-const preview=usePreviewStore()
 const offset=ref(0)
 const mode=ref<GroupMode>('crew')
 const orders=ref<ToirRecord[]>([])
@@ -104,7 +102,6 @@ async function load(){
 }
 function shift(amount:number){offset.value+=amount;selected.value=null;void load()}
 watch(()=>session.session?.active_company_id,()=>{selected.value=null;void load()})
-watch(()=>preview.enabled,()=>{selected.value=null;void load()})
 onMounted(()=>void load())
 </script>
 

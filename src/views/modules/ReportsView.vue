@@ -10,12 +10,10 @@ import { loadOverview, listResources, loadWorkControl, type WorkControl } from '
 import { getStock, type StockItem } from '../../api/stock'
 import { specs } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import type { Overview, ToirRecord } from '../../types/toir'
 
 const props=defineProps<{report:string}>()
 const session=useSessionStore()
-const preview=usePreviewStore()
 const router=useRouter()
 const overview=ref<Overview|null>(null)
 const workControl=ref<WorkControl|null>(null)
@@ -89,12 +87,11 @@ async function refresh(){
       listResources('employees',{per_page:100}),getStock({per_page:100})
     ])
     overview.value=o;orders.value=wo.data;employees.value=em.data;stockItems.value=st.data
-    workControl.value=preview.enabled?null:await loadWorkControl()
+    workControl.value=await loadWorkControl()
   }catch(cause){error.value=cause instanceof Error?cause.message:'Не удалось загрузить отчёт'}
   finally{busy.value=false}
 }
 watch(()=>session.session?.active_company_id,()=>void refresh())
-watch(()=>preview.enabled,()=>void refresh())
 onMounted(()=>void refresh())
 </script>
 <template>
@@ -144,7 +141,6 @@ onMounted(()=>void refresh())
         </tbody>
       </table></div>
     </section>
-    <BaseNotice v-if="report==='repairs'&&preview.enabled" tone="info">В демо-режиме оперативный контроль отключён — реальные показатели компании не отображаются.</BaseNotice>
     <BaseCard v-if="report==='repairs'||report==='quality'" >
       <div class="report-heading"><h2>{{ report==='repairs'?'Состояние нарядов':'Результаты завершения работ' }}</h2>
         <p>Рассчитано по данным текущей компании</p></div>

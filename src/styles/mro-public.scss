@@ -1,0 +1,16 @@
+@use "@lib/scss/var" as *;
+@use "@lib/scss/mixins" as *;
+@use "@lib/scss/patterns" as *;
+:is(.public-site, .pricing-site, .legal-site, .admin-layout, .mro-public-page) {
+  --border-radius: 8px;
+  --transition: .18s ease;
+  @import "@lib/scss/components/icon";
+  @import "@lib/scss/components/button";
+  @import "@lib/scss/components/icon-button";
+  @import "@lib/scss/components/switch";
+  @import "@lib/scss/components/text-input";
+  @import "@lib/scss/components/select";
+  @import "@lib/scss/components/menu-item";
+  @import "@lib/scss/components/loader";
+  @import "@lib/scss/components/dropdown";
+}

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../../components/ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { UsersRound, CalendarClock, ClipboardList, RefreshCcw, Plus, X, UserPlus, Trash2, ChevronRight } from 'lucide-vue-next'
@@ -11,10 +12,9 @@ import { getCrews, getShifts, getForecast, createCrew, addCrewMember, removeCrew
   type Crew, type CrewShift, type ForecastRow, type GenerateResult } from '../../api/operations'
 import { listResources } from '../../api/resources'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import type { ToirRecord } from '../../types/toir'
 
-const session=useSessionStore(),preview=usePreviewStore()
+const session=useSessionStore()
 const editable=computed(()=>['owner','admin','manager'].includes(session.session?.active_role||''))
 const planner=computed(()=>editable.value||session.session?.active_role==='engineer')
 const activeTab=ref<'teams'|'shifts'|'forecast'>('teams')
@@ -67,7 +67,7 @@ function openShift(){
 }
 function openMember(){memberId.value='';modal.value='member';error.value=''}
 async function submitCrew(){
-  if(saving.value||preview.enabled)return
+  if(saving.value)return
   saving.value=true;error.value=''
   try{
     const row=await createCrew({name:crewName.value.trim(),code:crewCode.value.trim(),
@@ -78,7 +78,7 @@ async function submitCrew(){
   finally{saving.value=false}
 }
 async function submitMember(){
-  if(!selectedCrew.value||!memberId.value||saving.value||preview.enabled)return
+  if(!selectedCrew.value||!memberId.value||saving.value)return
   saving.value=true;error.value=''
   try{
     await addCrewMember(selectedCrew.value.id,Number(memberId.value))
@@ -87,12 +87,12 @@ async function submitMember(){
   finally{saving.value=false}
 }
 async function removeMember(id:number){
-  if(!selectedCrew.value||preview.enabled||!window.confirm('Исключить сотрудника из бригады?'))return
+  if(!selectedCrew.value||!window.confirm('Исключить сотрудника из бригады?'))return
   try{await removeCrewMember(selectedCrew.value.id,id);await load()}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось удалить участника'}
 }
 async function submitShifts(){
-  if(saving.value||preview.enabled||!shiftCrew.value||!weekdays.value.length)return
+  if(saving.value||!shiftCrew.value||!weekdays.value.length)return
   saving.value=true;error.value=''
   try{
     const response=await createRecurringShifts({crew_id:Number(shiftCrew.value),
@@ -108,7 +108,7 @@ async function submitShifts(){
   finally{saving.value=false}
 }
 async function cancelShift(id:number){
-  if(preview.enabled||!window.confirm('Удалить смену? Если есть наряды, удаление будет запрещено.'))return
+  if(!window.confirm('Удалить смену? Если есть наряды, удаление будет запрещено.'))return
   try{await removeShift(id);await load()}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось удалить смену'}
 }
@@ -120,7 +120,7 @@ async function previewGeneration(){
   finally{saving.value=false}
 }
 async function confirmGeneration(){
-  if(preview.enabled||saving.value)return
+  if(saving.value)return
   saving.value=true;error.value=''
   try{
     const data=await generateOrders(rangeDays.value,false)
@@ -132,7 +132,6 @@ async function confirmGeneration(){
 }
 function dueLabel(row:ForecastRow){return row.due==='overdue'?'Просрочено':row.due==='soon'?'Скоро':'План'}
 watch(()=>session.session?.active_company_id,()=>void load())
-watch(()=>preview.enabled,()=>void load())
 watch(rangeDays,()=>void load())
 onMounted(()=>void load())
 </script>
@@ -204,10 +203,10 @@ onMounted(()=>void load())
     <template v-else-if="activeTab==='shifts'">
       <div class="registry-toolbar">
         <span class="operations-muted">Подтверждённые смены. Загрузка проверяется перед назначением наряда.</span>
-        <select v-model="selectedCrewId" class="operations-select" aria-label="Фильтр по бригаде">
+        <BaseSelect v-model="selectedCrewId" class="operations-select" aria-label="Фильтр по бригаде">
           <option :value="null">Все бригады</option>
           <option v-for="crew in crews" :key="crew.id" :value="crew.id">{{ crew.name }}</option>
-        </select>
+        </BaseSelect>
       </div>
       <div class="toir-table-scroll"><table class="toir-table operations-table">
         <thead><tr><th>Дата</th><th>Бригада</th><th>Начало</th><th>Окончание</th><th>Статус</th><th>Управление</th></tr></thead>
@@ -227,10 +226,10 @@ onMounted(()=>void load())
       <div class="registry-toolbar">
         <span class="operations-muted">Прогнозные сроки — ещё не наряды. Работы появятся после формирования.</span>
         <label class="operations-inline-select">Горизонт:
-          <select v-model.number="rangeDays" class="operations-select" aria-label="Горизонт прогноза">
+          <BaseSelect v-model.number="rangeDays" class="operations-select" aria-label="Горизонт прогноза">
             <option :value="14">14 дней</option><option :value="30">30 дней</option>
             <option :value="60">60 дней</option><option :value="90">90 дней</option>
-          </select>
+          </BaseSelect>
         </label>
       </div>
       <div class="toir-table-scroll"><table class="toir-table operations-table">
@@ -261,36 +260,36 @@ onMounted(()=>void load())
             <form class="warehouse-form" @submit.prevent="submitCrew">
               <label>Название *<input v-model="crewName" required maxlength="200" placeholder="Механическая бригада №1"/></label>
               <label>Уникальный код *<input v-model="crewCode" required maxlength="64" placeholder="MECH-01"/></label>
-              <label>Мастер бригады<select v-model="crewLead">
+              <label>Мастер бригады<BaseSelect v-model="crewLead">
                 <option value="">Не назначен</option>
                 <option v-for="emp in availableEmployees" :key="emp.id" :value="String(emp.id)">{{ emp.name }}</option>
-              </select></label>
+              </BaseSelect></label>
               <div class="category-dialog-footer">
                 <BaseButton variant="secondary" @click="modal=null">Отмена</BaseButton>
-                <BaseButton type="submit" :disabled="saving||preview.enabled">Создать</BaseButton>
+                <BaseButton type="submit" :disabled="saving">Создать</BaseButton>
               </div>
             </form>
           </template>
           <template v-else-if="modal==='member'">
             <h2>Добавить участника</h2>
             <form class="warehouse-form" @submit.prevent="submitMember">
-              <label>Сотрудник *<select v-model="memberId" required>
+              <label>Сотрудник *<BaseSelect v-model="memberId" required>
                 <option value="">Выберите сотрудника</option>
                 <option v-for="emp in unassignedEmployees" :key="emp.id" :value="String(emp.id)">{{ emp.name }}</option>
-              </select></label>
+              </BaseSelect></label>
               <div class="category-dialog-footer">
                 <BaseButton variant="secondary" @click="modal=null">Отмена</BaseButton>
-                <BaseButton type="submit" :disabled="saving||preview.enabled||!memberId">Добавить</BaseButton>
+                <BaseButton type="submit" :disabled="saving||!memberId">Добавить</BaseButton>
               </div>
             </form>
           </template>
           <template v-else-if="modal==='shift'">
             <h2>Повторяющийся график смен</h2><p>Конфликтующие смены не создаются; период до 62 дней.</p>
             <form class="warehouse-form" @submit.prevent="submitShifts">
-              <label>Бригада *<select v-model="shiftCrew" required>
+              <label>Бригада *<BaseSelect v-model="shiftCrew" required>
                 <option value="">Выберите бригаду</option>
                 <option v-for="crew in crews" :key="crew.id" :value="String(crew.id)">{{ crew.name }}</option>
-              </select></label>
+              </BaseSelect></label>
               <div class="operations-form-two">
                 <label>С *<input v-model="shiftFrom" type="date" required/></label>
                 <label>По *<input v-model="shiftTo" type="date" :min="shiftFrom" required/></label>
@@ -305,7 +304,7 @@ onMounted(()=>void load())
               <label>Примечание<input v-model="shiftNote" maxlength="255" placeholder="Основная смена"/></label>
               <div class="category-dialog-footer">
                 <BaseButton variant="secondary" @click="modal=null">Отмена</BaseButton>
-                <BaseButton type="submit" :disabled="saving||preview.enabled||!weekdays.length">Создать смены</BaseButton>
+                <BaseButton type="submit" :disabled="saving||!weekdays.length">Создать смены</BaseButton>
               </div>
             </form>
           </template>
@@ -320,7 +319,7 @@ onMounted(()=>void load())
             <BaseNotice v-if="result?.blocked?.length" tone="warning">Не все работы помещаются в график. Создайте смены или устраните конфликты.</BaseNotice>
             <div class="category-dialog-footer">
               <BaseButton variant="secondary" @click="modal=null">Отмена</BaseButton>
-              <BaseButton :disabled="saving||preview.enabled||!result?.created" @click="confirmGeneration">
+              <BaseButton :disabled="saving||!result?.created" @click="confirmGeneration">
                 Создать {{ result?.created||0 }} нарядов
               </BaseButton>
             </div>

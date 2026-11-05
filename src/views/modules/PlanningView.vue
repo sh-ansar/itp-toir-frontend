@@ -10,7 +10,6 @@ import ToirEditorDrawer from '../../components/toir/ToirEditorDrawer.vue'
 import { loadSchedule } from '../../api/resources'
 import { specs, canEdit, STATUS_LABELS } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import type { ToirRecord } from '../../types/toir'
 
 interface TimelineItem {
@@ -27,7 +26,6 @@ interface TimelineItem {
   url:string
 }
 const session=useSessionStore()
-const preview=usePreviewStore()
 const editable=computed(()=>canEdit(session.session?.active_role,'plans'))
 const plans=ref<ToirRecord[]>([])
 const orders=ref<ToirRecord[]>([])
@@ -103,7 +101,6 @@ function shift(amount:number){
   void load()
 }
 watch(()=>session.session?.active_company_id,()=>{selected.value=null;void load()})
-watch(()=>preview.enabled,()=>{selected.value=null;void load()})
 watch(includeOrders,()=>rowLimit.value=24)
 onMounted(()=>void load())
 </script>
@@ -197,7 +194,7 @@ onMounted(()=>void load())
 
     <ToirRegistryTable v-else :rows="plans" :columns="specs.plans.columns" :selectable="false"
       @open="$router.push('/plans/'+$event)" />
-    <ToirEditorDrawer :open="editor" :spec="specs.plans" :preview="preview.enabled"
+    <ToirEditorDrawer :open="editor" :spec="specs.plans"
       @close="editor=false" @saved="id=>{editor=false;load();$router.push('/plans/'+id)}" />
   </div>
 </template>

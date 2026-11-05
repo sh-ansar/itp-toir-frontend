@@ -1,0 +1,3 @@
+<script setup lang="ts">const logo = import.meta.env.BASE_URL + 'brand/toir-gear.svg'</script>
+<template><span class="mro-brand"><img :src="logo" width="40" height="40" alt="" /><span>ITP <strong>ТОиР</strong></span></span></template>
+<style scoped>.mro-brand{display:inline-flex;align-items:center;gap:9px;color:#123441;white-space:nowrap;font-size:20px;font-weight:500;letter-spacing:-.04em}.mro-brand img{height:40px;width:40px;display:block;object-fit:contain;flex:none}.mro-brand strong{font-weight:700}</style>

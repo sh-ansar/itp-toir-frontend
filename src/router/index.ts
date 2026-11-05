@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useSessionStore } from '../stores/session'
+import api from '../api/mroCommercialAdapter'
 import LoginView from '../views/LoginView.vue'
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
@@ -32,7 +33,18 @@ const resourceRoutes = [
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path:'/',name:'home',component:HomeView,meta:{auth:true} },
+    { path:'/',name:'public.home',component:()=>import('../views/mroPublic/PublicLandingView.vue') },
+    { path:'/landing',redirect:'/' },
+    { path:'/pricing',name:'public.pricing',component:()=>import('../views/mroPublic/PublicPricingView.vue') },
+    { path:'/product/modules/:module',name:'public.module',component:()=>import('../views/mroPublic/PublicContentView.vue') },
+    { path:'/solutions/:sector',name:'public.sector',component:()=>import('../views/mroPublic/PublicContentView.vue') },
+    { path:'/legal/:document(offer|tariff-policy|acceptable-use|personal-data-consent|privacy)?',name:'public.legal',component:()=>import('../views/mroPublic/PublicLegalView.vue') },
+    { path:'/legal/version/:version(\\d+)',name:'public.legal.version',component:()=>import('../views/mroPublic/PublicLegalView.vue') },
+    { path:'/register',name:'public.register',component:()=>import('../views/mroPublic/MroRegisterView.vue') },
+    { path:'/register/verify',name:'public.register.verify',component:()=>import('../views/mroPublic/MroVerifyView.vue') },
+    { path:'/dashboard',name:'home',component:HomeView,meta:{auth:true} },
+    { path:'/billing',name:'billing',component:()=>import('../views/mroPublic/MroBillingView.vue'),meta:{auth:true} },
+    { path:'/admin/:section?',name:'mro.admin',component:()=>import('../views/mroPublic/MroAdminView.vue'),meta:{auth:true,admin:true} },
     { path:'/profile',name:'profile',component:ProfileView,meta:{auth:true} },
     { path:'/login',name:'login',component:LoginView },
     { path:'/forgot-password',name:'forgot',component:ForgotPasswordView },
@@ -67,6 +79,12 @@ router.beforeEach(async (to) => {
   if(!to.meta.auth)return true
   const store=useSessionStore()
   if(!store.checked)await store.refresh()
-  if(store.session)return true
+  if(store.session) {
+    if(to.meta.admin) {
+      try { await api.get('/platform-admin/access') }
+      catch { return {name:'home'} }
+    }
+    return true
+  }
   return {name:'login',query:{redirect:to.fullPath}}
 })
