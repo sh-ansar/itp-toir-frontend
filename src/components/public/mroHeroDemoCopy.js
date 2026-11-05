@@ -1,6 +1,6 @@
 // Public MRO showcase: localized fictional examples only; never requests company data.
 const ru = {
-  example:'Интерактивный пример · демонстрационные данные', overview:'Обзор', equipment:'Оборудование',
+  example:'Интерактивный пример · демонстрационные данные', reset:'Сбросить', overview:'Обзор', equipment:'Оборудование',
   orders:'Наряды', structure:'Структура', schedule:'План ТО', risks:'Риски',
   assets:'Единиц оборудования', available:'Исправно', today:'Нарядов сегодня',
   recent:'Последние события', eventOne:'ТО насоса завершено', eventTwo:'Создан наряд на компрессор',
@@ -24,7 +24,7 @@ const ru = {
   onlyDemo:'Изменения на этой странице не влияют на настоящие данные',
 }
 const en = {
-  example:'Interactive example · sample data', overview:'Overview', equipment:'Equipment',
+  example:'Interactive example · sample data', reset:'Reset', overview:'Overview', equipment:'Equipment',
   orders:'Work orders', structure:'Structure', schedule:'Maintenance plan', risks:'Risks',
   assets:'Equipment units', available:'Operational', today:'Orders today',
   recent:'Recent activity', eventOne:'Pump maintenance completed', eventTwo:'Compressor work order created',
@@ -48,7 +48,7 @@ const en = {
   onlyDemo:'Actions here do not change real company data',
 }
 const ge = {
-  example:'ინტერაქტიული მაგალითი · საცდელი მონაცემები', overview:'მიმოხილვა', equipment:'აღჭურვილობა',
+  example:'ინტერაქტიული მაგალითი · საცდელი მონაცემები', reset:'საწყისზე დაბრუნება', overview:'მიმოხილვა', equipment:'აღჭურვილობა',
   orders:'სამუშაო დავალებები', structure:'სტრუქტურა', schedule:'მომსახურების გეგმა', risks:'რისკები',
   assets:'აღჭურვილობის ერთეული', available:'გამართულია', today:'დღევანდელი დავალებები',
   recent:'ბოლო მოვლენები', eventOne:'ტუმბოს მომსახურება დასრულდა', eventTwo:'კომპრესორზე დავალება შეიქმნა',
@@ -72,7 +72,7 @@ const ge = {
   onlyDemo:'ამ გვერდზე მოქმედებები რეალურ მონაცემებს არ ცვლის',
 }
 const de = {
-  example:'Interaktives Beispiel · Demodaten', overview:'Übersicht', equipment:'Anlagen',
+  example:'Interaktives Beispiel · Demodaten', reset:'Zurücksetzen', overview:'Übersicht', equipment:'Anlagen',
   orders:'Arbeitsaufträge', structure:'Struktur', schedule:'Wartungsplan', risks:'Risiken',
   assets:'Anlagen gesamt', available:'Betriebsbereit', today:'Aufträge heute',
   recent:'Letzte Ereignisse', eventOne:'Pumpenwartung abgeschlossen', eventTwo:'Kompressorauftrag erstellt',
@@ -96,7 +96,7 @@ const de = {
   onlyDemo:'Aktionen ändern keine echten Unternehmensdaten',
 }
 const fr = {
-  example:'Exemple interactif · données fictives', overview:'Vue générale', equipment:'Équipements',
+  example:'Exemple interactif · données fictives', reset:'Réinitialiser', overview:'Vue générale', equipment:'Équipements',
   orders:'Ordres de travail', structure:'Structure', schedule:'Plan de maintenance', risks:'Risques',
   assets:'Équipements', available:'Opérationnels', today:"Ordres aujourd’hui",
   recent:'Activité récente', eventOne:'Entretien de la pompe terminé', eventTwo:'Ordre créé pour le compresseur',
@@ -120,7 +120,7 @@ const fr = {
   onlyDemo:'Les actions ne modifient aucune donnée réelle',
 }
 const es = {
-  example:'Ejemplo interactivo · datos ficticios', overview:'Resumen', equipment:'Equipos',
+  example:'Ejemplo interactivo · datos ficticios', reset:'Restablecer', overview:'Resumen', equipment:'Equipos',
   orders:'Órdenes de trabajo', structure:'Estructura', schedule:'Plan de mantenimiento', risks:'Riesgos',
   assets:'Equipos registrados', available:'Operativos', today:'Órdenes de hoy',
   recent:'Actividad reciente', eventOne:'Mantenimiento de bomba finalizado', eventTwo:'Orden para compresor creada',
