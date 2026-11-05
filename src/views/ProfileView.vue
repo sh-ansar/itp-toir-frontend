@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { Shield, UserRound } from 'lucide-vue-next'
 import BaseCard from '../components/ui/BaseCard.vue'
+import BaseSelect from '../components/ui/BaseSelect.vue'
+import { usePreferencesStore, type Locale } from '../stores/preferences'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseNotice from '../components/ui/BaseNotice.vue'
 import BasePageHeading from '../components/ui/BasePageHeading.vue'
@@ -12,6 +14,7 @@ import { useI18n } from '../i18n'
 
 const { t } = useI18n()
 const auth = useSessionStore()
+const preferences = usePreferencesStore()
 const currentPassword = ref('')
 const password = ref('')
 const confirmation = ref('')
@@ -55,6 +58,13 @@ async function submit() {
           <dt>{{ t('email') }}</dt><dd>{{ auth.session?.user.email || '—' }}</dd>
           <dt>{{ t('role') }}</dt><dd>{{ auth.session?.active_role || '—' }}</dd>
         </dl>
+        <div class="profile-locale" style="display:grid;gap:7px;margin:14px 0">
+          <label for="mro-profile-language">{{ {ru:'Язык интерфейса',en:'Interface language',ka:'ინტერფეისის ენა'}[preferences.locale] }}</label>
+          <BaseSelect id="mro-profile-language" :value="preferences.locale"
+            @change="preferences.locale = ($event.target as HTMLSelectElement).value as Locale">
+            <option value="ru">Русский</option><option value="en">English</option><option value="ka">ქართული</option>
+          </BaseSelect>
+        </div>
         <h3 class="subheading">{{ t('availableCompanies') }}</h3>
         <div class="company-list">
           <div v-for="company in auth.session?.companies" :key="company.id">

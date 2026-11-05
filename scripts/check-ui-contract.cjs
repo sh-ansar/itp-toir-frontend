@@ -19,7 +19,9 @@ for(const file of sources){
  if(used!==(source.match(/<\/BaseSelect>/g)||[]).length)errors.push('Unclosed BaseSelect tags: '+rel)
 }
 if(fs.existsSync(path.join(root,'stores/preview.ts')))errors.push('Obsolete preview store still exists')
-if(baseSelectUses!==23)errors.push('Expected 23 shared selects, found '+baseSelectUses)
+// Header company/language selectors moved into the shared account popover and profile preferences.
+// The profile locale selector is retained; exactly 22 shared selects now remain.
+if(baseSelectUses!==22)errors.push('Expected 22 shared selects after header consolidation, found '+baseSelectUses)
 if(nativeSelects!==1)errors.push('Expected one native select inside BaseSelect, found '+nativeSelects)
 if(errors.length){console.error('TOIR_UI_CONTRACT_FAILED',JSON.stringify(errors));process.exit(1)}
 console.log('TOIR_UI_CONTRACT_PASS',JSON.stringify({files:sources.length,sharedSelects:baseSelectUses,obsoleteDemoReferences:0}))
