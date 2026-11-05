@@ -222,10 +222,10 @@ function resetDemo() {
 <style scoped>
 .mro-live{width:100%;min-width:0;padding:13px 14px 17px;border-radius:20px;overflow:hidden;box-shadow:0 22px 56px #19506b17;background:linear-gradient(111deg,#fc3b96 0%,#ffb0ac 30%,#ffe4be 52%,#8ee7ef 77%,#6097f6 100%);color:#143546;font-family:Golos,"Golos Text","Segoe UI",sans-serif;text-align:left;font-size:12px;line-height:1.35}
 .mro-live *{box-sizing:border-box}.mro-live button{font:inherit;cursor:pointer}.mro-live button:focus-visible{outline:2px solid #167bb8;outline-offset:2px}
-.mro-live__topline{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:28px;padding:0 3px 9px;color:#173e54}
-.mro-live__sample{display:flex;align-items:center;gap:7px;padding:6px 11px;background:#fff9;border:1px solid #ffffff8c;border-radius:100px;font-size:11px}
+.mro-live__topline{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:9px;min-height:28px;padding:0 3px 9px;color:#173e54}
+.mro-live__sample{display:flex;align-items:center;gap:7px;min-width:0;overflow-wrap:anywhere;padding:6px 11px;background:#fff9;border:1px solid #ffffff8c;border-radius:100px;font-size:11px}
 .mro-live__pulse{width:7px;height:7px;border-radius:50%;background:#12a879;box-shadow:0 0 0 4px #20ba7540}
-.mro-live__reset{display:flex;align-items:center;gap:6px;border:1px solid #fff8;background:#fff8;color:#335870;border-radius:8px;padding:6px 10px}
+.mro-live__reset{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;border:1px solid #fff8;background:#fff8;color:#335870;border-radius:8px;padding:6px 10px}
 .mro-live__screen-tabs{display:none;align-items:center;gap:5px;padding:5px;background:#ffffffae;border-radius:11px;margin-bottom:10px}
 .mro-live__screen-tabs button{flex:1;min-width:0;padding:9px 5px;border:0;border-radius:7px;background:transparent;color:#496b7b;font-weight:600}
 .mro-live__screen-tabs button.is-active{background:#fff;color:#007bbd;box-shadow:0 2px 5px #21415117}
