@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import { ref, watch } from 'vue'
 import { X, Boxes } from 'lucide-vue-next'
 import BaseButton from '../ui/BaseButton.vue'
@@ -22,7 +23,7 @@ function submit(){emit('choose',selected.value)}
       <section class="category-dialog" role="dialog" aria-modal="true" aria-label="Категория актива">
         <header class="category-dialog-head">
           <div class="category-dialog-icon"><Boxes :size="19" /></div>
-          <button type="button" aria-label="Закрыть" class="drawer-close" @click="emit('close')"><X :size="18"/></button>
+          <SharedButton type="button" aria-label="Закрыть" class="drawer-close" @click="emit('close')"><X :size="18"/></SharedButton>
         </header>
         <h2>Категория актива</h2>
         <p>Для создания записи выберите категорию актива</p>

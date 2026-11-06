@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
+import { Table as SharedTable } from "@itpmining/vue-basic-components";
 import BaseSelect from '../../components/ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -138,7 +140,6 @@ onMounted(()=>void load())
 
 <template>
   <div class="operations-page workforce-page">
-    <div class="toir-breadcrumb">Ремонт и обслуживание / Бригады и графики</div>
     <BasePageHeading title="Бригады и планирование работ"
       description="Состав бригад, подтверждённые смены, прогноз ТО и распределение нарядов без пересечений."/>
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
@@ -159,7 +160,7 @@ onMounted(()=>void load())
         <BaseButton v-if="editable&&activeTab==='teams'" @click="openCrew"><Plus :size="16"/>Бригада</BaseButton>
         <BaseButton v-if="editable&&activeTab==='shifts'" @click="openShift"><CalendarClock :size="16"/>Создать график</BaseButton>
         <BaseButton v-if="planner&&activeTab==='forecast'" @click="previewGeneration"><ClipboardList :size="16"/>Сформировать наряды</BaseButton>
-        <button type="button" class="toolbar-icon" aria-label="Обновить планирование" :disabled="loading" @click="load"><RefreshCcw :size="17"/></button>
+        <SharedButton type="button" class="toolbar-icon" aria-label="Обновить планирование" :disabled="loading" @click="load"><RefreshCcw :size="17"/></SharedButton>
       </div>
     </div>
     <div v-if="activeTab==='teams'" class="operations-two-pane operations-crews-layout">
@@ -188,8 +189,8 @@ onMounted(()=>void load())
             <span class="operations-member-avatar">{{ member.name.slice(0,1) }}</span>
             <div><strong>{{ member.name }}</strong><small>{{ member.position||'Сотрудник' }}</small></div>
             <span v-if="selectedCrew.lead_employee_id===member.id" class="operations-small-tag">Мастер</span>
-            <button v-else-if="editable" type="button" class="toolbar-icon" title="Исключить из бригады"
-              :aria-label="'Исключить '+member.name" @click="removeMember(member.id)"><Trash2 :size="15"/></button>
+            <SharedButton v-else-if="editable" type="button" class="toolbar-icon" title="Исключить из бригады"
+              :aria-label="'Исключить '+member.name" @click="removeMember(member.id)"><Trash2 :size="15"/></SharedButton>
           </div>
           <p v-if="!selectedCrew.members.length" class="operations-muted">Нет участников. Добавьте сотрудников, чтобы назначать смены.</p>
           <div class="operations-crew-hint"><CalendarClock :size="18"/>
@@ -208,19 +209,16 @@ onMounted(()=>void load())
           <option v-for="crew in crews" :key="crew.id" :value="crew.id">{{ crew.name }}</option>
         </BaseSelect>
       </div>
-      <div class="toir-table-scroll"><table class="toir-table operations-table">
-        <thead><tr><th>Дата</th><th>Бригада</th><th>Начало</th><th>Окончание</th><th>Статус</th><th>Управление</th></tr></thead>
-        <tbody>
+      <div class="toir-table-scroll"><SharedTable class="toir-table operations-table"><template #header><tr><th>Дата</th><th>Бригада</th><th>Начало</th><th>Окончание</th><th>Статус</th><th>Управление</th></tr></template>
           <tr v-for="shift in matchedShifts" :key="shift.id">
             <td>{{ shift.work_date }}</td><td>{{ shift.crew?.name||crews.find(x=>x.id===shift.crew_id)?.name||'—' }}</td>
             <td>{{ shift.starts_at.slice(0,5) }}</td><td>{{ shift.ends_at.slice(0,5) }}</td>
             <td>Подтверждена</td>
-            <td><button v-if="editable" type="button" class="toolbar-icon" aria-label="Удалить смену"
-              @click="cancelShift(shift.id)"><Trash2 :size="15"/></button></td>
+            <td><SharedButton v-if="editable" type="button" class="toolbar-icon" aria-label="Удалить смену"
+              @click="cancelShift(shift.id)"><Trash2 :size="15"/></SharedButton></td>
           </tr>
           <tr v-if="!matchedShifts.length"><td colspan="6" class="operations-empty-cell">Смен пока нет. Создайте график работы бригады.</td></tr>
-        </tbody>
-      </table></div>
+        </SharedTable></div>
     </template>
     <template v-else>
       <div class="registry-toolbar">
@@ -232,9 +230,7 @@ onMounted(()=>void load())
           </BaseSelect>
         </label>
       </div>
-      <div class="toir-table-scroll"><table class="toir-table operations-table">
-        <thead><tr><th>Дата</th><th>Регламент</th><th>Узел</th><th>Бригада</th><th>Источник срока</th><th>Приоритет</th><th></th></tr></thead>
-        <tbody>
+      <div class="toir-table-scroll"><SharedTable class="toir-table operations-table"><template #header><tr><th>Дата</th><th>Регламент</th><th>Узел</th><th>Бригада</th><th>Источник срока</th><th>Приоритет</th><th></th></tr></template>
           <tr v-for="row in forecastVisible" :key="row.plan_id+'-'+row.trigger+'-'+row.date">
             <td><strong>{{ row.date }}</strong><small class="operations-due" :class="'due-'+row.due">{{ dueLabel(row) }}</small></td>
             <td>{{ row.title }}</td><td>{{ row.asset_name }}<small>{{ row.asset_code }}</small></td>
@@ -244,8 +240,7 @@ onMounted(()=>void load())
             <td><RouterLink :to="'/plans/'+row.plan_id">Открыть</RouterLink></td>
           </tr>
           <tr v-if="!forecastVisible.length"><td colspan="7" class="operations-empty-cell">Нет активных регламентов в этом горизонте. <RouterLink to="/plans/list">Добавьте план ТО</RouterLink>.</td></tr>
-        </tbody>
-      </table></div>
+        </SharedTable></div>
       <BaseNotice tone="info">Прогноз по моточасам появляется при двух показаниях. Это линейная оценка, не обученная ML-модель. Автоматическое распределение проверяет календарные сроки, смены и загрузку.</BaseNotice>
     </template>
     <Teleport to="body">
@@ -254,7 +249,7 @@ onMounted(()=>void load())
           :aria-label="modal==='crew'?'Создать бригаду':modal==='member'?'Добавить участника':modal==='shift'?'Создать график смен':'Сформировать наряды'">
           <header class="category-dialog-head"><div class="category-dialog-icon">
             <UsersRound v-if="modal==='crew'||modal==='member'" :size="19"/><CalendarClock v-else :size="19"/>
-          </div><button class="drawer-close" type="button" aria-label="Закрыть" @click="modal=null"><X :size="18"/></button></header>
+          </div><SharedButton class="drawer-close" type="button" aria-label="Закрыть" @click="modal=null"><X :size="18"/></SharedButton></header>
           <template v-if="modal==='crew'">
             <h2>Новая бригада</h2><p>Бригады назначаются на регламенты, наряды и рабочие смены.</p>
             <form class="warehouse-form" @submit.prevent="submitCrew">

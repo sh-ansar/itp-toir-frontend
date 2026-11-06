@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import { onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Wrench, Package, CalendarDays, ClipboardList, AlertTriangle, ArrowUpRight, RefreshCcw } from 'lucide-vue-next'
@@ -41,9 +42,9 @@ const tiles=[
 <template>
   <div class="toir-dashboard">
     <BasePageHeading title="Рабочий стол">
-      <button class="toolbar-icon" type="button" aria-label="Обновить показатели" :disabled="busy" @click="refresh">
+      <SharedButton class="toolbar-icon" type="button" aria-label="Обновить показатели" :disabled="busy" @click="refresh">
         <RefreshCcw :size="18" />
-      </button>
+      </SharedButton>
     </BasePageHeading>
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <div class="dashboard-metrics">

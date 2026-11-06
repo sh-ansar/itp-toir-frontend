@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
+import { Table as SharedTable } from "@itpmining/vue-basic-components";
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { Package, Plus, Search, RefreshCcw, ArrowDownToLine, History, X, AlertTriangle, Pencil } from 'lucide-vue-next'
@@ -103,7 +105,6 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
 
 <template>
   <div class="toir-registry-page warehouse-page">
-    <div class="toir-breadcrumb">Поставки / Склад и остатки</div>
     <BasePageHeading title="Склад и остатки" description="Номенклатура, доступное количество и журнал фактических движений." />
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <BaseNotice v-if="notice" tone="success">{{ notice }}</BaseNotice>
@@ -120,8 +121,8 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
       </div>
       <div class="toolbar-actions">
         <BaseButton v-if="canManage" type="button" @click="startCreate"><Plus :size="16"/>Новая позиция</BaseButton>
-        <button type="button" class="toolbar-icon" aria-label="Экспорт текущей страницы" @click="csv"><ArrowDownToLine :size="17"/></button>
-        <button type="button" class="toolbar-icon" aria-label="Обновить склад" :disabled="busy" @click="load"><RefreshCcw :size="17"/></button>
+        <SharedButton type="button" class="toolbar-icon" aria-label="Экспорт текущей страницы" @click="csv"><ArrowDownToLine :size="17"/></SharedButton>
+        <SharedButton type="button" class="toolbar-icon" aria-label="Обновить склад" :disabled="busy" @click="load"><RefreshCcw :size="17"/></SharedButton>
       </div>
     </div>
     <ToirRegistryTable :rows="items" :columns="columns" :meta="meta" :loading="busy" :selectable="false"
@@ -133,7 +134,7 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
         <div class="toolbar-actions">
           <BaseButton v-if="canManage" variant="secondary" type="button" @click="startEdit"><Pencil :size="16"/>Изменить</BaseButton>
           <BaseButton v-if="canManage" type="button" @click="startReceipt"><Plus :size="16"/>Оформить приход</BaseButton>
-          <button type="button" class="toolbar-icon" aria-label="Закрыть карточку склада" @click="selected=null"><X :size="16"/></button>
+          <SharedButton type="button" class="toolbar-icon" aria-label="Закрыть карточку склада" @click="selected=null"><X :size="16"/></SharedButton>
         </div>
       </div>
       <div class="warehouse-balance">
@@ -144,16 +145,13 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
       <h3><History :size="17"/> Журнал движений</h3>
       <p v-if="viewBusy" class="muted">Загрузка журнала…</p>
       <div v-else class="toir-table-scroll">
-        <table class="toir-table warehouse-history-table">
-          <thead><tr><th>Дата</th><th>Операция</th><th>Количество</th><th>Наряд</th><th>Комментарий</th></tr></thead>
-          <tbody>
+        <SharedTable class="toir-table warehouse-history-table"><template #header><tr><th>Дата</th><th>Операция</th><th>Количество</th><th>Наряд</th><th>Комментарий</th></tr></template>
             <tr v-for="m in movementRows" :key="m.id"><td>{{ new Date(m.created_at).toLocaleString('ru-RU') }}</td>
               <td>{{ actionLabel[m.action]||m.action }}</td><td>{{ m.quantity }}</td>
               <td><RouterLink v-if="m.work_order_id" class="detail-link" :to="'/work-orders/'+m.work_order_id">Наряд #{{ m.work_order_id }}</RouterLink><span v-else>—</span></td>
               <td>{{ m.note||'—' }}</td></tr>
             <tr v-if="!movementRows.length"><td colspan="5" class="empty-row">Движений пока нет.</td></tr>
-          </tbody>
-        </table>
+          </SharedTable>
       </div>
     </BaseCard>
     <Teleport to="body">
@@ -161,7 +159,7 @@ const actionLabel:Record<string,string>={receipt:'Приход',reserve:'Рез�
         <section class="category-dialog warehouse-dialog" role="dialog" aria-modal="true"
           :aria-label="modal==='create'?'Новая позиция':modal==='edit'?'Редактировать позицию':'Оформить приход'">
           <header class="category-dialog-head"><div class="category-dialog-icon"><Package :size="19"/></div>
-            <button class="drawer-close" type="button" aria-label="Закрыть" :disabled="saving" @click="modal=null"><X :size="17"/></button></header>
+            <SharedButton class="drawer-close" type="button" aria-label="Закрыть" :disabled="saving" @click="modal=null"><X :size="17"/></SharedButton></header>
           <h2>{{ modal==='create'?'Новая позиция':modal==='edit'?'Редактирование':'Приход на склад' }}</h2>
           <form class="warehouse-form" @submit.prevent="save">
             <template v-if="modal!=='receive'">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import BaseSelect from '../ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { ClipboardCheck, Plus, Pencil, Trash2, CheckCircle2, Circle, AlertTriangle,
@@ -190,23 +191,23 @@ onMounted(()=>void load())
           </div>
           <p v-if="work(step)?.comment" class="checklist-comment">{{ work(step)?.comment }}</p>
           <div v-if="canEditTemplate" class="checklist-actions">
-            <button type="button" class="toolbar-icon" :aria-label="'Изменить '+step.title"
-              @click="openEditor(step)"><Pencil :size="16"/></button>
-            <button type="button" class="toolbar-icon" :aria-label="'Удалить '+step.title"
-              @click="deleteTemplate(step)"><Trash2 :size="16"/></button>
+            <SharedButton type="button" class="toolbar-icon" :aria-label="'Изменить '+step.title"
+              @click="openEditor(step)"><Pencil :size="16"/></SharedButton>
+            <SharedButton type="button" class="toolbar-icon" :aria-label="'Удалить '+step.title"
+              @click="deleteTemplate(step)"><Trash2 :size="16"/></SharedButton>
           </div>
           <div v-else-if="canExecute&&editStepId!==step.id" class="checklist-actions">
             <BaseButton variant="secondary" @click="beginResult(step,'done')"><CheckCircle2 :size="15"/> Выполнено</BaseButton>
             <BaseButton v-if="!step.is_required" variant="secondary" @click="beginResult(step,'skipped')">Пропустить</BaseButton>
-            <button v-if="work(step)?.status!=='pending'" type="button" class="toolbar-icon"
+            <SharedButton v-if="work(step)?.status!=='pending'" type="button" class="toolbar-icon"
               title="Сбросить результат" :aria-label="'Сбросить '+step.title"
-              @click="beginResult(step,'pending')"><RotateCcw :size="16"/></button>
+              @click="beginResult(step,'pending')"><RotateCcw :size="16"/></SharedButton>
           </div>
           <form v-if="!isPlan&&canExecute&&editStepId===step.id" class="checklist-inline-form"
             @submit.prevent="submitResult(step)">
             <div class="checklist-form-heading">
               <strong>Результат операции</strong>
-              <button type="button" class="toolbar-icon" aria-label="Отмена" @click="closeForms"><X :size="15"/></button>
+              <SharedButton type="button" class="toolbar-icon" aria-label="Отмена" @click="closeForms"><X :size="15"/></SharedButton>
             </div>
             <label>Статус
               <BaseSelect v-model="resultStatus" :disabled="saving">
@@ -235,7 +236,7 @@ onMounted(()=>void load())
     <form v-if="isPlan&&editorOpen&&canEditTemplate" class="warehouse-form checklist-template-form"
       @submit.prevent="saveTemplate">
       <div class="checklist-form-heading"><h3>{{ editId?'Редактировать операцию':'Добавить операцию регламента' }}</h3>
-        <button type="button" class="toolbar-icon" aria-label="Закрыть редактор" @click="closeForms"><X :size="16"/></button>
+        <SharedButton type="button" class="toolbar-icon" aria-label="Закрыть редактор" @click="closeForms"><X :size="16"/></SharedButton>
       </div>
       <label>Наименование операции *
         <input v-model="def.title" required minlength="3" maxlength="200"

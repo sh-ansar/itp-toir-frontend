@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, CalendarDays, RefreshCcw, Search, X, ArrowUpRight, Clock3 } from 'lucide-vue-next'
@@ -107,7 +108,6 @@ onMounted(()=>void load())
 
 <template>
   <div class="schedule-page">
-    <div class="toir-breadcrumb">Ремонт и обслуживание / Календарь работ</div>
     <BasePageHeading title="Календарь работ"
       description="Наряды и подтверждённые смены бригад по дням недели. Переключайтесь между бригадами и исполнителями."/>
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
@@ -127,9 +127,9 @@ onMounted(()=>void load())
       </div>
       <div class="toolbar-actions">
         <BaseSearchField v-model="search" label="Поиск в календаре" placeholder="Поиск по работам и сотрудникам" />
-        <button type="button" class="toolbar-icon" aria-label="Обновить календарь" :disabled="loading" @click="load">
+        <SharedButton type="button" class="toolbar-icon" aria-label="Обновить календарь" :disabled="loading" @click="load">
           <RefreshCcw :size="18"/>
-        </button>
+        </SharedButton>
       </div>
     </div>
     <div class="schedule-layout" :class="{'schedule-layout--inspecting':!!selected}">

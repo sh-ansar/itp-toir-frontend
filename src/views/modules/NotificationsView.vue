@@ -34,7 +34,6 @@ onMounted(()=>void load())
 </script>
 <template>
   <div class="notifications-page">
-    <div class="toir-breadcrumb">Уведомления</div>
     <BasePageHeading title="Уведомления" description="Задачи и сроки, требующие внимания" />
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <BaseCard>

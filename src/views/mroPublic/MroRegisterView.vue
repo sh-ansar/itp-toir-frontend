@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted, watch } from 'vue'
+import { TextInput, Button } from '@itpmining/vue-basic-components'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '../../api/mroCommercialAdapter'
@@ -76,9 +77,9 @@ async function submit(){
     <h2 id="mro-register-title">{{t('mroPublic.companyAccess')}}</h2>
     <p v-if="plan" class="muted">{{t('adminPortal.plan')}}: {{plan}}</p>
     <form @submit.prevent="submit">
-     <label>{{t('mroPublic.name')}}<input v-model.trim="form.name" autocomplete="name" required minlength="2" maxlength="120"/></label>
-     <label>{{t('mroPublic.email')}}<input v-model.trim="form.email" type="email" autocomplete="email" required/></label>
-     <label>{{t('mroPublic.company')}}<input v-model.trim="form.company_name" autocomplete="organization" required minlength="2" maxlength="200"/></label>
+     <label>{{t('mroPublic.name')}}<TextInput v-model.trim="form.name" autocomplete="name" required minlength="2" maxlength="120"/></label>
+     <label>{{t('mroPublic.email')}}<TextInput v-model.trim="form.email" type="email" autocomplete="email" required/></label>
+     <label>{{t('mroPublic.company')}}<TextInput v-model.trim="form.company_name" autocomplete="organization" required minlength="2" maxlength="200"/></label>
      <div class="mro-legal-versions">
       <p>{{t('mroPublic.reviewLegal')}}:</p>
       <ul><li v-for="doc in legalDocs" :key="doc.id">
@@ -90,7 +91,7 @@ async function submit(){
       <p>{{t('mroPublic.acceptTerms')}}</p>
      </div>
      <p v-if="error" role="alert" class="mro-error">{{error}}</p>
-     <button type="submit" :disabled="busy||!acceptedRequired">{{busy?t('adminPortal.loading'):t('mroPublic.send')}}</button>
+     <Button type="submit" color="primary" block :disabled="busy||!acceptedRequired" :text="busy?t('adminPortal.loading'):t('mroPublic.send')" />
     </form>
     <p class="muted">{{t('mroPublic.haveAccount')}} <RouterLink to="/login">{{t('mroPublic.backLogin')}}</RouterLink></p>
    </template>

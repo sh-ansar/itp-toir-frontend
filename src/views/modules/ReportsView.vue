@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
+import { Table as SharedTable } from "@itpmining/vue-basic-components";
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { BarChart3, Users, Package, History, BadgeCheck, RefreshCcw, AlertTriangle } from 'lucide-vue-next'
@@ -96,10 +98,9 @@ onMounted(()=>void refresh())
 </script>
 <template>
   <div class="reports-page">
-    <div class="toir-breadcrumb">Отчеты / {{ selected.label }}</div>
     <BasePageHeading :title="selected.label">
-      <button class="toolbar-icon" type="button" aria-label="Обновить отчёт" @click="refresh">
-        <RefreshCcw :size="18" /></button>
+      <SharedButton class="toolbar-icon" type="button" aria-label="Обновить отчёт" @click="refresh">
+        <RefreshCcw :size="18" /></SharedButton>
     </BasePageHeading>
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <nav class="report-tabs" aria-label="Виды отчетов">
@@ -126,9 +127,7 @@ onMounted(()=>void refresh())
       </div>
       <h3>Приоритетные незакрытые наряды</h3>
       <p class="muted">До {{ workControl.limit }} записей: сначала критические, затем ближайшие сроки.</p>
-      <div class="toir-table-scroll"><table class="toir-table">
-        <thead><tr><th>Наряд</th><th>Оборудование</th><th>Приоритет</th><th>Плановый срок</th><th>Исполнитель</th><th>Статус</th><th>Материалы</th></tr></thead>
-        <tbody>
+      <div class="toir-table-scroll"><SharedTable class="toir-table"><template #header><tr><th>Наряд</th><th>Оборудование</th><th>Приоритет</th><th>Плановый срок</th><th>Исполнитель</th><th>Статус</th><th>Материалы</th></tr></template>
           <tr v-for="item in workControl.orders" :key="item.id">
             <td><RouterLink :to="'/work-orders/'+item.id">{{ item.number||'#'+item.id }}</RouterLink></td>
             <td>{{ item.asset?.name||'Не указано' }}</td>
@@ -138,8 +137,7 @@ onMounted(()=>void refresh())
             <td>{{ Number(item.actual_material_cost||0).toLocaleString('ru-RU') }}</td>
           </tr>
           <tr v-if="!workControl.orders.length"><td colspan="7">Нет незакрытых нарядов.</td></tr>
-        </tbody>
-      </table></div>
+        </SharedTable></div>
     </section>
     <BaseCard v-if="report==='repairs'||report==='quality'" >
       <div class="report-heading"><h2>{{ report==='repairs'?'Состояние нарядов':'Результаты завершения работ' }}</h2>

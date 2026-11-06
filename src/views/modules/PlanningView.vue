@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import { computed, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, Plus, RefreshCcw, CalendarDays, X, ArrowUpRight } from 'lucide-vue-next'
 import BaseButton from '../../components/ui/BaseButton.vue'
@@ -107,7 +108,6 @@ onMounted(()=>void load())
 
 <template>
   <div class="planning-page">
-    <div class="toir-breadcrumb">Ремонт и обслуживание / Планирование</div>
     <BasePageHeading title="Планирование" />
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <div class="registry-toolbar">
@@ -123,9 +123,9 @@ onMounted(()=>void load())
       </div>
       <div class="toolbar-actions">
         <BaseButton v-if="editable" type="button" @click="editor=true"><Plus :size="16" />Создать мероприятие</BaseButton>
-        <button type="button" class="toolbar-icon" title="Обновить" :disabled="loading" @click="load">
+        <SharedButton type="button" class="toolbar-icon" title="Обновить" :disabled="loading" @click="load">
           <RefreshCcw :size="18" />
-        </button>
+        </SharedButton>
       </div>
     </div>
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
+import { Table as SharedTable } from "@itpmining/vue-basic-components";
 import BaseSelect from '../ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { Package, Plus, RefreshCcw, X } from 'lucide-vue-next'
@@ -66,17 +68,15 @@ async function submit(){
           type="button" @click="open('consume')">Списать</BaseButton>
         <BaseButton v-if="canOperate&&['waiting','overdue','in_progress'].includes(status)"
           variant="secondary" type="button" @click="open('release')">Снять резерв</BaseButton>
-        <button type="button" class="toolbar-icon" aria-label="Обновить материалы" :disabled="busy" @click="load"><RefreshCcw :size="17"/></button>
+        <SharedButton type="button" class="toolbar-icon" aria-label="Обновить материалы" :disabled="busy" @click="load"><RefreshCcw :size="17"/></SharedButton>
       </div>
     </div>
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <BaseNotice v-if="success" tone="success">{{ success }}</BaseNotice>
     <p v-if="busy" class="muted">Загрузка материалов…</p>
     <div v-else class="toir-table-scroll">
-      <table class="toir-table warehouse-history-table">
-        <thead><tr><th>Артикул</th><th>Номенклатура</th><th>Зарезервировано</th>
-          <th>Израсходовано</th><th>Стоимость</th></tr></thead>
-        <tbody>
+      <SharedTable class="toir-table warehouse-history-table"><template #header><tr><th>Артикул</th><th>Номенклатура</th><th>Зарезервировано</th>
+          <th>Израсходовано</th><th>Стоимость</th></tr></template>
           <tr v-for="line in lines" :key="line.id">
             <td>{{ line.item.sku }}</td><td>{{ line.item.name }}</td>
             <td>{{ line.quantity_reserved }} {{ line.item.unit }}</td>
@@ -84,8 +84,7 @@ async function submit(){
             <td>{{ line.actual_cost }}</td>
           </tr>
           <tr v-if="!lines.length"><td colspan="5" class="empty-row">Материалы не прикреплены. Добавьте резерв или спишите материалы на наряд.</td></tr>
-        </tbody>
-      </table>
+        </SharedTable>
     </div>
     <div class="order-cost-line"><span>Фактическая стоимость материалов</span><strong>{{ cost }}</strong></div>
     <BaseNotice v-if="status==='in_progress'&&lines.some(l=>Number(l.quantity_reserved)>0)" tone="warning">
@@ -95,7 +94,7 @@ async function submit(){
       <div v-if="modal" class="category-backdrop" @click.self="!saving&&(modal=null)">
         <section class="category-dialog warehouse-dialog" role="dialog" aria-modal="true" :aria-label="operationLabels[modal]">
           <header class="category-dialog-head"><div class="category-dialog-icon"><Package :size="19"/></div>
-            <button class="drawer-close" type="button" aria-label="Закрыть" :disabled="saving" @click="modal=null"><X :size="18"/></button></header>
+            <SharedButton class="drawer-close" type="button" aria-label="Закрыть" :disabled="saving" @click="modal=null"><X :size="18"/></SharedButton></header>
           <h2>{{ operationLabels[modal] }}</h2>
           <p>{{ modal==='reserve'?'Резерв удерживает доступное количество до списания или освобождения.':
             modal==='consume'?'Списание уменьшает складской остаток и фиксирует стоимость ремонта.':

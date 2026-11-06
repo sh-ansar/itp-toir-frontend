@@ -1,4 +1,5 @@
 <script setup>
+import { Table as SharedTable } from "@itpmining/vue-basic-components";
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@itpmining/vue-basic-components'
@@ -90,9 +91,7 @@ watch(locale,()=>{keyword.value=''})
       </div>
     </div>
     <div v-else class="demo-tasks__table-wrap">
-      <table class="demo-tasks__table">
-        <thead><tr><th>{{ c.tasks }}</th><th>{{ x.assignee }}</th><th>{{ x.status }}</th><th></th></tr></thead>
-        <tbody><tr v-for="task in filtered" :key="task.id">
+      <SharedTable class="demo-tasks__table"><template #header><tr><th>{{ c.tasks }}</th><th>{{ x.assignee }}</th><th>{{ x.status }}</th><th></th></tr></template><tr v-for="task in filtered" :key="task.id">
           <td>{{ x.tasksExtra[task.index] }}</td>
           <td>{{ assignee(task) }}</td>
           <td><span class="demo-tasks__status">{{ c[task.state] }}</span></td>
@@ -102,8 +101,7 @@ watch(locale,()=>{keyword.value=''})
             <button type="button" :disabled="task.state==='done'" :aria-label="c.moveNext"
                     @click="move(task.id,1)"><Icon icon="Chevron Right" /></button>
           </td>
-        </tr></tbody>
-      </table>
+        </tr></SharedTable>
     </div>
     <p v-if="filtered.length===0" class="demo-tasks__empty">{{ c.emptyResults }}</p>
   </div>

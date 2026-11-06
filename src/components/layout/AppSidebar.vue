@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute,useRouter } from 'vue-router'
+import { AppSidebar as SharedAppSidebar } from '@itpmining/vue-basic-components'
 import {
   Wrench, ClipboardList, CalendarDays, Users, FolderKanban,
   Boxes, Package, Warehouse, Hammer, Cog, Truck, Bell, MessageCircle,
@@ -47,76 +48,72 @@ const groups=[
     {label:'История ремонта',path:'/reports/history',icon:ClipboardList}
   ]}
 ]
-const pageKey=computed(()=>route.fullPath)
+const router=useRouter()
+const activeId=computed(()=>{
+  if(route.path==='/dashboard')return 'dashboard'
+  return route.fullPath
+})
+const items=computed(()=>[
+  {id:'dashboard',label:'Рабочий стол',href:router.resolve('/dashboard').href,iconComponent:LayoutDashboard},
+  {id:'separator1',label:'',separator:true},
+  ...groups.map(group=>({
+    id:group.key,label:group.label,href:router.resolve(group.children[0].path).href,
+    iconComponent:group.icon,
+    children:group.children.map(link=>({
+      id:link.path,label:link.label,href:router.resolve(link.path).href,iconComponent:link.icon
+    }))
+  })),
+  {id:'separator2',label:'',separator:true},
+  {id:'/notifications',label:'Уведомления',href:router.resolve('/notifications').href,iconComponent:Bell},
+  {id:'/chat',label:'Чат',href:router.resolve('/chat').href,iconComponent:MessageCircle},
+  {id:'/settings',label:'Конфигурация',href:router.resolve('/settings').href,iconComponent:Settings}
+])
+const logoSrc=import.meta.env.BASE_URL+'brand/toir-gear.svg'
 function close(){emit('update:mobileOpen',false)}
-function isActive(path:string){
-  if(path.includes('?'))return pageKey.value===path
-  return route.path===path && (path!=='/assets'||!route.query.category)
-}
-function toggle(key:string){
-  if(ui.sidebarCollapsed && !props.mobileOpen){
-    // A compact icon must always be able to reveal its group's destinations.
-    ui.toggleSidebar()
-    expanded.value[key]=true
-    return
+function navigate(item:{id:string;href?:string},event:MouseEvent){
+  event.preventDefault()
+  if(!item.href)return
+  if(ui.sidebarCollapsed&&!props.mobileOpen&&groups.some(group=>group.key===item.id)){
+    ui.toggleSidebar();return
   }
-  expanded.value[key]=!expanded.value[key]
+  void router.push(item.href)
+  close()
 }
-const logoSrc = import.meta.env.BASE_URL + 'brand/toir-gear.svg'
-const menuToggleSrc = import.meta.env.BASE_URL + 'brand/menu-toggle.svg'
 </script>
-
 <template>
-  <aside class="sidebar toir-sidebar" :class="{'toir-sidebar--collapsed':ui.sidebarCollapsed && !mobileOpen,'sidebar--open':mobileOpen}">
-    <div class="toir-sidebar-head">
-      <RouterLink to="/dashboard" class="brand-link" title="ITP ТОиР" @click="close">
-        <img class="toir-brand-icon" :src="logoSrc" alt="ITP ТОиР" width="42" height="42" />
-        <span class="brand-copy"><strong>ITP ТОиР</strong></span>
-      </RouterLink>
-      <button class="sidebar-collapse-btn" type="button"
-        :title="ui.sidebarCollapsed ? 'Развернуть меню' : 'Свернуть меню'"
-        :aria-label="ui.sidebarCollapsed ? 'Развернуть меню' : 'Свернуть меню'"
-        :aria-expanded="!ui.sidebarCollapsed"
-        @click="ui.toggleSidebar()">
-        <img :src="menuToggleSrc" alt="" aria-hidden="true" width="20" height="20" />
-      </button>
-      <button class="mobile-close-btn" type="button" aria-label="Закрыть меню" @click="close"><X :size="20" /></button>
-    </div>
-    <nav class="toir-nav" aria-label="Меню ТОИР">
-      <RouterLink to="/" class="toir-nav-item" :class="{active:route.path==='/'}" title="Рабочий стол" @click="close">
-        <LayoutDashboard :size="19" /><span>Рабочий стол</span>
-      </RouterLink>
-      <div class="nav-separator"></div>
-      <div v-for="group in groups" :key="group.key" class="nav-group">
-        <button type="button" class="group-toggle" :aria-expanded="(!ui.sidebarCollapsed || props.mobileOpen) && !!expanded[group.key]"
-          :title="group.label" @click="toggle(group.key)">
-          <component :is="group.icon" :size="19" aria-hidden="true" />
-          <span>{{ group.label }}</span>
-          <ChevronDown class="group-chevron" :class="{up:expanded[group.key]}" :size="15" />
-        </button>
-        <div v-if="expanded[group.key]&&(!ui.sidebarCollapsed || props.mobileOpen)" class="group-subnav">
-          <RouterLink v-for="link in group.children" :key="link.path" :to="link.path" class="subnav-link"
-            :class="{active:isActive(link.path)}" @click="close">{{ link.label }}</RouterLink>
+  <aside class="sidebar toir-sidebar" :class="{'toir-sidebar--collapsed':ui.sidebarCollapsed&&!mobileOpen,'sidebar--open':mobileOpen}">
+    <SharedAppSidebar :items="items" :active-id="activeId" :collapsed="ui.sidebarCollapsed&&!mobileOpen"
+      brand="ITP ТОиР" navigation-label="Меню ТОиР"
+      collapse-label="Свернуть меню" expand-label="Развернуть меню"
+      @toggle-collapse="ui.toggleSidebar()" @navigate="navigate">
+      <template #brand>
+        <RouterLink to="/dashboard" class="brand-link" title="ITP ТОиР" @click="close">
+          <img class="toir-brand-icon" :src="logoSrc" alt="ITP ТОиР" width="42" height="42"/>
+          <span v-if="!ui.sidebarCollapsed||mobileOpen" class="brand-copy"><strong>ITP ТОиР</strong></span>
+        </RouterLink>
+
+      </template>
+      <template #icon="{item}">
+        <component :is="item.iconComponent" :size="19" aria-hidden="true"/>
+      </template>
+      <template #footer>
+        <div class="toir-sidebar-foot">
+          <img :src="logoSrc" alt="" width="28" height="28" aria-hidden="true"/>
+          <div v-if="!ui.sidebarCollapsed||mobileOpen" class="sidebar-user-copy">
+            <strong>{{session.session?.user.name}}</strong>
+            <small>{{session.session?.user.email}}</small>
+          </div>
         </div>
-      </div>
-      <div class="nav-separator"></div>
-      <RouterLink to="/notifications" class="toir-nav-item" :class="{active:route.path==='/notifications'}" @click="close">
-        <Bell :size="19" /><span>Уведомления</span>
-      </RouterLink>
-      <RouterLink to="/chat" class="toir-nav-item" :class="{active:route.path==='/chat'}" @click="close">
-        <MessageCircle :size="19" /><span>Чат</span>
-      </RouterLink>
-      <RouterLink to="/settings" class="toir-nav-item" :class="{active:route.path==='/settings'}" @click="close">
-        <Settings :size="19" /><span>Конфигурация</span>
-      </RouterLink>
-    </nav>
-    <div class="toir-sidebar-foot">
-      <div class="foot-logo"><img :src="logoSrc" alt="" width="28" height="28" aria-hidden="true" /></div>
-      <div class="sidebar-user-copy">
-        <strong>{{ session.session?.user.name }}</strong>
-        <small>{{ session.session?.user.email }}</small>
-      </div>
-    </div>
+      </template>
+    </SharedAppSidebar>
   </aside>
   <button v-if="mobileOpen" type="button" class="sidebar-shade" aria-label="Закрыть меню" @click="close"></button>
 </template>
+<style scoped>
+.toir-sidebar :deep(.itp-ui-sidebar){width:100%;min-height:100%;max-height:100dvh;overflow-y:auto}
+.toir-sidebar :deep(.itp-ui-sidebar__brand){min-height:68px}
+.brand-link{display:flex;align-items:center;gap:11px;min-width:0;color:inherit;text-decoration:none}
+.toir-sidebar-foot{display:flex;align-items:center;gap:8px;min-width:0}
+.sidebar-user-copy{display:grid;gap:2px;min-width:0}
+.sidebar-user-copy>*{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>

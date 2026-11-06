@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import BaseSelect from '../ui/BaseSelect.vue'
+import { Drawer } from '@itpmining/vue-basic-components'
 import { computed, reactive, ref, watch } from 'vue'
 import { X, Save } from 'lucide-vue-next'
 import BaseButton from '../ui/BaseButton.vue'
@@ -76,14 +77,10 @@ async function submit(){
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="open" class="editor-backdrop" @click.self="emit('close')">
-      <aside class="editor-drawer" role="dialog" aria-modal="true" :aria-label="isEdit?'Редактировать '+spec.singular:'Создать '+spec.singular">
-        <header class="editor-head">
-          <div><small>{{ spec.breadcrumb }}</small><h2>{{ isEdit?'Редактировать':'Создать' }} {{ spec.singular.toLowerCase() }}</h2></div>
-          <button class="drawer-close" type="button" aria-label="Закрыть" @click="emit('close')"><X :size="21" /></button>
-        </header>
-        <form id="toir-editor" class="editor-body" @submit.prevent="submit">
+  <Drawer :open="open" :title="(isEdit?'Редактировать ':'Создать ')+spec.singular.toLowerCase()"
+    :description="spec.breadcrumb" width="large" close-label="Закрыть редактор"
+    @close="emit('close')">
+    <form id="toir-editor" class="editor-body" @submit.prevent="submit">
           <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
           <template v-for="field in spec.fields" :key="field.key">
             <div v-if="field.type==='select'||field.type==='asset'||field.type==='employee'||field.type==='project'||field.type==='parent'||field.type==='crew'"
@@ -114,13 +111,13 @@ async function submit(){
               :required="field.required" :disabled="busy" />
           </template>
         </form>
-        <footer class="editor-footer">
-          <BaseButton variant="secondary" type="button" :disabled="busy" @click="emit('close')">Отмена</BaseButton>
-          <BaseButton type="submit" :disabled="!ready" @click="submit">
-            <Save :size="17" />{{ busy?'Сохранение…':'Сохранить' }}
-          </BaseButton>
-        </footer>
-      </aside>
-    </div>
-  </Teleport>
+    <template #footer>
+      <div class="editor-footer">
+        <BaseButton variant="secondary" type="button" :disabled="busy" @click="emit('close')">Отмена</BaseButton>
+        <BaseButton type="button" :disabled="!ready" @click="submit">
+          <Save :size="17" />{{busy?'Сохранение…':'Сохранить'}}
+        </BaseButton>
+      </div>
+    </template>
+  </Drawer>
 </template>

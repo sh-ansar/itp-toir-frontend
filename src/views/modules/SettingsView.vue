@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
+import { Table as SharedTable } from "@itpmining/vue-basic-components";
 import BaseSelect from '../../components/ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { ShieldCheck, Building2, Users, UserPlus, RefreshCw, Send, Save } from 'lucide-vue-next'
@@ -101,15 +103,13 @@ onMounted(()=>void refresh())
       <div class="members-heading">
         <div><h2><Users :size="20"/> Пользователи и роли</h2></div>
         <div class="members-actions">
-          <button class="toolbar-icon" type="button" aria-label="Обновить участников" :disabled="loading" @click="refresh"><RefreshCw :size="17"/></button>
+          <SharedButton class="toolbar-icon" type="button" aria-label="Обновить участников" :disabled="loading" @click="refresh"><RefreshCw :size="17"/></SharedButton>
           <BaseButton type="button" :disabled="!mailEnabled" @click="showInvite=true;error=''"><UserPlus :size="16"/>Пригласить</BaseButton>
         </div>
       </div>
       <BaseNotice v-if="!loading&&!mailEnabled" tone="warning">Почтовая отправка не настроена. Приглашения и повторная отправка писем недоступны, пока администратор сервера не подключит SMTP.</BaseNotice>
       <div class="toir-table-scroll">
-        <table class="toir-table members-table">
-          <thead><tr><th>Сотрудник</th><th>Email</th><th>Роль</th><th>Статус</th><th>Действия</th></tr></thead>
-          <tbody>
+        <SharedTable class="toir-table members-table"><template #header><tr><th>Сотрудник</th><th>Email</th><th>Роль</th><th>Статус</th><th>Действия</th></tr></template>
             <tr v-for="member in members" :key="member.id">
               <td><strong>{{ member.name }}</strong></td>
               <td>{{ member.email }}</td>
@@ -120,27 +120,26 @@ onMounted(()=>void refresh())
               </BaseSelect></td>
               <td>{{ !member.account_active?'Учётная запись отключена':!member.membership_active?'Доступ отключён':!member.email_verified?'Ожидает подтверждения':'Активен' }}</td>
               <td><div class="members-actions">
-                <button type="button" class="toolbar-icon" :disabled="saving!==null||!member.account_active||(!isOwner&&member.role==='owner')"
+                <SharedButton type="button" class="toolbar-icon" :disabled="saving!==null||!member.account_active||(!isOwner&&member.role==='owner')"
                   :title="!member.account_active?'Учётная запись отключена на уровне системы':member.membership_active?'Отключить доступ':'Включить доступ'"
                   :aria-label="(member.membership_active?'Отключить ':'Включить ')+member.name"
                   @click="update(member,member.role,!member.membership_active)">
                   <ShieldCheck :size="17"/>
-                </button>
-                <button v-if="member.account_active&&!member.email_verified&&member.membership_active" type="button" class="toolbar-icon"
+                </SharedButton>
+                <SharedButton v-if="member.account_active&&!member.email_verified&&member.membership_active" type="button" class="toolbar-icon"
                   :disabled="saving!==null||!mailEnabled" :title="'Отправить приглашение '+member.name"
-                  :aria-label="'Повторить приглашение '+member.name" @click="resend(member)"><Send :size="17"/></button>
+                  :aria-label="'Повторить приглашение '+member.name" @click="resend(member)"><Send :size="17"/></SharedButton>
               </div></td>
             </tr>
             <tr v-if="!members.length"><td colspan="5">{{ loading?'Загрузка участников…':'Нет участников для отображения.' }}</td></tr>
-          </tbody>
-        </table>
+          </SharedTable>
       </div>
     </section>
     <Teleport to="body">
       <div v-if="showInvite" class="category-backdrop" @click.self="saving===null&&(showInvite=false)">
         <section class="category-dialog workflow-dialog" role="dialog" aria-modal="true" aria-label="Пригласить пользователя">
           <header class="category-dialog-head"><div class="category-dialog-icon"><UserPlus :size="19"/></div>
-            <button type="button" class="drawer-close" aria-label="Закрыть" :disabled="saving!==null" @click="showInvite=false">×</button></header>
+            <SharedButton type="button" class="drawer-close" aria-label="Закрыть" :disabled="saving!==null" @click="showInvite=false">×</SharedButton></header>
           <h2>Пригласить пользователя</h2>
           <p>Новый пользователь получит одноразовую ссылку для установки пароля. Действующим пользователям назначается доступ к этой компании.</p>
           <form class="workflow-form" @submit.prevent="invite">

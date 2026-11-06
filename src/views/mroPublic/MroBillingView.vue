@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { TextInput, Button } from '@itpmining/vue-basic-components'
 import { useI18n } from 'vue-i18n'
 import api from '../../api/mroCommercialAdapter'
 const {t,locale}=useI18n()
@@ -74,12 +75,12 @@ onMounted(refresh)
     </div>
     <p v-if="!plans.length">{{t('mroPublic.noPublishedPlans')}}</p>
     <template v-if="active">
-     <label class="billing-field">{{t('mroPublic.months')}}<input v-model.number="months" type="number" min="1" max="120"/></label>
-     <label class="billing-field">{{t('mroPublic.startDate')}}<input v-model="date" type="date"/></label>
+     <label class="billing-field">{{t('mroPublic.months')}}<TextInput v-model.number="months" type="number" min="1" max="120"/></label>
+     <label class="billing-field">{{t('mroPublic.startDate')}}<TextInput v-model="date" type="date"/></label>
      <div v-for="doc in legal" :key="doc.type" class="legal-choice">
       <label><input v-model="approved[doc.type]" type="checkbox"/><span>{{doc.title}}</span></label>
      </div>
-     <button :disabled="!canBilling||!canInvoice||busy||legal.some(doc=>doc.required&&!approved[doc.type])" @click="createInvoice">{{t('mroPublic.createInvoice')}}</button>
+     <Button color="primary" :disabled="!canBilling||!canInvoice||busy||legal.some(doc=>doc.required&&!approved[doc.type])" :text="t('mroPublic.createInvoice')" @click="createInvoice" />
      <p v-if="!canInvoice" class="billing-muted">{{t('mroPublic.billingUnavailable')}}</p>
     </template>
    </article>

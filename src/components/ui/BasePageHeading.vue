@@ -1,39 +1,40 @@
 <script setup lang="ts">
-withDefaults(defineProps<{
-  title: string
-  description?: string
-  eyebrow?: string
-}>(), { description: '', eyebrow: '' })
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { PageHeader } from '@itpmining/vue-basic-components'
+const props = withDefaults(defineProps<{ title:string; description?:string; eyebrow?:string }>(), {description:'',eyebrow:''})
+const route=useRoute(),router=useRouter()
+const pageTitles:Record<string,string>={
+  dashboard:'Рабочий стол','work-orders':'Наряд-задания',assets:'Активы',
+  'asset-tree':'Цифровая структура оборудования',employees:'Сотрудники',
+  projects:'Проекты',supplies:'Поставки',tenders:'Тендеры',plans:'Планирование',
+  crews:'Бригады и смены',schedule:'Расписание',risk:'Риски оборудования',
+  reports:'Отчёты',warehouse:'Склад и остатки',settings:'Конфигурация',
+  profile:'Профиль',notifications:'Уведомления',chat:'Чат',billing:'Оплата'
+}
+const breadcrumbs=computed(()=>{
+  const parts=route.path.split('/').filter(Boolean)
+  if(parts[0]==='dashboard')return [{label:'Рабочий стол'}]
+  const list:Array<{label:string;href?:string}>=[{label:'Рабочий стол',href:router.resolve('/dashboard').href}]
+  if(parts[0]==='asset-tree')list.push({label:'Активы',href:router.resolve('/assets').href})
+  if(parts.length>1&&parts[0]!=='asset-tree')list.push({
+    label:pageTitles[parts[0]]||parts[0],href:router.resolve('/'+parts[0]).href
+  })
+  list.push({label:props.title})
+  return list
+})
 </script>
-
 <template>
-  <header class="base-page-heading">
-    <div class="base-page-heading__copy">
-      <span v-if="eyebrow" class="base-page-heading__eyebrow">{{ eyebrow }}</span>
-      <div class="base-page-heading__title-row">
-        <h1 class="page-title">{{ title }}</h1>
-        <slot name="info" />
-      </div>
-      <p v-if="description" class="muted">{{ description }}</p>
-    </div>
-    <div v-if="$slots.default" class="base-page-heading__actions"><slot /></div>
-  </header>
+  <div class="base-page-heading">
+    <span v-if="eyebrow" class="base-page-heading__eyebrow">{{eyebrow}}</span>
+    <PageHeader :title="title" :description="description" :breadcrumbs="breadcrumbs" breadcrumbs-label="Навигация по страницам">
+      <template v-if="$slots.default || $slots.info" #actions>
+        <slot name="info"/><slot/>
+      </template>
+    </PageHeader>
+  </div>
 </template>
-
 <style scoped>
-.base-page-heading{min-width:0;display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-5);flex-wrap:wrap}
-.base-page-heading__copy{min-width:0;max-width:760px;display:grid;gap:0}
-.base-page-heading__eyebrow{
-  display:block;margin:0;color:var(--color-primary);font-size:12px;line-height:17px;
-  font-weight:500;letter-spacing:0;text-transform:uppercase
-}
-.base-page-heading__title-row{min-width:0;display:flex;align-items:flex-start;gap:var(--space-1)}
-.base-page-heading__copy :deep(.page-title){margin:0;color:var(--color-text);font-size:var(--font-page-heading);line-height:1.333;font-weight:700;letter-spacing:0}
-.base-page-heading__copy p{margin:0;color:var(--color-muted);font-size:var(--font-body-size);line-height:var(--line-body);font-weight:400}
-.base-page-heading__actions{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:var(--space-2);flex-wrap:wrap}
-@media(max-width:600px){
-  .base-page-heading{align-items:flex-start;gap:var(--space-3)}
-  .base-page-heading__actions{width:100%;justify-content:flex-start}
-  .base-page-heading__actions :deep(button){width:100%}
-}
+.base-page-heading { min-width:0; width:100% }
+.base-page-heading__eyebrow {display:block;color:var(--color-primary);font-size:12px;font-weight:500}
 </style>

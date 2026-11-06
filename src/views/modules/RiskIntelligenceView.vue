@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import BaseSelect from '../../components/ui/BaseSelect.vue'
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -48,7 +49,6 @@ onMounted(()=>void load())
 
 <template>
   <div class="operations-page risk-intelligence-page">
-    <div class="toir-breadcrumb">Аналитика / Технические риски</div>
     <BasePageHeading title="Техническое состояние и зоны риска"
       description="Объяснимый приоритет обследования объектов и агрегатов на основе доступных фактов."/>
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
@@ -72,9 +72,9 @@ onMounted(()=>void load())
       </div>
       <div class="toolbar-actions">
         <RouterLink class="toir-toolbar-btn" to="/asset-tree"><Activity :size="16"/>Структура активов</RouterLink>
-        <button type="button" class="toolbar-icon" aria-label="Обновить расчёт рисков" :disabled="loading" @click="load">
+        <SharedButton type="button" class="toolbar-icon" aria-label="Обновить расчёт рисков" :disabled="loading" @click="load">
           <RefreshCcw :size="17"/>
-        </button>
+        </SharedButton>
       </div>
     </div>
     <div class="operations-two-pane">

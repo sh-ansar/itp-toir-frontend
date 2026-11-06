@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import BaseSelect from '../../components/ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -260,7 +261,6 @@ async function confirmOperation(){
 
 <template>
   <div class="detail-page">
-    <div class="toir-breadcrumb">{{ spec.breadcrumb }} / {{ title }}</div>
     <div class="detail-page-head">
       <button class="detail-back" type="button" aria-label="Назад к списку" @click="router.push('/'+resource)">
         <ChevronLeft :size="22" />
@@ -422,7 +422,7 @@ async function confirmOperation(){
       <div v-if="dispatchDialog" class="category-backdrop" @click.self="!dispatchBusy&&(dispatchDialog=false)">
         <section class="category-dialog workflow-dialog" role="dialog" aria-modal="true" aria-label="Назначить исполнителя">
           <header class="category-dialog-head"><div class="category-dialog-icon"><Users :size="19"/></div>
-            <button class="drawer-close" type="button" aria-label="Закрыть" :disabled="dispatchBusy" @click="dispatchDialog=false"><X :size="18"/></button>
+            <SharedButton class="drawer-close" type="button" aria-label="Закрыть" :disabled="dispatchBusy" @click="dispatchDialog=false"><X :size="18"/></SharedButton>
           </header>
           <h2>Назначить исполнителя</h2>
           <p>Назначение сохраняется в журнале наряда. После назначения можно начать работы.</p>
@@ -455,7 +455,7 @@ async function confirmOperation(){
       <div v-if="reviewDecision" class="category-backdrop" @click.self="!reviewBusy&&(reviewDecision=null)">
         <section class="category-dialog workflow-dialog" role="dialog" aria-modal="true" aria-label="Приёмка ремонта">
           <header class="category-dialog-head"><div class="category-dialog-icon"><CheckCircle2 :size="19"/></div>
-            <button class="drawer-close" type="button" aria-label="Закрыть" :disabled="reviewBusy" @click="reviewDecision=null"><X :size="18"/></button>
+            <SharedButton class="drawer-close" type="button" aria-label="Закрыть" :disabled="reviewBusy" @click="reviewDecision=null"><X :size="18"/></SharedButton>
           </header>
           <h2>{{ reviewDecision==='accept'?'Принять выполненные работы':'Вернуть на доработку' }}</h2>
           <p>{{ reviewDecision==='accept'?'Подтвердите результат проверки. После приёмки наряд будет закрыт.':'Укажите замечания. Наряд вернётся исполнителю в работу.' }}</p>
@@ -477,7 +477,7 @@ async function confirmOperation(){
         <section class="category-dialog workflow-dialog" role="dialog" aria-modal="true" aria-label="Регистрация неисправности">
           <header class="category-dialog-head">
             <div class="category-dialog-icon"><Wrench :size="19" /></div>
-            <button type="button" class="drawer-close" aria-label="Закрыть" :disabled="faultBusy" @click="faultDialog=false"><X :size="18" /></button>
+            <SharedButton type="button" class="drawer-close" aria-label="Закрыть" :disabled="faultBusy" @click="faultDialog=false"><X :size="18" /></SharedButton>
           </header>
           <h2>Сообщить о неисправности</h2>
           <p>Для оборудования будет создан аварийный наряд. Исполнитель назначается при планировании работ.</p>
@@ -509,8 +509,8 @@ async function confirmOperation(){
         <section class="category-dialog workflow-dialog" role="dialog" aria-modal="true" :aria-label="operationLabel">
           <header class="category-dialog-head">
             <div class="category-dialog-icon"><Wrench :size="19" /></div>
-            <button type="button" class="drawer-close" aria-label="Закрыть окно" :disabled="workflowBusy"
-              @click="closeOperation"><X :size="18"/></button>
+            <SharedButton type="button" class="drawer-close" aria-label="Закрыть окно" :disabled="workflowBusy"
+              @click="closeOperation"><X :size="18"/></SharedButton>
           </header>
           <h2>{{ operationLabel }}</h2>
           <p v-if="workflowAction==='issue'">Создать наряд по текущему плановому циклу. Если наряд уже есть, откроется существующий.</p>
@@ -544,7 +544,7 @@ async function confirmOperation(){
         <section class="category-dialog warehouse-dialog" role="dialog" aria-modal="true" aria-label="Принять на склад">
           <header class="category-dialog-head">
             <div class="category-dialog-icon"><Package :size="19"/></div>
-            <button type="button" class="drawer-close" aria-label="Закрыть" :disabled="supplyBusy" @click="supplyDialog=false"><X :size="18"/></button>
+            <SharedButton type="button" class="drawer-close" aria-label="Закрыть" :disabled="supplyBusy" @click="supplyDialog=false"><X :size="18"/></SharedButton>
           </header>
           <h2>Принять заявку на склад</h2>
           <p>Количество из заявки будет оприходовано один раз, с записью в журнале.

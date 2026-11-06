@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -155,7 +156,6 @@ onMounted(()=>void load())
 
 <template>
   <div class="operations-page asset-structure-page">
-    <div class="toir-breadcrumb">Активы / Цифровая структура оборудования</div>
     <BasePageHeading title="Цифровая структура оборудования"
       description="Объекты, системы, агрегаты и детали в едином дереве. Регламенты и показания привязаны к конкретному узлу."/>
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
@@ -171,7 +171,7 @@ onMounted(()=>void load())
         placeholder="Найти объект, узел, инвентарный код" />
       <div class="toolbar-actions">
         <BaseButton v-if="editable" @click="openCreate(null)"><Plus :size="16"/> Создать объект</BaseButton>
-        <button class="toolbar-icon" type="button" aria-label="Обновить дерево" :disabled="loading" @click="load"><RefreshCcw :size="17"/></button>
+        <SharedButton class="toolbar-icon" type="button" aria-label="Обновить дерево" :disabled="loading" @click="load"><RefreshCcw :size="17"/></SharedButton>
       </div>
     </div>
     <div class="operations-two-pane">
@@ -262,7 +262,7 @@ onMounted(()=>void load())
       <div v-if="meterDialog" class="category-backdrop" @click.self="!saving&&(meterDialog=false)">
         <section class="category-dialog warehouse-dialog" role="dialog" aria-modal="true" aria-label="Записать показание">
           <header class="category-dialog-head"><div class="category-dialog-icon"><Activity :size="19"/></div>
-            <button type="button" class="drawer-close" aria-label="Закрыть" @click="meterDialog=false"><X :size="18"/></button></header>
+            <SharedButton type="button" class="drawer-close" aria-label="Закрыть" @click="meterDialog=false"><X :size="18"/></SharedButton></header>
           <h2>{{ meter==='condition_score'?'Оценка состояния узла':'Показание моточасов' }}</h2>
           <p>Показание сохраняется с датой, автором и историей. Последующие значения наработки не могут уменьшаться.</p>
           <form class="warehouse-form" @submit.prevent="submitReading">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button as SharedButton } from "@itpmining/vue-basic-components";
 import BaseSelect from '../../components/ui/BaseSelect.vue'
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -285,7 +286,6 @@ onBeforeUnmount(()=>{
 
 <template>
   <div class="chat-page toir-messenger">
-    <div class="toir-breadcrumb">Коммуникации / Чат</div>
     <BasePageHeading title="Чат" description="Личные сообщения и каналы сотрудников внутри ТОИР." />
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <BaseNotice v-if="notice" tone="success">{{ notice }}</BaseNotice>
@@ -293,9 +293,9 @@ onBeforeUnmount(()=>{
       <aside class="messenger-sidebar">
         <header class="messenger-sidebar-head">
           <h2>Сообщения</h2>
-          <button class="toolbar-icon" type="button" aria-label="Создать чат" title="Новый чат" @click="openCreate">
+          <SharedButton class="toolbar-icon" type="button" aria-label="Создать чат" title="Новый чат" @click="openCreate">
             <Plus :size="18"/>
-          </button>
+          </SharedButton>
         </header>
         <div class="messenger-filters">
           <button v-for="f in filterOptions" :key="f.key" type="button"
@@ -337,13 +337,13 @@ onBeforeUnmount(()=>{
               <small v-if="active.kind==='channel'">{{ active.members.length }} участников · {{ active.members.filter(m=>onlineUsers.has(m.id)).length }} в сети</small>
               <small v-else>{{ active.members.some(m=>m.id!==selfId&&onlineUsers.has(m.id))?'В сети':'Личный чат' }}</small>
             </span>
-            <button v-if="active.kind==='channel'&&active.is_admin" type="button" class="toolbar-icon"
-              title="Добавить участника" aria-label="Добавить участника" @click="userId=null;showAddMember=true"><UserPlus :size="17"/></button>
-            <button type="button" class="toolbar-icon" :title="active.archived?'Вернуть из архива':'Архивировать'"
+            <SharedButton v-if="active.kind==='channel'&&active.is_admin" type="button" class="toolbar-icon"
+              title="Добавить участника" aria-label="Добавить участника" @click="userId=null;showAddMember=true"><UserPlus :size="17"/></SharedButton>
+            <SharedButton type="button" class="toolbar-icon" :title="active.archived?'Вернуть из архива':'Архивировать'"
               aria-label="Архив чата" @click="toggleArchive">
-              <ArchiveRestore v-if="active.archived" :size="17"/><Archive v-else :size="17"/></button>
-            <button v-if="active.kind==='channel'" type="button" class="toolbar-icon" title="Выйти из канала"
-              aria-label="Выйти из канала" @click="leave"><LogOut :size="17"/></button>
+              <ArchiveRestore v-if="active.archived" :size="17"/><Archive v-else :size="17"/></SharedButton>
+            <SharedButton v-if="active.kind==='channel'" type="button" class="toolbar-icon" title="Выйти из канала"
+              aria-label="Выйти из канала" @click="leave"><LogOut :size="17"/></SharedButton>
           </header>
           <div ref="timeline" class="messenger-messages" role="log" aria-label="Сообщения чата" @scroll.passive="scrollMessages">
             <p v-if="chatBusy" class="messenger-muted">Загрузка истории…</p>
@@ -404,7 +404,7 @@ onBeforeUnmount(()=>{
       <div v-if="showNew" class="category-backdrop" @click.self="!busy&&(showNew=false)">
         <section class="category-dialog messenger-dialog" role="dialog" aria-modal="true" aria-label="Создать чат">
           <header class="category-dialog-head"><div class="category-dialog-icon"><MessageCircle :size="19"/></div>
-            <button type="button" class="drawer-close" aria-label="Закрыть" :disabled="busy" @click="showNew=false"><X :size="18"/></button></header>
+            <SharedButton type="button" class="drawer-close" aria-label="Закрыть" :disabled="busy" @click="showNew=false"><X :size="18"/></SharedButton></header>
           <h2>Новый чат</h2>
           <p>Создайте личный чат или канал только для сотрудников этой компании.</p>
           <form class="warehouse-form" @submit.prevent="submitCreate">
@@ -436,7 +436,7 @@ onBeforeUnmount(()=>{
       <div v-if="showAddMember" class="category-backdrop" @click.self="showAddMember=false">
         <section class="category-dialog messenger-dialog" role="dialog" aria-modal="true" aria-label="Добавить участника">
           <header class="category-dialog-head"><div class="category-dialog-icon"><UserPlus :size="19"/></div>
-            <button class="drawer-close" aria-label="Закрыть" type="button" @click="showAddMember=false"><X :size="18"/></button></header>
+            <SharedButton class="drawer-close" aria-label="Закрыть" type="button" @click="showAddMember=false"><X :size="18"/></SharedButton></header>
           <h2>Пригласить в канал</h2><p>Доступ получит только сотрудник текущей компании.</p>
           <form class="warehouse-form" @submit.prevent="addMember">
             <label>Сотрудник<BaseSelect v-model="userId" required>

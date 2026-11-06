@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { TextInput, Button } from '@itpmining/vue-basic-components'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '../../api/mroCommercialAdapter'
@@ -32,10 +33,10 @@ async function verify(){
    <h1>{{t('mroPublic.verifyTitle')}}</h1>
    <p>{{t('mroPublic.verifyHint')}}</p>
    <form v-if="token" @submit.prevent="verify">
-    <label>{{t('mroPublic.password')}}<input v-model="password" type="password" autocomplete="new-password" minlength="12" required/></label>
-    <label>{{t('mroPublic.confirmPassword')}}<input v-model="confirmation" type="password" autocomplete="new-password" minlength="12" required/></label>
+    <label>{{t('mroPublic.password')}}<TextInput v-model="password" type="password" autocomplete="new-password" minlength="12" required/></label>
+    <label>{{t('mroPublic.confirmPassword')}}<TextInput v-model="confirmation" type="password" autocomplete="new-password" minlength="12" required/></label>
     <p v-if="error" role="alert" class="error">{{error}}</p>
-    <button :disabled="busy" type="submit">{{busy?t('adminPortal.loading'):t('mroPublic.complete')}}</button>
+    <Button color="primary" block :disabled="busy" type="submit" :text="busy?t('adminPortal.loading'):t('mroPublic.complete')" />
    </form>
    <p v-else role="alert" class="error">{{t('mroPublic.invalidLink')}}</p>
    <RouterLink to="/register">{{t('mroPublic.startAgain')}}</RouterLink>
