@@ -31,6 +31,10 @@ const steps = computed(() => isModule.value
   ? ui.value.steps[entry.value?.family || 'overview'] || ui.value.steps.overview
   : (sectorSteps[locale.value] || sectorSteps.en)[key.value] || ui.value.steps.sector)
 const defaultDemo = computed(() => entry.value?.demo || 'tasks')
+const missingHeading = computed(() => ({
+  ru:'Раздел не найден', en:'Page not found', ka:'გვერდი ვერ მოიძებნა', ge:'გვერდი ვერ მოიძებნა',
+  de:'Seite nicht gefunden', fr:'Page introuvable', es:'Página no encontrada'
+})[locale.value] || 'Page not found')
 
 function toDemo() {
   document.getElementById('detail-interactive')?.scrollIntoView({
@@ -38,7 +42,7 @@ function toDemo() {
     block:'start'
   })
 }
-function updateTitle() { document.title = heading.value + ' — ITP ТОиР' }
+function updateTitle() { document.title = (entry.value ? heading.value : missingHeading.value) + ' — ITP ТОиР' }
 onMounted(updateTitle)
 watch([key,locale], updateTitle)
 onBeforeUnmount(() => { document.title='ITP ТОиР' })
@@ -153,10 +157,23 @@ onBeforeUnmount(() => { document.title='ITP ТОиР' })
   </main>
   <PublicSiteFooter />
 </div>
+<div v-else class="public-details public-details--missing">
+  <PublicSiteHeader />
+  <main class="public-details__missing" aria-labelledby="public-details-missing-heading">
+    <span class="public-details__missing-code">404</span>
+    <h1 id="public-details-missing-heading">{{ missingHeading }}</h1>
+    <router-link to="/" class="public-details__missing-link">{{ ui.backHome }}</router-link>
+  </main>
+  <PublicSiteFooter />
+</div>
 </template>
 
 <style scoped>
 .public-details { background:#f6f9fb;min-height:100dvh;color:#102d3c;overflow-x:clip }
+.public-details--missing{display:flex;flex-direction:column}
+.public-details--missing .public-details__missing{width:100%;flex:1;min-height:420px;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;text-align:center;padding:48px 18px}
+.public-details__missing-code{color:var(--color-primary,#0697e0);font-size:42px;font-weight:700}
+.public-details__missing-link{display:inline-flex;padding:11px 18px;border-radius:8px;color:#fff;background:var(--color-primary,#0697e0);text-decoration:none}
 .public-details main { max-width:1440px;margin:auto; }
 .public-details__breadcrumbs { display:flex;gap:10px;align-items:center;padding:24px 24px 12px;font-size:12px;color:#6a8b9c; }
 .public-details__breadcrumbs a { color:inherit;text-decoration:none; }
