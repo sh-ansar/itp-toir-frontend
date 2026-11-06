@@ -1,0 +1,368 @@
+{
+  "system": "mro",
+  "baseCommit": "c5f83e16c9a14b4e3cf274560f2ab671dfbbd783",
+  "files": [
+    {
+      "path": "src/App.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/admin/BillingEditor.vue",
+      "libraryImports": [
+        "Button,TextInput,Select"
+      ],
+      "localUi": false
+    },
+    {
+      "path": "src/components/admin/InvoiceEditor.vue",
+      "libraryImports": [
+        "Button,TextInput,Select"
+      ],
+      "localUi": false
+    },
+    {
+      "path": "src/components/admin/LegalChoices.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/admin/LegalEditor.vue",
+      "libraryImports": [
+        "Button,TextInput,Select,Switch"
+      ],
+      "localUi": false
+    },
+    {
+      "path": "src/components/admin/PlanEditor.vue",
+      "libraryImports": [
+        "Button,TextInput,Switch,Select"
+      ],
+      "localUi": false
+    },
+    {
+      "path": "src/components/layout/AppSidebar.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/layout/AppTopbar.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/layout/AuthPreferences.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/layout/MroAccountMenu.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/mroCommercial/MroAdminSidebar.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/mroCommercial/MroBrand.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/mroCommercial/MroThemeSwitcher.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/mroCommercial/PublicLocaleSwitcher.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/public/LandingEmployeesDemo.vue",
+      "libraryImports": [
+        "Icon"
+      ],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/LandingFeaturePreview.vue",
+      "libraryImports": [
+        "Icon"
+      ],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/LandingHeroExperience.vue",
+      "libraryImports": [
+        "Button"
+      ],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/LandingInteractiveDemo.vue",
+      "libraryImports": [
+        "Icon"
+      ],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/LandingModulesInteractive.vue",
+      "libraryImports": [
+        "Icon, Switch"
+      ],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/LandingTasksDemo.vue",
+      "libraryImports": [
+        "Icon"
+      ],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/MroHeroLiveDemo.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/PublicLegalLinks.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/PublicSiteFooter.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/PublicSiteHeader.vue",
+      "libraryImports": [
+        "Button, Icon, IconButton"
+      ],
+      "localUi": true
+    },
+    {
+      "path": "src/components/public/PublicTariffs.vue",
+      "libraryImports": [
+        "Button,Icon"
+      ],
+      "localUi": true
+    },
+    {
+      "path": "src/components/toir/ToirCategoryDialog.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/toir/ToirChecklistPanel.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/toir/ToirEditorDrawer.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/toir/ToirOrderMaterials.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/toir/ToirRegistryTable.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/components/ui/BaseButton.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/BaseCard.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/BaseFormField.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/BaseKpiGrid.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/BaseNotice.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/BasePageHeading.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/BaseSearchField.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/BaseSelect.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/BaseStatusPill.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/components/ui/PasswordField.vue",
+      "libraryImports": [],
+      "localUi": true
+    },
+    {
+      "path": "src/views/ForgotPasswordView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/HomeView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/LoginView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/AssetStructureView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/ChatView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/DetailView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/NotificationsView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/PlanningView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/RegistryView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/ReportsView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/RiskIntelligenceView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/ScheduleView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/SettingsView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/WarehouseView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/modules/WorkforcePlanningView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/mroPublic/MroAdminView.vue",
+      "libraryImports": [
+        "Button,Icon,MenuItem,Modal,TextInput,Select"
+      ],
+      "localUi": false
+    },
+    {
+      "path": "src/views/mroPublic/MroBillingView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/mroPublic/MroRegisterView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/mroPublic/MroVerifyView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/mroPublic/PublicContentView.vue",
+      "libraryImports": [
+        "Button, Icon"
+      ],
+      "localUi": false
+    },
+    {
+      "path": "src/views/mroPublic/PublicLandingView.vue",
+      "libraryImports": [
+        "Button, Icon"
+      ],
+      "localUi": false
+    },
+    {
+      "path": "src/views/mroPublic/PublicLegalView.vue",
+      "libraryImports": [
+        "Button, Icon"
+      ],
+      "localUi": false
+    },
+    {
+      "path": "src/views/mroPublic/PublicPricingView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/NotFoundView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/ProfileView.vue",
+      "libraryImports": [],
+      "localUi": false
+    },
+    {
+      "path": "src/views/ResetPasswordView.vue",
+      "libraryImports": [],
+      "localUi": false
+    }
+  ]
+}

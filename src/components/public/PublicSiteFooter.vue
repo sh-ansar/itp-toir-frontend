@@ -1,4 +1,5 @@
 <script setup>
+import { SiteFooter } from "@itpmining/vue-basic-components"
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PublicLegalLinks from '@/components/public/PublicLegalLinks.vue'
@@ -8,8 +9,8 @@ const modules = computed(() => publicModules.map(item => ({key:item.key,name:t('
 const features = computed(() => ['team','people','knowledge','chat'].map(key => ({key,title:t('publicPortal.feature_' + key + '_title')})))
 </script>
 <template>
-  <footer class="public-site-footer">
-    <div class="footer-columns">
+  <SiteFooter>
+    <template #columns>
       <nav :aria-label="t('publicPortal.product')" class="footer-column">
         <h2>{{ t('publicPortal.product') }}</h2>
         <router-link to="/#product">{{ t('publicPortal.home') }}</router-link>
@@ -44,29 +45,10 @@ const features = computed(() => ['team','people','knowledge','chat'].map(key => 
         <h2>{{ t('adminPortal.documents') }}</h2>
         <PublicLegalLinks />
       </div>
-    </div>
-    <div class="footer-bottom">
+    </template>
+<template #bottom>
       <span>© {{ new Date().getFullYear() }} ITP Mining</span>
       <router-link to="/pricing">{{ t('adminPortal.plans') }}</router-link>
-    </div>
-  </footer>
+    </template>
+</SiteFooter>
 </template>
-<style scoped>
-.public-site-footer {background:#e6f0f4;color:#153642;min-width:0;}
-.footer-columns {max-width:1440px;margin:auto;padding:52px 24px 38px;display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));gap:25px;box-sizing:border-box;}
-.footer-column {display:flex;flex-direction:column;align-items:flex-start;min-width:0;}
-.footer-column h2 {font-size:14px;font-weight:670;margin:0 0 18px;color:#587b8b;letter-spacing:0;}
-.footer-column>a {font-size:13px;line-height:1.5;color:inherit;text-decoration:none!important;
-  margin:7px 0;overflow-wrap:anywhere;border:0!important;transition:color .18s ease;}
-.footer-column>a:hover,.footer-bottom a:hover {text-decoration:none!important;color:#466d7b;}
-.footer-column>a:focus-visible,.footer-bottom a:focus-visible {outline:2px solid #536e79;outline-offset:3px;}
-.footer-bottom {max-width:1440px;margin:auto;display:flex;gap:16px;justify-content:space-between;
-  padding:20px 24px 28px;border-top:1px solid #d1e2e8;font-size:13px;color:#668894;box-sizing:border-box;}
-.footer-bottom a {color:inherit;text-decoration:none!important;}
-@media(max-width:1180px){.footer-columns{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;}}
-@media(max-width:650px){.footer-columns{grid-template-columns:repeat(2,minmax(0,1fr));padding:36px 16px;gap:26px 18px}
-.footer-bottom{padding:18px 16px 24px;flex-wrap:wrap;}}
-@media(max-width:350px){.footer-columns{grid-template-columns:1fr;gap:22px;}}
-@media(prefers-reduced-motion:reduce){.footer-column>a{transition:none!important;}}
-</style>

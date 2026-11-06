@@ -1,14 +1,16 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
-import { Button, Icon } from '@itpmining/vue-basic-components'
+import { useRoute, useRouter } from 'vue-router'
+import { Button, Icon, SiteLegalContent } from '@itpmining/vue-basic-components'
 import api from '@/api/mroCommercialAdapter'
 import PublicSiteHeader from '@/components/public/PublicSiteHeader.vue'
 import PublicSiteFooter from '@/components/public/PublicSiteFooter.vue'
 
 const { t, locale } = useI18n()
 const route = useRoute()
+const router = useRouter()
+function navigateLegal(item,event){if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();router.push("/legal")}
 const documents = ref([])
 const currentDocument = ref(null)
 const loading = ref(false)
@@ -63,7 +65,7 @@ watch([() => route.params.version, () => route.params.document, locale], load, {
         <span v-if="isDocument" aria-hidden="true">/</span>
         <span aria-current="page">{{ isDocument ? (currentDocument?.title || t('adminPortal.documents')) : t('adminPortal.documents') }}</span>
       </nav>
-      <header class="legal-intro">
+      <header v-if="!currentDocument" class="legal-intro">
         <p class="legal-kicker">{{ labels.legal }}</p>
         <h1>{{ currentDocument?.title || t('adminPortal.documents') }}</h1>
         <p v-if="!isDocument">{{t('publicPortal.legalIntro')}}</p>
@@ -81,12 +83,12 @@ watch([() => route.params.version, () => route.params.document, locale], load, {
             <Icon icon="Document" /> {{ labels.download }}
           </a>
         </div>
-        <article class="legal-document">
+        <SiteLegalContent :title="currentDocument.title" :back-href="router.resolve('/legal').href" :back-label="labels.back" @navigate="navigateLegal">
           <template v-for="(part,index) in paragraphs" :key="index">
             <h2 v-if="part.heading" class="legal-document-section">{{ part.text }}</h2>
             <p v-else>{{ part.text }}</p>
           </template>
-        </article>
+        </SiteLegalContent>
         <details class="legal-integrity">
           <summary>{{ labels.details }}</summary>
           <p>{{ labels.integrity }} (SHA-256): <code>{{ currentDocument.sha256 }}</code></p>
