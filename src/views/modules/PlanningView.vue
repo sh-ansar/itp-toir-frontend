@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button as SharedButton } from "@itpmining/vue-basic-components";
+import { Button as SharedButton, UiCheckbox } from '@itpmining/vue-basic-components'
 import { computed, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, Plus, RefreshCcw, CalendarDays, X, ArrowUpRight } from 'lucide-vue-next'
 import BaseButton from '../../components/ui/BaseButton.vue'
@@ -113,13 +113,11 @@ onMounted(()=>void load())
     <div class="registry-toolbar">
       <div class="toolbar-leading">
         <div class="switch-tabs" role="group" aria-label="Вид планирования">
-          <button type="button" :class="{active:mode==='gantt'}" @click="mode='gantt'">График</button>
-          <button type="button" :class="{active:mode==='list'}" @click="mode='list'">Список</button>
+          <SharedButton type="button" :class="{active:mode==='gantt'}" @click="mode='gantt'">График</SharedButton>
+          <SharedButton type="button" :class="{active:mode==='list'}" @click="mode='list'">Список</SharedButton>
         </div>
-        <label v-if="mode==='gantt'" class="planning-orders-toggle">
-          <input v-model="includeOrders" type="checkbox" />
-          Показывать наряды
-        </label>
+        <UiCheckbox v-if="mode==='gantt'" v-model="includeOrders" class="planning-orders-toggle"
+          label="Показывать наряды"/>
       </div>
       <div class="toolbar-actions">
         <BaseButton v-if="editable" type="button" @click="editor=true"><Plus :size="16" />Создать мероприятие</BaseButton>
@@ -165,20 +163,20 @@ onMounted(()=>void load())
           </div>
         </div>
         <footer class="gantt-footer">
-          <button type="button" aria-label="Предыдущие три недели" @click="shift(-21)">
+          <SharedButton type="button" aria-label="Предыдущие три недели" @click="shift(-21)">
             <ChevronLeft :size="17" />
-          </button>
+          </SharedButton>
           <strong>{{ days[0]?.key }} — {{ days[20]?.key }}</strong>
-          <button type="button" aria-label="Следующие три недели" @click="shift(21)">
+          <SharedButton type="button" aria-label="Следующие три недели" @click="shift(21)">
             <ChevronRight :size="17" />
-          </button>
-          <button type="button" @click="date=new Date();selected=null">Сегодня</button>
-          <button v-if="timeline.length>shownRows.length" type="button" @click="rowLimit+=24">Ещё {{ timeline.length-shownRows.length }}</button>
+          </SharedButton>
+          <SharedButton type="button" @click="date=new Date();selected=null">Сегодня</SharedButton>
+          <SharedButton v-if="timeline.length>shownRows.length" type="button" @click="rowLimit+=24">Ещё {{ timeline.length-shownRows.length }}</SharedButton>
         </footer>
       </div>
       <aside v-if="selected" class="planning-inspector" aria-label="Просмотр мероприятия">
         <header><small>{{ selected.kind==='plan'?'План ТО':'Наряд-задание' }}</small>
-          <button type="button" aria-label="Закрыть просмотр" @click="selected=null"><X :size="18"/></button>
+          <SharedButton type="button" aria-label="Закрыть просмотр" @click="selected=null"><X :size="18"/></SharedButton>
         </header>
         <h2>{{ selected.title }}</h2>
         <BaseStatusPill :tone="tone(selected.status)">{{ STATUS_LABELS[selected.status]||selected.status }}</BaseStatusPill>

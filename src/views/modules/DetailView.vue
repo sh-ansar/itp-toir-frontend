@@ -262,9 +262,9 @@ async function confirmOperation(){
 <template>
   <div class="detail-page">
     <div class="detail-page-head">
-      <button class="detail-back" type="button" aria-label="Назад к списку" @click="router.push('/'+resource)">
+      <SharedButton class="detail-back" type="button" aria-label="Назад к списку" @click="router.push('/'+resource)">
         <ChevronLeft :size="22" />
-      </button>
+      </SharedButton>
       <BasePageHeading :title="resource==='work-orders'?'Наряд-задание: '+(record?.number||id):title" />
     </div>
     <p v-if="record?.created_at" class="detail-created">Дата создания: {{ new Date(record.created_at).toLocaleDateString('ru-RU') }}</p>

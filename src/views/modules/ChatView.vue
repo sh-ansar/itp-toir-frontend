@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button as SharedButton } from "@itpmining/vue-basic-components";
+import { Button as SharedButton, ChatLayout, ChatFilterTabs, ChatConversationItem, ChatHeader, ChatComposer, ChatMessageBubble, ActionMenu, ConfirmDialog, Drawer, TextInput } from '@itpmining/vue-basic-components'
 import BaseSelect from '../../components/ui/BaseSelect.vue'
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -40,7 +40,10 @@ const drafts=ref<Record<number,string>>({})
 const replyTo=ref<ChatMessage|null>(null)
 const editing=ref<ChatMessage|null>(null)
 const timeline=ref<HTMLElement|null>(null)
-const composer=ref<HTMLTextAreaElement|null>(null)
+const composer=ref<{focus:()=>void}|null>(null)
+const messageSearchOpen=ref(false),messageSearch=ref('')
+const deleteConfirmOpen=ref(false),leaveConfirmOpen=ref(false),confirmBusy=ref(false)
+const pendingDelete=ref<ChatMessage|null>(null)
 const readSeen=ref(new Set<number>())
 const deliverySeen=ref(new Set<number>())
 const typingName=ref('')
@@ -57,6 +60,7 @@ const filterOptions:{key:ChatFilter;label:string}[]=[
 const visibleChats=computed(()=>chats.value.filter(c=>(
   c.title+' '+c.members.map(m=>m.name).join(' ')
 ).toLocaleLowerCase('ru').includes(search.value.toLocaleLowerCase('ru'))))
+const visibleMessages=computed(()=>messages.value.filter(m=>!messageSearchOpen.value||!messageSearch.value.trim()||((m.body||'')+' '+(m.sender_name||'')).toLocaleLowerCase('ru').includes(messageSearch.value.trim().toLocaleLowerCase('ru'))))
 const availablePeople=computed(()=>people.value.filter(p=>p.id!==selfId.value))
 const otherPeople=computed(()=>availablePeople.value.filter(p=>!active.value?.members.some(m=>m.id===p.id)))
 let pollTimer:ReturnType<typeof setInterval>|null=null, ticket=0
@@ -75,7 +79,7 @@ async function openChat(chat:ChatInfo){
   const t=++ticket
   active.value=chat
   draft.value=drafts.value[chat.id]||''
-  replyTo.value=null;editing.value=null;mobileConversation.value=true
+  replyTo.value=null;editing.value=null;messageSearchOpen.value=false;messageSearch.value='';mobileConversation.value=true
   messages.value=[];readSeen.value=new Set();deliverySeen.value=new Set()
   canLoadEarlier.value=false;typingName.value=''
   chatBusy.value=true;error.value=''
@@ -94,7 +98,7 @@ function closeChat(){
   if(active.value)drafts.value[active.value.id]=draft.value
   mobileConversation.value=false
   active.value=null
-  messages.value=[];typingName.value=''
+  messages.value=[];typingName.value='';messageSearchOpen.value=false;messageSearch.value=''
   ticket++
 }
 async function sync(){
@@ -201,17 +205,35 @@ function receivedSignal(signal:ChatSignal){
   if(active.value?.id===signal.chat_id)void sync()
   void refreshChats()
 }
-function handleComposer(e:KeyboardEvent){
-  if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();void submit()}
-}
 function setReply(m:ChatMessage){replyTo.value=m;editing.value=null;composer.value?.focus()}
 function setEdit(m:ChatMessage){editing.value=m;replyTo.value=null;draft.value=m.body;composer.value?.focus()}
 function cancelCompose(){draft.value='';editing.value=null;replyTo.value=null}
-async function removeMessage(m:ChatMessage){
-  if(!active.value)return
-  if(!window.confirm('Удалить сообщение? Действие нельзя отменить.'))return
-  try{await deleteMessage(active.value.id,m.id);await sync()}
+function removeMessage(m:ChatMessage){
+  if(!active.value||!canModify(m))return
+  pendingDelete.value=m
+  deleteConfirmOpen.value=true
+}
+async function confirmRemoveMessage(){
+  const message=pendingDelete.value,id=active.value?.id
+  if(!message||!id||!canModify(message))return
+  confirmBusy.value=true
+  try{await deleteMessage(id,message.id);deleteConfirmOpen.value=false;pendingDelete.value=null;await sync()}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось удалить сообщение'}
+  finally{confirmBusy.value=false}
+}
+function messageStatus(m:ChatMessage){
+  if(m.user_id!==selfId.value)return ''
+  return m.total_recipients>0&&m.read_count>=m.total_recipients?'read':
+    m.total_recipients>0&&m.delivered_count>=m.total_recipients?'delivered':'sent'
+}
+function messageActions(m:ChatMessage){
+  return [{id:'reply',label:'Ответить'},
+    ...(canModify(m)?[{id:'edit',label:'Редактировать'},{id:'delete',label:'Удалить',danger:true}]:[])]
+}
+function onMessageAction(m:ChatMessage,action:string){
+  if(action==='reply')setReply(m)
+  if(action==='edit'&&canModify(m))setEdit(m)
+  if(action==='delete'&&canModify(m))removeMessage(m)
 }
 function canModify(m:ChatMessage){
   return m.user_id===selfId.value && !m.deleted &&
@@ -241,12 +263,17 @@ async function toggleArchive(){
   try{await archiveChat(id);await refreshChats();closeChat()}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось изменить архив'}
 }
-async function leave(){
+function leave(){
   if(!active.value||active.value.kind!=='channel')return
-  if(!window.confirm('Выйти из канала? Вы больше не будете видеть переписку.'))return
-  const id=active.value.id
-  try{await leaveChat(id);await refreshChats();closeChat()}
+  leaveConfirmOpen.value=true
+}
+async function confirmLeave(){
+  const id=active.value?.id
+  if(!id||active.value?.kind!=='channel')return
+  confirmBusy.value=true
+  try{await leaveChat(id);leaveConfirmOpen.value=false;await refreshChats();closeChat()}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось выйти из канала'}
+  finally{confirmBusy.value=false}
 }
 async function addMember(){
   if(!active.value||!userId.value)return
@@ -286,169 +313,211 @@ onBeforeUnmount(()=>{
 
 <template>
   <div class="chat-page toir-messenger">
-    <BasePageHeading title="Чат" description="Личные сообщения и каналы сотрудников внутри ТОИР." />
-    <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
-    <BaseNotice v-if="notice" tone="success">{{ notice }}</BaseNotice>
-    <div class="messenger-layout" :class="{'messenger-layout--conversation':mobileConversation}">
-      <aside class="messenger-sidebar">
-        <header class="messenger-sidebar-head">
-          <h2>Сообщения</h2>
-          <SharedButton class="toolbar-icon" type="button" aria-label="Создать чат" title="Новый чат" @click="openCreate">
-            <Plus :size="18"/>
-          </SharedButton>
-        </header>
-        <div class="messenger-filters">
-          <button v-for="f in filterOptions" :key="f.key" type="button"
-            :class="{active:filter===f.key}" @click="filter=f.key">{{ f.label }}</button>
-        </div>
-        <div class="messenger-search-wrap"><BaseSearchField v-model="search" label="Поиск чатов" placeholder="Поиск чатов" /></div>
-        <div class="messenger-list" role="list">
-          <button v-for="chat in visibleChats" :key="chat.id" type="button" role="listitem"
-            class="messenger-conversation" :class="{active:active?.id===chat.id}" @click="openChat(chat)">
-            <span class="messenger-avatar">{{ chat.kind==='channel'?'#':initials(chat.title) }}</span>
-            <span class="messenger-conversation-body">
-              <span class="messenger-title-row"><strong>{{ chat.title }}</strong>
-                <small>{{ chat.last_message?ago(chat.last_message.created_at):'' }}</small></span>
-              <span class="messenger-last-row">
-                <span>{{ chat.last_message?.body||'Нет сообщений' }}</span>
-                <em v-if="chat.unread_count">{{ chat.unread_count }}</em>
-              </span>
-            </span>
-          </button>
-          <div v-if="!visibleChats.length" class="messenger-list-empty"><Inbox :size="25"/>
-            <strong>Чатов пока нет</strong><small>Создайте личный чат или канал.</small></div>
-        </div>
-        <footer class="messenger-sidebar-footer">
-          <ShieldCheck :size="14"/>
-          <span>Чаты доступны только сотрудникам компании</span>
-          <span class="messenger-network-state" :class="{connected:realtimeConnected}"
-            :title="realtimeConnected?'Reverb подключён':'Восстанавливается подключение'">
-            <span aria-hidden="true" class="messenger-network-dot"></span>
-            {{ realtimeConnected?'В сети':'Подключение' }}
-          </span>
-        </footer>
-      </aside>
-      <section class="messenger-main">
-        <template v-if="active">
-          <header class="messenger-chat-header">
-            <button type="button" class="messenger-back" aria-label="Назад к чатам" @click="closeChat"><ChevronLeft :size="19"/></button>
-            <span class="messenger-avatar messenger-avatar--small">{{ active.kind==='channel'?'#':initials(active.title) }}</span>
-            <span class="messenger-chat-title"><strong>{{ active.title }}</strong>
-              <small v-if="active.kind==='channel'">{{ active.members.length }} участников · {{ active.members.filter(m=>onlineUsers.has(m.id)).length }} в сети</small>
-              <small v-else>{{ active.members.some(m=>m.id!==selfId&&onlineUsers.has(m.id))?'В сети':'Личный чат' }}</small>
-            </span>
-            <SharedButton v-if="active.kind==='channel'&&active.is_admin" type="button" class="toolbar-icon"
-              title="Добавить участника" aria-label="Добавить участника" @click="userId=null;showAddMember=true"><UserPlus :size="17"/></SharedButton>
-            <SharedButton type="button" class="toolbar-icon" :title="active.archived?'Вернуть из архива':'Архивировать'"
-              aria-label="Архив чата" @click="toggleArchive">
-              <ArchiveRestore v-if="active.archived" :size="17"/><Archive v-else :size="17"/></SharedButton>
-            <SharedButton v-if="active.kind==='channel'" type="button" class="toolbar-icon" title="Выйти из канала"
-              aria-label="Выйти из канала" @click="leave"><LogOut :size="17"/></SharedButton>
+    <BasePageHeading title="Чат" description="Личные сообщения и каналы сотрудников внутри ТОиР."/>
+    <BaseNotice v-if="error" tone="error">{{error}}</BaseNotice>
+    <BaseNotice v-if="notice" tone="info">{{notice}}</BaseNotice>
+    <ChatLayout class="toir-shared-chat" :show-conversation="mobileConversation">
+      <template #sidebar>
+        <div class="messenger-sidebar">
+          <header class="messenger-sidebar-head">
+            <h2>Сообщения</h2>
+            <SharedButton type="button" class="toolbar-icon" aria-label="Создать чат" title="Новый чат" @click="openCreate">
+              <Plus :size="18" aria-hidden="true"/>
+            </SharedButton>
           </header>
-          <div ref="timeline" class="messenger-messages" role="log" aria-label="Сообщения чата" @scroll.passive="scrollMessages">
+          <ChatFilterTabs :model-value="filter" :tabs="filterOptions.map(f=>({id:f.key,label:f.label}))"
+            @update:model-value="filter=$event as ChatFilter"/>
+          <div class="messenger-search-wrap">
+            <BaseSearchField v-model="search" label="Поиск чатов" placeholder="Поиск чатов"/>
+          </div>
+          <div class="messenger-list" role="list">
+            <ChatConversationItem v-for="chat in visibleChats" :key="chat.id"
+              :title="chat.title" :subtitle="chat.last_message?.body || 'Нет сообщений'"
+              :time="chat.last_message ? ago(chat.last_message.created_at) : ''"
+              :initials="chat.kind==='channel' ? '#' : initials(chat.title)"
+              :unread="chat.unread_count" :active="active?.id===chat.id"
+              :online="chat.kind==='direct'&&chat.members.some(m=>m.id!==selfId&&onlineUsers.has(m.id))"
+              @select="openChat(chat)"/>
+            <div v-if="!visibleChats.length" class="messenger-list-empty">
+              <Inbox :size="25" aria-hidden="true"/><strong>Чатов пока нет</strong>
+              <small>Создайте личный чат или канал.</small>
+            </div>
+          </div>
+          <footer class="messenger-sidebar-footer">
+            <ShieldCheck :size="14" aria-hidden="true"/>
+            <span>Чаты доступны только сотрудникам компании</span>
+            <span class="messenger-network-state" :class="{connected:realtimeConnected}"
+              :title="realtimeConnected?'Reverb подключён':'Восстанавливается подключение'">
+              <span aria-hidden="true" class="messenger-network-dot"></span>
+              {{realtimeConnected?'В сети':'Подключение'}}
+            </span>
+          </footer>
+        </div>
+      </template>
+      <template #header>
+        <div v-if="active" class="toir-chat-header-row">
+          <ChatHeader class="toir-chat-header" :title="active.title"
+            :subtitle="active.kind==='channel'
+              ? active.members.length+' участников · '+active.members.filter(m=>onlineUsers.has(m.id)).length+' в сети'
+              : 'Личный чат'"
+            :online="active.kind==='direct' && active.members.some(m=>m.id!==selfId&&onlineUsers.has(m.id))"
+            show-back :call-enabled="false" :show-video-call="false" :show-info="false"
+            @back="closeChat" @search="messageSearchOpen=!messageSearchOpen;messageSearch=''"/>
+          <div class="toir-chat-header-actions">
+            <SharedButton v-if="active.kind==='channel'&&active.is_admin" class="toolbar-icon"
+              type="button" title="Добавить участника" aria-label="Добавить участника"
+              @click="userId=null;showAddMember=true"><UserPlus :size="17" aria-hidden="true"/></SharedButton>
+            <SharedButton type="button" class="toolbar-icon"
+              :title="active.archived?'Вернуть из архива':'Архивировать'" aria-label="Архив чата"
+              @click="toggleArchive">
+              <ArchiveRestore v-if="active.archived" :size="17" aria-hidden="true"/>
+              <Archive v-else :size="17" aria-hidden="true"/>
+            </SharedButton>
+            <SharedButton v-if="active.kind==='channel'" class="toolbar-icon" type="button"
+              title="Выйти из канала" aria-label="Выйти из канала" @click="leave">
+              <LogOut :size="17" aria-hidden="true"/>
+            </SharedButton>
+          </div>
+        </div>
+        <div v-else class="toir-chat-header-placeholder">Выберите беседу</div>
+      </template>
+      <template #messages>
+        <div v-if="active" class="toir-chat-messages-area">
+          <div v-if="messageSearchOpen" class="toir-message-search">
+            <BaseSearchField v-model="messageSearch" label="Поиск в переписке" placeholder="Найти в сообщениях"/>
+            <SharedButton type="button" class="toolbar-icon" aria-label="Закрыть поиск"
+              @click="messageSearchOpen=false;messageSearch=''"><X :size="16"/></SharedButton>
+          </div>
+          <div ref="timeline" class="messenger-messages" role="log" aria-label="Сообщения чата"
+            @scroll.passive="scrollMessages">
             <p v-if="chatBusy" class="messenger-muted">Загрузка истории…</p>
             <p v-else-if="loadingEarlier" class="messenger-muted">Загрузка предыдущих сообщений…</p>
             <p v-else-if="!messages.length" class="messenger-muted">Сообщений пока нет. Напишите первое сообщение.</p>
-            <div v-for="m in messages" :key="m.id" class="messenger-message-line" :class="{mine:m.user_id===selfId}">
-              <div class="messenger-message" :class="{'messenger-message--deleted':m.deleted}"
-                :data-chat-message-id="m.id">
-                <strong v-if="active.kind==='channel'&&m.user_id!==selfId" class="messenger-sender">{{ m.sender_name }}</strong>
-                <blockquote v-if="m.reply_preview" class="messenger-reply">{{ m.reply_preview }}</blockquote>
-                <p>{{ m.deleted?'Сообщение удалено':m.body }}</p>
-                <footer><span v-if="m.edited_at">изменено · </span><span>{{ ago(m.created_at) }}</span>
-                  <span v-if="m.user_id===selfId"
-                    :title="m.total_recipients>0&&m.read_count>=m.total_recipients?'Прочитано всеми':
-                      m.total_recipients>0&&m.delivered_count>=m.total_recipients?'Доставлено всем':'Отправлено'">
-                    <CheckCheck v-if="m.total_recipients>0&&m.read_count>=m.total_recipients" :size="15" class="receipt-read"/>
-                    <CheckCheck v-else-if="m.total_recipients>0&&m.delivered_count>=m.total_recipients" :size="15"/>
-                    <Check v-else :size="15"/>
-                  </span></footer>
-                <div v-if="!m.deleted" class="messenger-message-actions">
-                  <button type="button" aria-label="Ответить" title="Ответить" @click="setReply(m)"><Reply :size="14"/></button>
-                  <button v-if="canModify(m)" type="button" aria-label="Редактировать сообщение"
-                    title="Редактировать" @click="setEdit(m)"><Pencil :size="14"/></button>
-                  <button v-if="canModify(m)" type="button" aria-label="Удалить сообщение"
-                    title="Удалить" @click="removeMessage(m)"><Trash2 :size="14"/></button>
-                </div>
-              </div>
+            <p v-else-if="messageSearchOpen&&!visibleMessages.length" class="messenger-muted">По вашему запросу сообщений нет.</p>
+            <div v-for="m in visibleMessages" :key="m.id" class="toir-message-entry" :data-chat-message-id="m.id">
+              <ChatMessageBubble :author="active.kind==='channel'&&m.user_id!==selfId?m.sender_name:''"
+                :text="m.deleted?'Сообщение удалено':m.body"
+                :outgoing="m.user_id===selfId" :time="ago(m.created_at)"
+                :reply-to="m.reply_preview||''" :edited="!!m.edited_at"
+                :status="messageStatus(m)" :show-actions="false" :system="m.deleted"/>
+              <ActionMenu v-if="!m.deleted" :label="'Действия с сообщением '+m.id"
+                :items="messageActions(m)" @select="onMessageAction(m,String($event))"/>
             </div>
           </div>
-          <div v-if="replyTo||editing" class="messenger-compose-reply">
-            <span><strong>{{ editing?'Редактирование':'Ответ для '+replyTo?.sender_name }}</strong>
-              <small>{{ editing?.body||replyTo?.body }}</small></span>
-            <button type="button" aria-label="Отменить ответ" @click="cancelCompose"><X :size="17"/></button>
+        </div>
+        <div v-else class="messenger-welcome">
+          <MessageCircle :size="44" aria-hidden="true"/>
+          <h2>Общайтесь внутри ТОиР</h2>
+          <p>Выберите переписку или создайте новый чат. Личные и групповые беседы изолированы от Portal.</p>
+          <BaseButton type="button" @click="openCreate"><Plus :size="16" aria-hidden="true"/>Создать чат</BaseButton>
+        </div>
+      </template>
+      <template #composer>
+        <div v-if="active" class="toir-chat-composer-area">
+          <div v-if="editing" class="messenger-compose-reply">
+            <span><strong>Редактирование сообщения</strong><small>{{editing.body}}</small></span>
+            <SharedButton type="button" class="toolbar-icon" aria-label="Отменить редактирование"
+              @click="cancelCompose"><X :size="17" aria-hidden="true"/></SharedButton>
           </div>
-          <form class="messenger-compose" @submit.prevent="submit">
-            <textarea ref="composer" v-model="draft" maxlength="2048" rows="1"
-              :disabled="sending" placeholder="Напишите сообщение…"
-              aria-label="Текст сообщения" @keydown="handleComposer"></textarea>
-            <BaseButton type="submit" :disabled="sending||!draft.trim()" icon-only>
-              <Send :size="18"/><span class="visually-hidden">Отправить</span>
-            </BaseButton>
-          </form>
+          <ChatComposer ref="composer" v-model="draft" :disabled="sending" :loading="sending"
+            :max-length="2048" placeholder="Напишите сообщение…"
+            :reply-text="replyTo?.body||''" @send="submit" @cancel-reply="cancelCompose"
+            @attach="notice='Прикрепление файлов пока не поддерживается сервером ТОиР'"
+            @voice="notice='Голосовые сообщения пока не поддерживаются сервером ТОиР'"/>
           <div class="messenger-sync-note">
-            <span v-if="typingName" class="messenger-typing">{{ typingName }} · </span>
+            <span v-if="typingName" class="messenger-typing">{{typingName}} · </span>
             <span v-if="realtimeConnected" class="messenger-realtime-connected">В реальном времени · Reverb</span>
             <span v-else>Автоматическое обновление · соединение восстанавливается</span>
           </div>
-        </template>
-        <div v-else class="messenger-welcome">
-          <MessageCircle :size="44"/>
-          <h2>Общайтесь внутри ТОИР</h2>
-          <p>Выберите переписку или создайте новый чат. Личные и групповые беседы изолированы от Portal.</p>
-          <BaseButton type="button" @click="openCreate"><Plus :size="16"/>Создать чат</BaseButton>
         </div>
-      </section>
-    </div>
-    <Teleport to="body">
-      <div v-if="showNew" class="category-backdrop" @click.self="!busy&&(showNew=false)">
-        <section class="category-dialog messenger-dialog" role="dialog" aria-modal="true" aria-label="Создать чат">
-          <header class="category-dialog-head"><div class="category-dialog-icon"><MessageCircle :size="19"/></div>
-            <SharedButton type="button" class="drawer-close" aria-label="Закрыть" :disabled="busy" @click="showNew=false"><X :size="18"/></SharedButton></header>
-          <h2>Новый чат</h2>
-          <p>Создайте личный чат или канал только для сотрудников этой компании.</p>
-          <form class="warehouse-form" @submit.prevent="submitCreate">
-            <div class="switch-tabs" role="group" aria-label="Тип чата">
-              <button type="button" :class="{active:kind==='direct'}" @click="kind='direct'"><UserRound :size="16"/>Личный чат</button>
-              <button type="button" :class="{active:kind==='channel'}" @click="kind='channel'"><Users :size="16"/>Канал</button>
-            </div>
-            <label v-if="kind==='channel'">Название канала *
-              <input v-model.trim="title" maxlength="150" required placeholder="Например, Ремонтная группа №1"/>
-            </label>
-            <label v-if="kind==='direct'">Сотрудник *
-              <BaseSelect v-model="userId" required>
-                <option :value="null" disabled>Выберите сотрудника</option>
-                <option v-for="u in availablePeople" :key="u.id" :value="u.id">{{ u.name }}</option>
-              </BaseSelect>
-            </label>
-            <label v-else>Участники (Ctrl / Cmd для выбора нескольких)
-              <BaseSelect v-model="selectedMembers" multiple size="6">
-                <option v-for="u in availablePeople" :key="u.id" :value="u.id">{{ u.name }}</option>
-              </BaseSelect>
-            </label>
-            <div class="category-dialog-footer">
-              <BaseButton type="button" variant="secondary" @click="showNew=false">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="busy">Создать</BaseButton>
-            </div>
-          </form>
-        </section>
-      </div>
-      <div v-if="showAddMember" class="category-backdrop" @click.self="showAddMember=false">
-        <section class="category-dialog messenger-dialog" role="dialog" aria-modal="true" aria-label="Добавить участника">
-          <header class="category-dialog-head"><div class="category-dialog-icon"><UserPlus :size="19"/></div>
-            <SharedButton class="drawer-close" aria-label="Закрыть" type="button" @click="showAddMember=false"><X :size="18"/></SharedButton></header>
-          <h2>Пригласить в канал</h2><p>Доступ получит только сотрудник текущей компании.</p>
-          <form class="warehouse-form" @submit.prevent="addMember">
-            <label>Сотрудник<BaseSelect v-model="userId" required>
-              <option :value="null" disabled>Выберите сотрудника</option>
-              <option v-for="u in otherPeople" :key="u.id" :value="u.id">{{ u.name }}</option></BaseSelect></label>
-            <div class="category-dialog-footer">
-              <BaseButton type="button" variant="secondary" @click="showAddMember=false">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="!userId">Добавить</BaseButton>
-            </div>
-          </form>
-        </section>
-      </div>
-    </Teleport>
+      </template>
+    </ChatLayout>
+    <ConfirmDialog v-model:open="deleteConfirmOpen" title="Удалить сообщение?"
+      message="Удаление сообщения нельзя отменить." confirm-label="Удалить" cancel-label="Отмена"
+      destructive :busy="confirmBusy" @confirm="confirmRemoveMessage" @cancel="deleteConfirmOpen=false"/>
+    <ConfirmDialog v-model:open="leaveConfirmOpen" title="Выйти из канала?"
+      message="Вы больше не будете видеть переписку канала." confirm-label="Выйти" cancel-label="Отмена"
+      destructive :busy="confirmBusy" @confirm="confirmLeave" @cancel="leaveConfirmOpen=false"/>
+        <Drawer :open="showNew" title="Новый чат"
+      description="Создайте личный чат или канал для сотрудников текущей компании."
+      width="medium" close-label="Закрыть" @close="!busy&&(showNew=false)">
+      <form id="mro-new-chat-form" class="warehouse-form" @submit.prevent="submitCreate">
+        <div class="switch-tabs" role="group" aria-label="Тип чата">
+          <SharedButton type="button" :class="{active:kind==='direct'}" @click="kind='direct'">
+            <UserRound :size="16" aria-hidden="true"/>Личный чат
+          </SharedButton>
+          <SharedButton type="button" :class="{active:kind==='channel'}" @click="kind='channel'">
+            <Users :size="16" aria-hidden="true"/>Канал
+          </SharedButton>
+        </div>
+        <label v-if="kind==='channel'">Название канала *
+          <TextInput v-model.trim="title" maxlength="150" required
+            placeholder="Например, Ремонтная группа №1"/>
+        </label>
+        <label v-if="kind==='direct'">Сотрудник *
+          <BaseSelect v-model="userId" required>
+            <option :value="null" disabled>Выберите сотрудника</option>
+            <option v-for="u in availablePeople" :key="u.id" :value="u.id">{{u.name}}</option>
+          </BaseSelect>
+        </label>
+        <label v-else>Участники
+          <BaseSelect v-model="selectedMembers" multiple size="6">
+            <option v-for="u in availablePeople" :key="u.id" :value="u.id">{{u.name}}</option>
+          </BaseSelect>
+        </label>
+      </form>
+      <template #footer>
+        <div class="category-dialog-footer">
+          <BaseButton type="button" variant="secondary" :disabled="busy" @click="showNew=false">Отмена</BaseButton>
+          <BaseButton type="button" :disabled="busy||(kind==='direct'&&!userId)||(kind==='channel'&&!title.trim())"
+            @click="submitCreate">Создать</BaseButton>
+        </div>
+      </template>
+    </Drawer>
+    <Drawer :open="showAddMember" title="Пригласить в канал"
+      description="Доступ получит только сотрудник текущей компании."
+      width="medium" close-label="Закрыть" @close="showAddMember=false">
+      <form id="mro-member-add-form" class="warehouse-form" @submit.prevent="addMember">
+        <label>Сотрудник
+          <BaseSelect v-model="userId" required>
+            <option :value="null" disabled>Выберите сотрудника</option>
+            <option v-for="u in otherPeople" :key="u.id" :value="u.id">{{u.name}}</option>
+          </BaseSelect>
+        </label>
+      </form>
+      <template #footer>
+        <div class="category-dialog-footer">
+          <BaseButton type="button" variant="secondary" @click="showAddMember=false">Отмена</BaseButton>
+          <BaseButton type="button" :disabled="!userId" @click="addMember">Добавить</BaseButton>
+        </div>
+      </template>
+    </Drawer>
   </div>
 </template>
+<style scoped>
+.toir-shared-chat{height:min(74dvh,760px);min-height:450px}
+.messenger-sidebar{height:100%;background:var(--color-surface);overflow:hidden}
+.toir-chat-header-row{display:flex;align-items:center;min-width:0}
+.toir-chat-header{flex:1;min-width:0}
+.toir-chat-header-actions{display:flex;align-items:center;gap:4px;flex:none;padding-right:8px}
+.toir-chat-header-placeholder{padding:19px;color:var(--color-muted);font-size:13px}
+.toir-chat-messages-area{display:flex;flex-direction:column;min-height:0;height:100%}
+.toir-chat-messages-area .messenger-messages{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;gap:12px}
+.toir-message-search{display:flex;align-items:center;gap:8px;padding:8px 12px}
+.toir-message-entry{display:flex;align-items:flex-end;gap:6px}
+.toir-message-entry:has(.is-outgoing){flex-direction:row-reverse}
+.toir-message-entry :deep(.itp-chat-message){min-width:0;flex:1}
+.toir-message-entry :deep(.itp-chat-message__bubble){max-width:min(90%,540px)}
+.toir-chat-composer-area{display:grid;gap:7px;min-width:0}
+.toir-chat-composer-area :deep(.itp-chat-composer){width:100%}
+.toir-chat-composer-area .messenger-sync-note{padding:0}
+.toir-shared-chat :deep(.itp-chat-layout__messages){overflow:hidden;padding:0}
+.toir-shared-chat :deep(.itp-chat-layout__composer){padding:8px 12px}
+.toir-shared-chat :deep(.itp-chat-layout__header){min-height:56px}
+.toir-shared-chat :deep(.itp-chat-header__icon[title="Назад к чатам"]){display:none}
+@media(max-width:640px){
+.toir-shared-chat{height:calc(100dvh - 205px);min-height:420px}
+.toir-shared-chat :deep(.itp-chat-header__icon[title="Назад к чатам"]){display:grid}
+.toir-message-entry :deep(.itp-chat-message__bubble){max-width:100%}
+}
+</style>

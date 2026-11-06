@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button as SharedButton } from "@itpmining/vue-basic-components";
+import { Button as SharedButton, PeriodCalendar } from '@itpmining/vue-basic-components'
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, CalendarDays, RefreshCcw, Search, X, ArrowUpRight, Clock3 } from 'lucide-vue-next'
@@ -16,6 +16,10 @@ type GroupMode='crew'|'employee'
 interface ScheduleRow {id:string;label:string;type:'crew'|'employee'|'unassigned';sourceId:number|null}
 const session=useSessionStore()
 const offset=ref(0)
+const calendarOpen=ref(false)
+const periodView=ref<'month'|'quarter'|'year'>('month')
+const periodMonth=ref(new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0'))
+const calendarDate=ref('')
 const mode=ref<GroupMode>('crew')
 const orders=ref<ToirRecord[]>([])
 const shifts=ref<CrewShift[]>([])
@@ -102,6 +106,23 @@ async function load(){
   finally{loading.value=false}
 }
 function shift(amount:number){offset.value+=amount;selected.value=null;void load()}
+function jumpToDate(value:string){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return
+  const parts=value.split('-').map(Number)
+  const target=new Date(Date.UTC(parts[0],parts[1]-1,parts[2]))
+  if(Number.isNaN(target.getTime()))return
+  const now=new Date(),today=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()))
+  const monday=(date:Date)=>{
+    const day=(date.getUTCDay()+6)%7
+    date.setUTCDate(date.getUTCDate()-day)
+    return date.getTime()
+  }
+  offset.value=Math.round((monday(target)-monday(today))/(7*86400000))
+  selected.value=null
+  calendarDate.value=value
+  calendarOpen.value=false
+  void load()
+}
 watch(()=>session.session?.active_company_id,()=>{selected.value=null;void load()})
 onMounted(()=>void load())
 </script>
@@ -114,24 +135,34 @@ onMounted(()=>void load())
     <div class="registry-toolbar">
       <div class="toolbar-leading">
         <div class="schedule-controls">
-          <button type="button" aria-label="Предыдущая неделя" @click="shift(-1)"><ChevronLeft :size="18"/></button>
-          <button type="button" @click="offset=0;selected=null;load()">Сегодня</button>
-          <button type="button" aria-label="Следующая неделя" @click="shift(1)"><ChevronRight :size="18"/></button>
+          <SharedButton type="button" aria-label="Предыдущая неделя" @click="shift(-1)"><ChevronLeft :size="18"/></SharedButton>
+          <SharedButton type="button" @click="offset=0;selected=null;load()">Сегодня</SharedButton>
+          <SharedButton type="button" aria-label="Следующая неделя" @click="shift(1)"><ChevronRight :size="18"/></SharedButton>
         </div>
         <strong class="schedule-period">{{ days[0]?.num }} — {{ days[6]?.num }}</strong>
         <span class="schedule-count">{{ weeklyOrders.length }} нарядов</span>
         <div class="switch-tabs" role="group" aria-label="Показать календарь по">
-          <button type="button" :class="{active:mode==='crew'}" @click="mode='crew'">Бригады</button>
-          <button type="button" :class="{active:mode==='employee'}" @click="mode='employee'">Исполнители</button>
+          <SharedButton type="button" :class="{active:mode==='crew'}" @click="mode='crew'">Бригады</SharedButton>
+          <SharedButton type="button" :class="{active:mode==='employee'}" @click="mode='employee'">Исполнители</SharedButton>
         </div>
       </div>
       <div class="toolbar-actions">
         <BaseSearchField v-model="search" label="Поиск в календаре" placeholder="Поиск по работам и сотрудникам" />
+        <SharedButton type="button" :aria-expanded="calendarOpen" aria-controls="toir-period-picker"
+          class="toir-toolbar-btn" @click="calendarOpen=!calendarOpen">
+          <CalendarDays :size="17" aria-hidden="true"/>Выбрать дату
+        </SharedButton>
         <SharedButton type="button" class="toolbar-icon" aria-label="Обновить календарь" :disabled="loading" @click="load">
           <RefreshCcw :size="18"/>
         </SharedButton>
       </div>
     </div>
+    <section v-if="calendarOpen" id="toir-period-picker" class="schedule-period-picker" aria-label="Выбор недели">
+      <p>Месяц, квартал и год служат для навигации. Выберите день — загрузится соответствующая неделя с нарядами и сменами.</p>
+      <PeriodCalendar v-model="calendarDate" v-model:month="periodMonth" v-model:view="periodView"
+        selection-mode="single" locale="ru-RU" label="Выбор даты графика"
+        @select-date="jumpToDate($event.date)"/>
+    </section>
     <div class="schedule-layout" :class="{'schedule-layout--inspecting':!!selected}">
       <div class="schedule-scroll">
         <div class="schedule-grid">
@@ -164,7 +195,7 @@ onMounted(()=>void load())
       </div>
       <aside v-if="selected" class="planning-inspector schedule-inspector" aria-label="Детали наряда">
         <header><small>{{ selected.number }}</small>
-          <button type="button" aria-label="Закрыть детали" @click="selected=null"><X :size="18"/></button>
+          <SharedButton type="button" aria-label="Закрыть детали" @click="selected=null"><X :size="18"/></SharedButton>
         </header>
         <h2>{{ selected.title }}</h2>
         <BaseStatusPill :tone="tone(selected.status)">{{ STATUS_LABELS[selected.status||'']||selected.status }}</BaseStatusPill>
@@ -182,3 +213,10 @@ onMounted(()=>void load())
     </div>
   </div>
 </template>
+
+<style scoped>
+.schedule-period-picker{padding:16px;border:1px solid var(--color-stroke);border-radius:10px;background:var(--color-surface);display:grid;gap:12px}
+.schedule-period-picker>p{font-size:12px;color:var(--color-muted);margin:0;line-height:1.5}
+.schedule-period-picker :deep(.itp-period-calendar){min-width:0}
+@media(max-width:650px){.schedule-period-picker{padding:10px}}
+</style>

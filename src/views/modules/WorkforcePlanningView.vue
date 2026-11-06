@@ -152,9 +152,9 @@ onMounted(()=>void load())
     </div>
     <div class="registry-toolbar">
       <div class="switch-tabs" role="tablist" aria-label="Разделы планирования">
-        <button type="button" role="tab" :aria-selected="activeTab==='teams'" :class="{active:activeTab==='teams'}" @click="activeTab='teams'">Бригады</button>
-        <button type="button" role="tab" :aria-selected="activeTab==='shifts'" :class="{active:activeTab==='shifts'}" @click="activeTab='shifts'">Графики смен</button>
-        <button type="button" role="tab" :aria-selected="activeTab==='forecast'" :class="{active:activeTab==='forecast'}" @click="activeTab='forecast'">Прогноз ТО</button>
+        <SharedButton type="button" role="tab" :aria-selected="activeTab==='teams'" :class="{active:activeTab==='teams'}" @click="activeTab='teams'">Бригады</SharedButton>
+        <SharedButton type="button" role="tab" :aria-selected="activeTab==='shifts'" :class="{active:activeTab==='shifts'}" @click="activeTab='shifts'">Графики смен</SharedButton>
+        <SharedButton type="button" role="tab" :aria-selected="activeTab==='forecast'" :class="{active:activeTab==='forecast'}" @click="activeTab='forecast'">Прогноз ТО</SharedButton>
       </div>
       <div class="toolbar-actions">
         <BaseButton v-if="editable&&activeTab==='teams'" @click="openCrew"><Plus :size="16"/>Бригада</BaseButton>

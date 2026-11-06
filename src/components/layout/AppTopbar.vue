@@ -7,7 +7,7 @@ import MroAccountMenu from './MroAccountMenu.vue'
 
 const emit=defineEmits<{ 'open-menu': [] }>()
 const router=useRouter(),route=useRoute(),ui=usePreferencesStore()
-const search=ref(''),accountOpen=ref(false),error=ref('')
+const search=ref(''),error=ref('')
 const header=ref<{focusSearch:()=>void}|null>(null)
 const translate=(ru:string,en:string,ka:string)=>({ru,en,ka})[ui.locale]
 const placeholder=computed(()=>translate('Поиск по объектам и работам','Search assets and work orders','ობიექტებისა და სამუშაოების ძიება'))
@@ -20,25 +20,20 @@ function doSearch(){
   const target=['/assets','/work-orders','/employees','/projects','/supplies'].includes(route.path)?route.path:'/assets'
   void router.push({path:target,query:q?{search:q}:{}})
 }
-function onPointer(event:PointerEvent){
-  if(event.target instanceof Element&&!event.target.closest('.mro-account-anchor'))accountOpen.value=false
-}
 function onKey(event:KeyboardEvent){
-  if(event.key==='Escape'&&accountOpen.value){accountOpen.value=false;return}
   if(event.key!=='/'||event.ctrlKey||event.metaKey||event.altKey||event.shiftKey)return
   if((event.target as Element|null)?.closest?.('input,textarea,select,[contenteditable="true"]'))return
   event.preventDefault();header.value?.focusSearch()
 }
 watch(()=>route.fullPath,()=>{
-  accountOpen.value=false
   search.value=typeof route.query.search==='string'?route.query.search:''
 },{immediate:true})
 // Clearing the shared SearchBar must also reset a search already applied to the route.
 watch(search,(value,previous)=>{
   if(!value && previous && typeof route.query.search==='string')doSearch()
 })
-onMounted(()=>{document.addEventListener('pointerdown',onPointer);window.addEventListener('keydown',onKey)})
-onBeforeUnmount(()=>{document.removeEventListener('pointerdown',onPointer);window.removeEventListener('keydown',onKey)})
+onMounted(()=>window.addEventListener('keydown',onKey))
+onBeforeUnmount(()=>window.removeEventListener('keydown',onKey))
 </script>
 <template>
   <div class="mro-topbar-wrapper">
@@ -49,8 +44,7 @@ onBeforeUnmount(()=>{document.removeEventListener('pointerdown',onPointer);windo
       @toggle-navigation="emit('open-menu')" @search="doSearch"
       @notifications="router.push('/notifications')" @toggle-theme="ui.toggleTheme()">
       <template #account>
-        <MroAccountMenu :open="accountOpen" @toggle="accountOpen=!accountOpen"
-          @close="accountOpen=false" @error="error=$event" />
+        <MroAccountMenu @error="error=$event" />
       </template>
     </SharedAppTopbar>
     <p v-if="error" role="alert" class="topbar-error">{{error}}</p>

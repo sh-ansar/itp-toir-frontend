@@ -2,7 +2,8 @@
    Page components should consume semantic tokens instead of page-local values. */
 
 :root {
-  font-family:"Golos Text",Golos,"Segoe UI",Arial,sans-serif;
+  font-family:Golos,"Golos Text","Segoe UI",Arial,sans-serif;
+  --itp-ui-font:Golos,"Golos Text","Segoe UI",Arial,sans-serif;
   color:#093044;
   background:#f8fafb;
   font-synthesis:none;
