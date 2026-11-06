@@ -18,7 +18,7 @@
     "pusher-js": "^8.6.0",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0",
-    "@itpmining/vue-basic-components": "file:vendor/itpmining-vue-basic-components-0.10.0-reserve.3.tgz",
+    "@itpmining/vue-basic-components": "file:vendor/itpmining-vue-basic-components-0.10.0-reserve.4.tgz",
     "vue-i18n": "^11.4.14"
   },
   "devDependencies": {
