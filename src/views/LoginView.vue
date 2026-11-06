@@ -34,7 +34,7 @@ async function submit() {
     password.value = ''
     const requested = route.query.redirect
     const destination = typeof requested === 'string' && requested.startsWith('/') &&
-      !requested.startsWith('//') && !requested.includes('\\') ? requested : '/'
+      !requested.startsWith('//') && !requested.includes('\\') ? requested : '/dashboard'
     await router.replace(destination)
   } catch (error) {
     password.value = ''

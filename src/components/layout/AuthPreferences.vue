@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../ui/BaseSelect.vue'
 import { Moon, Sun } from 'lucide-vue-next'
 import { usePreferencesStore, type Locale } from '../../stores/preferences'
 const ui = usePreferencesStore()
@@ -7,12 +8,12 @@ const ui = usePreferencesStore()
 <template>
   <div class="auth-preferences">
     <label class="visually-hidden" for="auth-locale">Language</label>
-    <select id="auth-locale" :value="ui.locale"
+    <BaseSelect id="auth-locale" :value="ui.locale"
       @change="ui.locale = ($event.target as HTMLSelectElement).value as Locale">
       <option value="ru">RU</option>
       <option value="en">EN</option>
       <option value="ka">GE</option>
-    </select>
+    </BaseSelect>
     <button type="button" :aria-label="ui.theme === 'dark' ? 'Light' : 'Dark'"
       :aria-pressed="ui.theme === 'dark'" @click="ui.toggleTheme()">
       <Sun v-if="ui.theme === 'dark'" :size="18" aria-hidden="true" />

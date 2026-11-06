@@ -8,7 +8,7 @@ import AppTopbar from './components/layout/AppTopbar.vue'
 const route = useRoute()
 const session = useSessionStore()
 const mobileOpen = ref(false)
-const showShell = computed(() => !!route.meta.auth && !!session.session)
+const showShell = computed(() => !!route.meta.auth && !route.meta.admin && !!session.session)
 </script>
 
 <template>

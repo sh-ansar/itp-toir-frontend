@@ -9,10 +9,8 @@ import { loadOverview, listResources } from '../api/resources'
 import { getRisks, getForecast, type RiskResponse, type ForecastRow } from '../api/operations'
 import type { Overview, ToirRecord } from '../types/toir'
 import { useSessionStore } from '../stores/session'
-import { usePreviewStore } from '../stores/preview'
 
 const session=useSessionStore()
-const preview=usePreviewStore()
 const data=ref<Overview|null>(null)
 const orders=ref<ToirRecord[]>([])
 const risk=ref<RiskResponse|null>(null)
@@ -32,7 +30,6 @@ async function refresh(){
   finally{busy.value=false}
 }
 watch(()=>session.session?.active_company_id,()=>void refresh())
-watch(()=>preview.enabled,()=>{void refresh()})
 onMounted(()=>void refresh())
 const tiles=[
   {label:'Всего активов',icon:Package,key:'assets' as const,to:'/assets'},

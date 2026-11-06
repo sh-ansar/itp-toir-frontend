@@ -8,13 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
+      - name: Verify translated live MRO hero without dependencies
+        run: npm run check:hero
+      - name: Authenticate private ITP component package
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.ITPMINING_PACKAGES_READ_TOKEN || github.token }}
+        run: |
+          echo '@itpmining:registry=https://npm.pkg.github.com' >> "$HOME/.npmrc"
+          printf '//npm.pkg.github.com/:_authToken=%s\n' "$NODE_AUTH_TOKEN" >> "$HOME/.npmrc"
       - run: npm ci --no-audit
+      - run: npm run check:ui
       - run: npm run typecheck
       - name: Build production app under /mro/
         run: npm run build

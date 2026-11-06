@@ -1,0 +1,56 @@
+@use "@lib/scss/var" as *;
+@use "@lib/scss/mixins" as *;
+@use "@lib/scss/patterns" as *;
+
+/* Match Portal's actual public font assets; retain HRM-style fonts in the MRO app shell. */
+@font-face { font-family:Golos; font-style:normal; font-weight:400; font-display:swap; src:url("@lib/fonts/golos-text-v4-cyrillic_cyrillic-ext_latin-regular.woff2") format("woff2"); }
+@font-face { font-family:Golos; font-style:normal; font-weight:500; font-display:swap; src:url("@lib/fonts/golos-text-v4-cyrillic_cyrillic-ext_latin-500.woff2") format("woff2"); }
+@font-face { font-family:Golos; font-style:normal; font-weight:600; font-display:swap; src:url("@lib/fonts/golos-text-v4-cyrillic_cyrillic-ext_latin-600.woff2") format("woff2"); }
+@font-face { font-family:Golos; font-style:normal; font-weight:700; font-display:swap; src:url("@lib/fonts/golos-text-v4-cyrillic_cyrillic-ext_latin-700.woff2") format("woff2"); }
+
+/* A commercial surface is a separate layout. Internal MRO UI keeps its HRM design tokens. */
+#app:has(:is(.public-site,.pricing-site,.legal-site,.admin-layout,.mro-public-page)) {
+  font-family:Golos,sans-serif;
+  font-size:16px;
+  line-height:normal;
+}
+
+/* Exact Portal light-theme token contract for public and administration screens.
+   Values sourced from Portal's src/assets/scss/public-pages.scss. */
+:is(.public-site,.pricing-site,.legal-site,.admin-layout,.mro-public-page) {
+  color-scheme:light;
+  --background-base:hsl(200,27%,98%);
+  --background-lower:hsl(200,28%,93%);
+  --border-base:hsla(200,33%,40%,.08);
+  --border-strong:hsla(200,33%,40%,.24);
+  --icon-base:hsl(200,26%,56%);
+  --icon-fade-10:hsl(200,40%,85%);
+  --icon-fade-5:hsl(200,39%,93%);
+  --modifier-hover-dark:hsla(200,90%,12%,.1);
+  --modifier-hover-light:hsla(200,70%,45%,.06);
+  --overlay-base:#284351;
+  --overlay-on:#fff;
+  --primary-base:hsl(200,95%,45%);
+  --primary-fade:hsl(200,95%,90%);
+  --primary-on:#f7f7f7;
+  --surface-active:hsla(200,100%,40%,.08);
+  --surface-base:hsla(200,40%,85%,.2);
+  --surface-raised:hsla(0,0%,100%,.85);
+  --text-base:hsl(200,77%,15%);
+  --text-strong:hsl(200,76%,9%);
+  --text-weak:hsl(199,26%,56%);
+  --logo-box:var(--primary-base);
+  --logo-text-itp:var(--primary-on);
+  --logo-text-portal:var(--text-strong);
+  --border-radius:8px;
+  --transition:.18s ease;
+  @import "@lib/scss/components/icon";
+  @import "@lib/scss/components/button";
+  @import "@lib/scss/components/icon-button";
+  @import "@lib/scss/components/switch";
+  @import "@lib/scss/components/text-input";
+  @import "@lib/scss/components/select";
+  @import "@lib/scss/components/menu-item";
+  @import "@lib/scss/components/loader";
+  @import "@lib/scss/components/dropdown";
+}

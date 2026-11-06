@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../../components/ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronLeft, Pencil, Trash2, ClipboardList, History, Package, FileText, Link2, Wrench, Play, CheckCircle2, RotateCcw, CalendarPlus, X, Users } from 'lucide-vue-next'
@@ -14,13 +15,11 @@ import { getStock, receiveSupply, type StockItem } from '../../api/stock'
 import { loadResource, loadAssetPassport, listResources, deleteResource, reportAssetFault, dispatchWorkOrder, reviewWorkOrder, transitionWorkOrder, issuePlanOrder, type WorkOrderAction, type AssetPassport } from '../../api/resources'
 import { specs, STATUS_LABELS, canEdit } from '../../config/toirModules'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import type { ResourceName, ToirRecord } from '../../types/toir'
 
 const props=defineProps<{resource:ResourceName;id:string}>()
 const router=useRouter()
 const session=useSessionStore()
-const preview=usePreviewStore()
 const spec=computed(()=>specs[props.resource])
 const record=ref<ToirRecord|null>(null)
 const busy=ref(false)
@@ -78,7 +77,7 @@ const canReview=computed(()=>props.resource==='work-orders'&&record.value?.statu
   && ['owner','admin','manager'].includes(session.session?.active_role||'')
   && record.value?.employee?.user_id!==session.session?.user.id
   && !record.value?.crew?.members?.some(m=>m.user_id===session.session?.user.id))
-const canDeleteDetails=computed(()=>canEditDetails.value && !preview.enabled &&
+const canDeleteDetails=computed(()=>canEditDetails.value &&
   !(props.resource==='work-orders' && (record.value?.maintenance_plan_id ||
     ['in_progress','awaiting_acceptance'].includes(record.value?.status||''))))
 const canReopen=computed(()=>['owner','admin','manager'].includes(session.session?.active_role||'')
@@ -124,7 +123,7 @@ async function refresh(){
   }catch(cause){if(run===stamp){record.value=null;error.value=cause instanceof Error?cause.message:'Не удалось загрузить запись'}}
   finally{if(run===stamp)busy.value=false}
 }
-watch(()=>[props.resource,props.id,session.session?.active_company_id,preview.enabled],()=>{
+watch(()=>[props.resource,props.id,session.session?.active_company_id],()=>{
   tab.value='overview';void refresh()
 })
 onMounted(()=>void refresh())
@@ -145,7 +144,7 @@ function textOf(field:string):string{
   return STATUS_LABELS[String(value)]||String(value)
 }
 async function remove(){
-  if(!record.value||!editable.value||preview.enabled)return
+  if(!record.value||!editable.value)return
   if(!window.confirm('Перенести запись в архив?'))return
   try{await deleteResource(props.resource,record.value.id);await router.replace('/'+props.resource)}
   catch(cause){error.value=cause instanceof Error?cause.message:'Не удалось архивировать запись'}
@@ -162,7 +161,7 @@ async function openDispatch(){
   catch(cause){dispatchError.value=cause instanceof Error?cause.message:'Не удалось загрузить исполнителей'}
 }
 async function submitDispatch(){
-  if(!record.value||!dispatchEmployee.value||dispatchBusy.value||preview.enabled)return
+  if(!record.value||!dispatchEmployee.value||dispatchBusy.value)return
   dispatchBusy.value=true;dispatchError.value=''
   try{
     await dispatchWorkOrder(record.value.id,{
@@ -175,7 +174,7 @@ async function submitDispatch(){
   finally{dispatchBusy.value=false}
 }
 async function submitReview(){
-  if(!record.value||!reviewDecision.value||reviewBusy.value||preview.enabled)return
+  if(!record.value||!reviewDecision.value||reviewBusy.value)return
   reviewBusy.value=true;reviewError.value=''
   try{
     await reviewWorkOrder(record.value.id,reviewDecision.value,reviewComment.value.trim())
@@ -184,7 +183,7 @@ async function submitReview(){
   finally{reviewBusy.value=false}
 }
 async function submitFault(){
-  if(!record.value||faultBusy.value||preview.enabled)return
+  if(!record.value||faultBusy.value)return
   faultBusy.value=true;faultError.value=''
   try{
     const order=await reportAssetFault(record.value.id,{
@@ -205,7 +204,7 @@ async function openSupplyReceipt(){
   }catch(e){error.value=e instanceof Error?e.message:'Не удалось загрузить склад'}
 }
 async function submitSupplyReceipt(){
-  if(!record.value||!stockTarget.value||supplyBusy.value||preview.enabled)return
+  if(!record.value||!stockTarget.value||supplyBusy.value)return
   supplyBusy.value=true;error.value=''
   try{
     await receiveSupply(record.value.id,stockTarget.value)
@@ -229,7 +228,7 @@ function closeOperation(){
   workflowError.value=''
 }
 async function confirmOperation(){
-  if(!record.value||!workflowAction.value||workflowBusy.value||preview.enabled)return
+  if(!record.value||!workflowAction.value||workflowBusy.value)return
   const action=workflowAction.value
   const note=workflowNote.value.trim()
   if(['complete','reopen'].includes(action)&&note.length<3){
@@ -272,17 +271,17 @@ async function confirmOperation(){
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <div v-if="record" class="detail-actions">
       <BaseButton v-if="resource==='assets'&&record.status!=='retired'&&record.status!=='disposed'"
-        type="button" :disabled="preview.enabled" @click="faultTitle='';faultDescription='';faultPriority='normal';faultError='';faultDialog=true">
+        type="button"  @click="faultTitle='';faultDescription='';faultPriority='normal';faultError='';faultDialog=true">
         <Wrench :size="16" />Сообщить о неисправности
       </BaseButton>
       <BaseButton v-if="canEditDetails" type="button" @click="editor=true"><Pencil :size="16" />Редактировать</BaseButton>
-      <BaseButton v-if="canDispatch" type="button" variant="secondary" :disabled="preview.enabled" @click="openDispatch">
+      <BaseButton v-if="canDispatch" type="button" variant="secondary"  @click="openDispatch">
         <Users :size="16" />Назначить исполнителя
       </BaseButton>
-      <BaseButton v-if="canReview" type="button" :disabled="preview.enabled" @click="reviewDecision='accept';reviewComment='';reviewError=''">
+      <BaseButton v-if="canReview" type="button"  @click="reviewDecision='accept';reviewComment='';reviewError=''">
         <CheckCircle2 :size="16" />Принять работы
       </BaseButton>
-      <BaseButton v-if="canReview" type="button" variant="secondary" :disabled="preview.enabled" @click="reviewDecision='reject';reviewComment='';reviewError=''">
+      <BaseButton v-if="canReview" type="button" variant="secondary"  @click="reviewDecision='reject';reviewComment='';reviewError=''">
         <RotateCcw :size="16" />Вернуть на доработку
       </BaseButton>
       <BaseButton v-if="resource==='work-orders'&&record&&canOperateOrder&&['waiting','overdue'].includes(record.status||'')"
@@ -417,7 +416,7 @@ async function confirmOperation(){
         <p class="muted">Раздел создан. Операции и вложения подключаются в следующем этапе; вымышленные данные не отображаются.</p>
       </section>
     </template>
-    <ToirEditorDrawer :open="editor" :spec="spec" :record="record" :preview="preview.enabled"
+    <ToirEditorDrawer :open="editor" :spec="spec" :record="record"
       @close="editor=false" @saved="saved" />
     <Teleport to="body">
       <div v-if="dispatchDialog" class="category-backdrop" @click.self="!dispatchBusy&&(dispatchDialog=false)">
@@ -430,10 +429,10 @@ async function confirmOperation(){
           <BaseNotice v-if="dispatchError" tone="error">{{ dispatchError }}</BaseNotice>
           <form class="workflow-form" @submit.prevent="submitDispatch">
             <label for="dispatch-employee">Действующий исполнитель *
-              <select id="dispatch-employee" v-model="dispatchEmployee" required :disabled="dispatchBusy">
+              <BaseSelect id="dispatch-employee" v-model="dispatchEmployee" required :disabled="dispatchBusy">
                 <option :value="null" disabled>Выберите сотрудника</option>
                 <option v-for="employee in dispatchEmployees" :key="employee.id" :value="employee.id">{{ employee.name }}</option>
-              </select>
+              </BaseSelect>
             </label>
             <label for="dispatch-start">Планируемое начало
               <input id="dispatch-start" v-model="dispatchStart" type="datetime-local" :disabled="dispatchBusy" />
@@ -446,7 +445,7 @@ async function confirmOperation(){
             </label>
             <div class="category-dialog-footer">
               <BaseButton type="button" variant="secondary" :disabled="dispatchBusy" @click="dispatchDialog=false">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="dispatchBusy||!dispatchEmployee||preview.enabled||!!(dispatchStart&&dispatchEnd&&dispatchEnd<dispatchStart)">{{ dispatchBusy?'Сохранение…':'Назначить' }}</BaseButton>
+              <BaseButton type="submit" :disabled="dispatchBusy||!dispatchEmployee||!!(dispatchStart&&dispatchEnd&&dispatchEnd<dispatchStart)">{{ dispatchBusy?'Сохранение…':'Назначить' }}</BaseButton>
             </div>
           </form>
         </section>
@@ -467,7 +466,7 @@ async function confirmOperation(){
             </label>
             <div class="category-dialog-footer">
               <BaseButton type="button" variant="secondary" :disabled="reviewBusy" @click="reviewDecision=null">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="reviewBusy||reviewComment.trim().length<3||preview.enabled">{{ reviewBusy?'Проведение…':'Подтвердить' }}</BaseButton>
+              <BaseButton type="submit" :disabled="reviewBusy||reviewComment.trim().length<3">{{ reviewBusy?'Проведение…':'Подтвердить' }}</BaseButton>
             </div>
           </form>
         </section>
@@ -491,9 +490,9 @@ async function confirmOperation(){
               <textarea id="fault-description" v-model="faultDescription" rows="4" minlength="10" maxlength="5000" required :disabled="faultBusy" placeholder="Что произошло и при каких условиях" />
             </label>
             <label for="fault-priority">Приоритет *
-              <select id="fault-priority" v-model="faultPriority" :disabled="faultBusy">
+              <BaseSelect id="fault-priority" v-model="faultPriority" :disabled="faultBusy">
                 <option value="normal">Обычный</option><option value="high">Высокий</option><option value="critical">Критический</option>
-              </select>
+              </BaseSelect>
             </label>
             <div class="category-dialog-footer">
               <BaseButton type="button" variant="secondary" :disabled="faultBusy" @click="faultDialog=false">Отмена</BaseButton>
@@ -518,22 +517,21 @@ async function confirmOperation(){
           <p v-else-if="workflowAction==='start'">Начать выполнение работ. У наряда должны быть актив и назначенный исполнитель.</p>
           <p v-else-if="workflowAction==='complete'">Подтвердите выполненные работы и опишите результат. История сохранится в журнале наряда.</p>
           <p v-else>Укажите причину повторного открытия. У нарядов, выпущенных из плана ТО, повторное открытие недоступно.</p>
-          <BaseNotice v-if="preview.enabled" tone="warning">Демо-режим: операции не сохраняются. Выключите просмотр макета.</BaseNotice>
           <BaseNotice v-if="workflowError" tone="error">{{ workflowError }}</BaseNotice>
           <form class="workflow-form" @submit.prevent="confirmOperation">
             <label v-if="workflowAction==='complete'" for="workflow-labor">Фактические трудозатраты, минут
               <input id="workflow-labor" v-model.number="workflowLaborMinutes" type="number" min="0" max="1000000" step="1"
-                :disabled="workflowBusy||preview.enabled" placeholder="Укажите по табелю или факту" />
+                :disabled="workflowBusy" placeholder="Укажите по табелю или факту" />
               <small>Не заполняйте, если время не учтено. В отчётах оно не будет рассчитываться приблизительно.</small>
             </label>
             <label v-if="workflowAction==='complete'||workflowAction==='reopen'" for="workflow-comment">
               {{ workflowAction==='complete'?'Результат работ':'Причина' }} *
               <textarea id="workflow-comment" v-model="workflowNote" rows="4" maxlength="2000"
-                :disabled="workflowBusy||preview.enabled" required placeholder="Опишите выполненные работы или причину"></textarea>
+                :disabled="workflowBusy" required placeholder="Опишите выполненные работы или причину"></textarea>
             </label>
             <div class="category-dialog-footer">
               <BaseButton type="button" variant="secondary" :disabled="workflowBusy" @click="closeOperation">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="workflowBusy||preview.enabled||(
+              <BaseButton type="submit" :disabled="workflowBusy||(
                 ['complete','reopen'].includes(workflowAction)&&workflowNote.trim().length<3
               )">{{ workflowBusy?'Выполняется…':'Подтвердить' }}</BaseButton>
             </div>
@@ -551,15 +549,14 @@ async function confirmOperation(){
           <h2>Принять заявку на склад</h2>
           <p>Количество из заявки будет оприходовано один раз, с записью в журнале.
             Учётная цена обновится как средневзвешенная.</p>
-          <BaseNotice v-if="preview.enabled" tone="warning">Демо-режим: проведение прихода отключено.</BaseNotice>
           <form class="warehouse-form" @submit.prevent="submitSupplyReceipt">
             <label>Позиция склада с той же единицей измерения *
-              <select v-model="stockTarget" required>
+              <BaseSelect v-model="stockTarget" required>
                 <option :value="null" disabled>Выберите позицию</option>
                 <option v-for="item in stockChoices" :key="item.id" :value="item.id">
                   {{ item.sku }} — {{ item.name }}
                 </option>
-              </select>
+              </BaseSelect>
             </label>
             <p v-if="!stockChoices.length" class="muted">
               Совпадающих позиций на первой странице нет.
@@ -567,7 +564,7 @@ async function confirmOperation(){
             </p>
             <div class="category-dialog-footer">
               <BaseButton type="button" variant="secondary" :disabled="supplyBusy" @click="supplyDialog=false">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="!stockTarget||supplyBusy||preview.enabled">
+              <BaseButton type="submit" :disabled="!stockTarget||supplyBusy">
                 {{ supplyBusy?'Проведение…':'Провести приход' }}
               </BaseButton>
             </div>

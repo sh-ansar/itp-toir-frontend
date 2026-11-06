@@ -12,11 +12,9 @@ import { specs } from '../../config/toirModules'
 import { getAssetTree, getRisks, getReadings, recordReading,
   type AssetNode, type RiskNode, type MeterReading } from '../../api/operations'
 import { listResources } from '../../api/resources'
-import { usePreviewStore } from '../../stores/preview'
 import { useSessionStore } from '../../stores/session'
 import type { ToirRecord } from '../../types/toir'
 
-const preview=usePreviewStore()
 const session=useSessionStore()
 const loading=ref(false),saving=ref(false),error=ref(''),success=ref('')
 const nodes=ref<AssetNode[]>([])
@@ -135,7 +133,7 @@ function openMeter(type:'condition_score'|'operating_hours'){
   meterNote.value='';error.value='';meterDialog.value=true
 }
 async function submitReading(){
-  if(!selected.value||saving.value||preview.enabled)return
+  if(!selected.value||saving.value)return
   const value=Number(meterValue.value)
   if(!Number.isFinite(value)||value<0||(meter.value==='condition_score'&&(value>100||!Number.isInteger(value)))){
     error.value='Введите допустимое значение показания.';return
@@ -152,7 +150,6 @@ async function submitReading(){
 }
 watch(selectedId,()=>void loadDetails())
 watch(()=>session.session?.active_company_id,()=>{expanded.value=new Set();void load()})
-watch(()=>preview.enabled,()=>{expanded.value=new Set();void load()})
 onMounted(()=>void load())
 </script>
 
@@ -259,7 +256,7 @@ onMounted(()=>void load())
       </BaseCard>
     </div>
     <BaseNotice tone="info">Индекс риска — объяснимая оценка приоритетов обслуживания, а не математическая вероятность отказа.</BaseNotice>
-    <ToirEditorDrawer :open="drawer" :spec="specs.assets" :defaults="defaults" :preview="preview.enabled"
+    <ToirEditorDrawer :open="drawer" :spec="specs.assets" :defaults="defaults"
       @close="drawer=false" @saved="onSaved"/>
     <Teleport to="body">
       <div v-if="meterDialog" class="category-backdrop" @click.self="!saving&&(meterDialog=false)">
@@ -276,7 +273,7 @@ onMounted(()=>void load())
             <label>Примечание<textarea v-model="meterNote" rows="2" maxlength="255"/></label>
             <div class="category-dialog-footer">
               <BaseButton variant="secondary" @click="meterDialog=false">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="saving||preview.enabled||!meterValue">Сохранить</BaseButton>
+              <BaseButton type="submit" :disabled="saving||!meterValue">Сохранить</BaseButton>
             </div>
           </form>
         </section>

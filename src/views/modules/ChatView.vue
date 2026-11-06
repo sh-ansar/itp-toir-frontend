@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../../components/ui/BaseSelect.vue'
 import BaseSearchField from '../../components/ui/BaseSearchField.vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
@@ -15,12 +16,10 @@ import {
   type ChatInfo, type ChatMessage, type ChatFilter, type ChatUser
 } from '../../api/chat'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import { connectRealtime, disconnectRealtime, onChatSignal, onChatReconnect,
   realtimeConnected, onlineUsers, type ChatSignal } from '../../api/realtime'
 
 const session=useSessionStore()
-const preview=usePreviewStore()
 const selfId=computed(()=>session.session?.user.id||0)
 const active=ref<ChatInfo|null>(null)
 const chats=ref<ChatInfo[]>([])
@@ -118,7 +117,7 @@ async function sync(){
 }
 async function markVisible(){
   const id=active.value?.id
-  if(!id||preview.enabled||document.hidden||!document.hasFocus())return
+  if(!id||document.hidden||!document.hasFocus())return
   const container=timeline.value
   if(!container)return
   const viewport=container.getBoundingClientRect()
@@ -145,7 +144,7 @@ async function markVisible(){
   }
 }
 async function submit(){
-  if(!active.value||sending.value||preview.enabled)return
+  if(!active.value||sending.value)return
   const body=draft.value.trim()
   if(!body)return
   sending.value=true;error.value=''
@@ -208,7 +207,7 @@ function setReply(m:ChatMessage){replyTo.value=m;editing.value=null;composer.val
 function setEdit(m:ChatMessage){editing.value=m;replyTo.value=null;draft.value=m.body;composer.value?.focus()}
 function cancelCompose(){draft.value='';editing.value=null;replyTo.value=null}
 async function removeMessage(m:ChatMessage){
-  if(!active.value||preview.enabled)return
+  if(!active.value)return
   if(!window.confirm('Удалить сообщение? Действие нельзя отменить.'))return
   try{await deleteMessage(active.value.id,m.id);await sync()}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось удалить сообщение'}
@@ -222,7 +221,6 @@ async function openCreate(){
   kind.value='direct';title.value='';userId.value=null;selectedMembers.value=[];showNew.value=true
 }
 async function submitCreate(){
-  if(preview.enabled)return
   if(kind.value==='direct'&&!userId.value)return
   if(kind.value==='channel'&&!title.value.trim())return
   busy.value=true;error.value=''
@@ -237,37 +235,32 @@ async function submitCreate(){
   finally{busy.value=false}
 }
 async function toggleArchive(){
-  if(!active.value||preview.enabled)return
+  if(!active.value)return
   const id=active.value.id
   try{await archiveChat(id);await refreshChats();closeChat()}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось изменить архив'}
 }
 async function leave(){
-  if(!active.value||active.value.kind!=='channel'||preview.enabled)return
+  if(!active.value||active.value.kind!=='channel')return
   if(!window.confirm('Выйти из канала? Вы больше не будете видеть переписку.'))return
   const id=active.value.id
   try{await leaveChat(id);await refreshChats();closeChat()}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось выйти из канала'}
 }
 async function addMember(){
-  if(!active.value||!userId.value||preview.enabled)return
+  if(!active.value||!userId.value)return
   try{active.value=await addChatMember(active.value.id,userId.value);showAddMember.value=false;userId.value=null}
   catch(e){error.value=e instanceof Error?e.message:'Не удалось добавить участника'}
 }
 watch(filter,()=>void refreshChats())
 watch(()=>session.session?.active_company_id,()=>{
   closeChat();disconnectRealtime()
-  if(!preview.enabled)void connectRealtime()
-  void refreshChats();void loadPeople()
-})
-watch(()=>preview.enabled,()=>{
-  closeChat();disconnectRealtime()
-  if(!preview.enabled)void connectRealtime()
+  void connectRealtime()
   void refreshChats();void loadPeople()
 })
 watch(draft,v=>{
   if(active.value)drafts.value[active.value.id]=v
-  if(!v.trim()||!active.value||preview.enabled||!realtimeConnected.value)return
+  if(!v.trim()||!active.value||!realtimeConnected.value)return
   if(Date.now()-lastTypingSent>2000){
     lastTypingSent=Date.now()
     void sendTyping(active.value.id).catch(()=>{})
@@ -277,7 +270,7 @@ onMounted(()=>{
   void refreshChats();void loadPeople()
   removeSignal=onChatSignal(receivedSignal)
   removeReconnect=onChatReconnect(()=>{void sync();void refreshChats()})
-  if(!preview.enabled)void connectRealtime()
+  void connectRealtime()
   pollTimer=setInterval(()=>{if(!document.hidden){void sync();void refreshChats()}},6000)
   document.addEventListener('visibilitychange',onVisibility)
 })
@@ -387,9 +380,9 @@ onBeforeUnmount(()=>{
           </div>
           <form class="messenger-compose" @submit.prevent="submit">
             <textarea ref="composer" v-model="draft" maxlength="2048" rows="1"
-              :disabled="sending" :placeholder="preview.enabled?'Демо-режим: отправка отключена':'Напишите сообщение…'"
+              :disabled="sending" placeholder="Напишите сообщение…"
               aria-label="Текст сообщения" @keydown="handleComposer"></textarea>
-            <BaseButton type="submit" :disabled="sending||!draft.trim()||preview.enabled" icon-only>
+            <BaseButton type="submit" :disabled="sending||!draft.trim()" icon-only>
               <Send :size="18"/><span class="visually-hidden">Отправить</span>
             </BaseButton>
           </form>
@@ -414,7 +407,6 @@ onBeforeUnmount(()=>{
             <button type="button" class="drawer-close" aria-label="Закрыть" :disabled="busy" @click="showNew=false"><X :size="18"/></button></header>
           <h2>Новый чат</h2>
           <p>Создайте личный чат или канал только для сотрудников этой компании.</p>
-          <BaseNotice v-if="preview.enabled" tone="warning">Демонстрационные чаты не сохраняются.</BaseNotice>
           <form class="warehouse-form" @submit.prevent="submitCreate">
             <div class="switch-tabs" role="group" aria-label="Тип чата">
               <button type="button" :class="{active:kind==='direct'}" @click="kind='direct'"><UserRound :size="16"/>Личный чат</button>
@@ -424,19 +416,19 @@ onBeforeUnmount(()=>{
               <input v-model.trim="title" maxlength="150" required placeholder="Например, Ремонтная группа №1"/>
             </label>
             <label v-if="kind==='direct'">Сотрудник *
-              <select v-model="userId" required>
+              <BaseSelect v-model="userId" required>
                 <option :value="null" disabled>Выберите сотрудника</option>
                 <option v-for="u in availablePeople" :key="u.id" :value="u.id">{{ u.name }}</option>
-              </select>
+              </BaseSelect>
             </label>
             <label v-else>Участники (Ctrl / Cmd для выбора нескольких)
-              <select v-model="selectedMembers" multiple size="6">
+              <BaseSelect v-model="selectedMembers" multiple size="6">
                 <option v-for="u in availablePeople" :key="u.id" :value="u.id">{{ u.name }}</option>
-              </select>
+              </BaseSelect>
             </label>
             <div class="category-dialog-footer">
               <BaseButton type="button" variant="secondary" @click="showNew=false">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="busy||preview.enabled">Создать</BaseButton>
+              <BaseButton type="submit" :disabled="busy">Создать</BaseButton>
             </div>
           </form>
         </section>
@@ -447,12 +439,12 @@ onBeforeUnmount(()=>{
             <button class="drawer-close" aria-label="Закрыть" type="button" @click="showAddMember=false"><X :size="18"/></button></header>
           <h2>Пригласить в канал</h2><p>Доступ получит только сотрудник текущей компании.</p>
           <form class="warehouse-form" @submit.prevent="addMember">
-            <label>Сотрудник<select v-model="userId" required>
+            <label>Сотрудник<BaseSelect v-model="userId" required>
               <option :value="null" disabled>Выберите сотрудника</option>
-              <option v-for="u in otherPeople" :key="u.id" :value="u.id">{{ u.name }}</option></select></label>
+              <option v-for="u in otherPeople" :key="u.id" :value="u.id">{{ u.name }}</option></BaseSelect></label>
             <div class="category-dialog-footer">
               <BaseButton type="button" variant="secondary" @click="showAddMember=false">Отмена</BaseButton>
-              <BaseButton type="submit" :disabled="!userId||preview.enabled">Добавить</BaseButton>
+              <BaseButton type="submit" :disabled="!userId">Добавить</BaseButton>
             </div>
           </form>
         </section>

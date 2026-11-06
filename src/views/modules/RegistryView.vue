@@ -12,12 +12,10 @@ import ToirCategoryDialog from '../../components/toir/ToirCategoryDialog.vue'
 import { specs, canEdit } from '../../config/toirModules'
 import { listResources, deleteResource } from '../../api/resources'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import type { ResourceName, ToirRecord, PageMeta } from '../../types/toir'
 
 const props=defineProps<{resource:ResourceName}>()
 const session=useSessionStore()
-const preview=usePreviewStore()
 const router=useRouter()
 const route=useRoute()
 const spec=computed(()=>specs[props.resource])
@@ -65,7 +63,6 @@ watch(()=>props.resource,()=>{
   void load()
 })
 watch(()=>session.session?.active_company_id,()=>{page.value=1;void load()})
-watch(()=>preview.enabled,()=>{page.value=1;editorOpen.value=false;void load()})
 watch([page,perPage,tab],()=>void load())
 watch(search,()=>{
   if(searchTimer)clearTimeout(searchTimer)
@@ -148,7 +145,7 @@ function saved(id:number){editorOpen.value=false;page.value=1;void load();void r
       <div class="toolbar-actions">
         <BaseButton v-if="editable" type="button" @click="beginCreate"><Plus :size="16" />Создать</BaseButton>
         <BaseButton v-if="editable" variant="secondary" type="button"
-          :disabled="selected.length===0||busy||preview.enabled" @click="removeSelected"><Trash2 :size="16" />Удалить</BaseButton>
+          :disabled="selected.length===0||busy" @click="removeSelected"><Trash2 :size="16" />Удалить</BaseButton>
         <button class="toolbar-icon" type="button" title="Экспортировать текущую страницу в CSV"
           aria-label="Экспорт CSV" @click="csv"><ArrowDownToLine :size="19" /></button>
       </div>
@@ -161,7 +158,7 @@ function saved(id:number){editorOpen.value=false;page.value=1;void load();void r
       :tree-mode="resource==='assets'&&tab==='all'"
       v-model:selected="selected" @open="goTo" @page="page=$event" @page-size="perPage=$event;page=1" />
     <ToirCategoryDialog :open="categoryDialog" @close="categoryDialog=false" @choose="categorySelected" />
-    <ToirEditorDrawer :open="editorOpen" :spec="spec" :preview="preview.enabled" :defaults="defaults"
+    <ToirEditorDrawer :open="editorOpen" :spec="spec"  :defaults="defaults"
       @close="editorOpen=false" @saved="saved" />
   </div>
 </template>

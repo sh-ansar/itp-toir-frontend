@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseSelect from '../ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { ClipboardCheck, Plus, Pencil, Trash2, CheckCircle2, Circle, AlertTriangle,
   Activity, RotateCcw, X, ShieldCheck } from 'lucide-vue-next'
@@ -7,7 +8,6 @@ import BaseNotice from '../ui/BaseNotice.vue'
 import { createPlanStep, deletePlanStep, getOrderSteps, getPlanSteps, recordWorkStep,
   updatePlanStep, type TemplateStep, type WorkStep, type StepKind,
   type StepDefinition, type StepStatus } from '../../api/checklist'
-import { usePreviewStore } from '../../stores/preview'
 import { useSessionStore } from '../../stores/session'
 
 const props=defineProps<{
@@ -17,7 +17,7 @@ const props=defineProps<{
   canManage:boolean
 }>()
 const emit=defineEmits<{changed:[]}>()
-const preview=usePreviewStore(),session=useSessionStore()
+const session=useSessionStore()
 const steps=ref<Array<TemplateStep|WorkStep>>([])
 const loading=ref(false),saving=ref(false),error=ref(''),message=ref('')
 const editorOpen=ref(false),editId=ref<number|null>(null)
@@ -28,9 +28,9 @@ const editStepId=ref<number|null>(null),resultStatus=ref<StepStatus>('done')
 const numericValue=ref(''),resultComment=ref('')
 const isPlan=computed(()=>props.entity==='plans')
 const canEditTemplate=computed(()=>isPlan.value&&props.canManage&&
-  props.status!=='completed'&&!preview.enabled)
+  props.status!=='completed')
 const canExecute=computed(()=>!isPlan.value&&props.canManage&&
-  props.status==='in_progress'&&!preview.enabled)
+  props.status==='in_progress')
 const requiredCount=computed(()=>steps.value.filter(s=>s.is_required).length)
 const completedRequired=computed(()=>steps.value.filter(s=>s.is_required&&'status' in s&&s.status==='done').length)
 const doneCount=computed(()=>steps.value.filter(s=>'status' in s&&s.status==='done').length)
@@ -122,7 +122,7 @@ async function submitResult(s:TemplateStep|WorkStep){
   }catch(e){error.value=e instanceof Error?e.message:'Не удалось записать результат'}
   finally{saving.value=false}
 }
-watch(()=>[props.id,props.entity,session.session?.active_company_id,preview.enabled],()=>{
+watch(()=>[props.id,props.entity,session.session?.active_company_id],()=>{
   closeForms();void load()
 })
 onMounted(()=>void load())
@@ -144,7 +144,6 @@ onMounted(()=>void load())
     </div>
     <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
     <BaseNotice v-if="message" tone="success">{{ message }}</BaseNotice>
-    <BaseNotice v-if="preview.enabled" tone="info">Демонстрационный образец. Изменения и отметки не сохраняются.</BaseNotice>
     <div v-if="!isPlan&&steps.length" class="checklist-progress">
       <div><span>Обязательные операции</span>
         <strong>{{ completedRequired }} / {{ requiredCount }} выполнено</strong></div>
@@ -210,11 +209,11 @@ onMounted(()=>void load())
               <button type="button" class="toolbar-icon" aria-label="Отмена" @click="closeForms"><X :size="15"/></button>
             </div>
             <label>Статус
-              <select v-model="resultStatus" :disabled="saving">
+              <BaseSelect v-model="resultStatus" :disabled="saving">
                 <option value="done">Выполнено</option>
                 <option v-if="!step.is_required" value="skipped">Пропущено</option>
                 <option value="pending">Не выполнено</option>
-              </select>
+              </BaseSelect>
             </label>
             <label v-if="step.kind==='measurement'&&resultStatus==='done'">
               Фактическое измерение{{ step.unit?' ('+step.unit+')':'' }} *
@@ -244,12 +243,12 @@ onMounted(()=>void load())
       </label>
       <div class="operations-form-two">
         <label>Вид операции
-          <select v-model="def.kind">
+          <BaseSelect v-model="def.kind">
             <option value="inspection">Осмотр</option>
             <option value="service">Обслуживание</option>
             <option value="safety">Безопасность / допуск</option>
             <option value="measurement">Контрольное измерение</option>
-          </select>
+          </BaseSelect>
         </label>
         <label v-if="def.kind==='measurement'">Единица измерения
           <input v-model="def.unit" maxlength="30" placeholder="бар, °C, мм/с"/>

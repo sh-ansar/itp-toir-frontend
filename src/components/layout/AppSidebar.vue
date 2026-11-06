@@ -69,7 +69,7 @@ const menuToggleSrc = import.meta.env.BASE_URL + 'brand/menu-toggle.svg'
 <template>
   <aside class="sidebar toir-sidebar" :class="{'toir-sidebar--collapsed':ui.sidebarCollapsed && !mobileOpen,'sidebar--open':mobileOpen}">
     <div class="toir-sidebar-head">
-      <RouterLink to="/" class="brand-link" title="ITP ТОиР" @click="close">
+      <RouterLink to="/dashboard" class="brand-link" title="ITP ТОиР" @click="close">
         <img class="toir-brand-icon" :src="logoSrc" alt="ITP ТОиР" width="42" height="42" />
         <span class="brand-copy"><strong>ITP ТОиР</strong></span>
       </RouterLink>

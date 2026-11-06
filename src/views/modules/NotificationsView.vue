@@ -7,11 +7,9 @@ import BaseNotice from '../../components/ui/BaseNotice.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
 import { listResources } from '../../api/resources'
 import { useSessionStore } from '../../stores/session'
-import { usePreviewStore } from '../../stores/preview'
 import type { ToirRecord } from '../../types/toir'
 
 const session=useSessionStore()
-const preview=usePreviewStore()
 const alerts=ref<{name:string;link:string;hint:string;kind:'order'|'plan'}[]>([])
 const busy=ref(false)
 const error=ref('')
@@ -32,7 +30,6 @@ async function load(){
   finally{busy.value=false}
 }
 watch(()=>session.session?.active_company_id,()=>void load())
-watch(()=>preview.enabled,()=>void load())
 onMounted(()=>void load())
 </script>
 <template>

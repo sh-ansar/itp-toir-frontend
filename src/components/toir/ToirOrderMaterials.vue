@@ -1,15 +1,14 @@
 <script setup lang="ts">
+import BaseSelect from '../ui/BaseSelect.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { Package, Plus, RefreshCcw, X } from 'lucide-vue-next'
 import BaseButton from '../ui/BaseButton.vue'
 import BaseNotice from '../ui/BaseNotice.vue'
 import { getStock, getOrderMaterials, operateMaterial,
   type StockItem, type OrderMaterial } from '../../api/stock'
-import { usePreviewStore } from '../../stores/preview'
 
 const props=defineProps<{orderId:number;status:string;canOperate:boolean}>()
 const emit=defineEmits<{changed:[]}>()
-const preview=usePreviewStore()
 const busy=ref(false),saving=ref(false),error=ref(''),success=ref('')
 const lines=ref<OrderMaterial[]>([])
 const items=ref<StockItem[]>([])
@@ -22,7 +21,7 @@ const options=computed(()=>{
   if(modal.value==='consume')return items.value
   return items.value.filter(x=>Number(x.available_quantity)>0)
 })
-const writable=computed(()=>props.canOperate&&!preview.enabled&&['waiting','overdue','in_progress'].includes(props.status))
+const writable=computed(()=>props.canOperate&&['waiting','overdue','in_progress'].includes(props.status))
 const operationLabels={reserve:'Зарезервировать',consume:'Списать на наряд',release:'Снять резерв'}
 let counter=0
 async function load(){
@@ -36,7 +35,7 @@ async function load(){
   }catch(e){if(token===counter)error.value=e instanceof Error?e.message:'Не удалось загрузить материалы'}
   finally{if(token===counter)busy.value=false}
 }
-watch(()=>[props.orderId,preview.enabled],()=>void load())
+watch(()=>[props.orderId],()=>void load())
 onMounted(()=>void load())
 function open(action:'reserve'|'consume'|'release'){
   error.value='';selectedItem.value='';quantity.value='1.000';modal.value=action
@@ -101,16 +100,15 @@ async function submit(){
           <p>{{ modal==='reserve'?'Резерв удерживает доступное количество до списания или освобождения.':
             modal==='consume'?'Списание уменьшает складской остаток и фиксирует стоимость ремонта.':
             'Снятие резерва возвращает материалы в доступный остаток.' }}</p>
-          <BaseNotice v-if="preview.enabled" tone="warning">В демо-режиме операции не сохраняются.</BaseNotice>
           <BaseNotice v-if="error" tone="error">{{ error }}</BaseNotice>
           <form class="warehouse-form" @submit.prevent="submit">
             <label>Номенклатура *
-              <select v-model="selectedItem" required :disabled="saving">
+              <BaseSelect v-model="selectedItem" required :disabled="saving">
                 <option value="" disabled>Выберите позицию</option>
                 <option v-for="item in options" :key="item.id" :value="String(item.id)">
                   {{ item.sku }} — {{ item.name }} (доступно {{ item.available_quantity||item.quantity_on_hand }} {{ item.unit }})
                 </option>
-              </select>
+              </BaseSelect>
             </label>
             <label>Количество *<input v-model="quantity" type="number" min="0.001" step="0.001" required :disabled="saving"/></label>
             <div class="category-dialog-footer">
